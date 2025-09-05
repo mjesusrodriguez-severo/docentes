@@ -8,6 +8,13 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev_secret_key")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "connect_args": {
+            "ssl": {
+                "ca": "/etc/ssl/certs/ca-certificates.crt"
+            }
+        }
+    }
     GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
     GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
     OAUTHLIB_INSECURE_TRANSPORT = True  # Solo para desarrollo
