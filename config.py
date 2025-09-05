@@ -33,9 +33,9 @@ class Config:
 
     CARPETA_SUSTITUCIONES_RAIZ_ID = "15wiaXSjf8Pw1_ngP9msLdxlHXfai6q9J"
 
-    ESENDEX_USER = "manolojimenez86@gmail.com"
-    ESENDEX_PASSWORD = "b072431a128749aca763"
-    ESENDEX_ACCOUNT_REF = "EX0322259"
+    ESENDEX_USER = os.getenv("ESENDEX_USER")
+    ESENDEX_PASSWORD = os.getenv("ESENDEX_PASSWORD")
+    ESENDEX_ACCOUNT_REF = os.getenv("ESENDEX_ACCOUNT_REF")
     ESENDEX_REMITENTE = "SeveroOchoa"
 
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads', 'absentismo')
