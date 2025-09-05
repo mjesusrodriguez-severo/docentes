@@ -23,9 +23,9 @@ class Config:
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
-    MAIL_USERNAME = 'mjesusrodriguez@severoochoa.es'
-    MAIL_PASSWORD = 'ajab vpbz qrdj ywpn'
-    MAIL_DEFAULT_SENDER = 'panel@severoochoa.es'
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER")
 
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     GOOGLE_CREDENTIALS_PATH = os.path.join(BASE_DIR, 'credentials', 'google_service_account.json')
