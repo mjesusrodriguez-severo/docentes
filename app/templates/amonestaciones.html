@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+
+{% block title %}Amonestaciones{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0 text-uppercase text-secondary">Amonestaciones</h5>
+      <button class="btn btn-outline-primary" onclick="mostrarFormulario()">
+          <i class="bi bi-exclamation-triangle"></i> Añadir amonestación
+        </button>
+    </div>
+
+
+<!-- Formulario dinámico oculto -->
+<div id="formulario-amonestacion" class="card p-4 mb-4 bg-light border d-none">
+  <form method="POST" action="{{ url_for('main.crear_amonestacion') }}">
+    <div class="mb-3">
+      <label for="grupo" class="form-label">Grupo</label>
+      <select name="grupo_id" id="grupo" class="form-select" required onchange="cargarAlumnos(this.value)">
+        <option value="">Selecciona un grupo</option>
+        {% for grupo in grupos %}
+        <option value="{{ grupo.id }}">{{ grupo.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="alumno" class="form-label">Alumno</label>
+      <select name="alumno_id" id="alumno" class="form-select" required>
+        <option value="">Selecciona un alumno</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="motivo" class="form-label">Motivo</label>
+      <input type="text" name="motivo" id="motivo" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="descripcion" class="form-label">Descripción</label>
+      <textarea name="descripcion" id="descripcion" class="form-control" rows="4" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+  </form>
+</div>
+
+<div class="card shadow-sm border mb-4">
+  <div class="card-body">
+    <h6 class="card-title text-uppercase text-muted mb-3">Filtros de búsqueda</h6>
+    <div class="row align-items-end gy-2">
+
+      <div class="col-md-4">
+        <label class="form-label">Tipo de amonestación:</label>
+        <div class="btn-group w-100" role="group" id="filtro-tipo">
+          <button class="btn btn-light active" data-tipo="todas" onclick="seleccionarFiltroTipo(this)">Todas</button>
+          <button class="btn btn-light" data-tipo="propia" onclick="seleccionarFiltroTipo(this)">Mis amonestaciones</button>
+          <button class="btn btn-light" data-tipo="tutoria" onclick="seleccionarFiltroTipo(this)">Mi tutoría</button>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <label for="inputAlumno" class="form-label">Filtrar por alumno:</label>
+        <input list="listaAlumnos" id="inputAlumno" class="form-control" placeholder="Escribe un nombre..." oninput="aplicarFiltros()">
+        <datalist id="listaAlumnos">
+          {% for alumno in todos_alumnos %}
+            <option data-id="{{ alumno.id }}" value="{{ alumno.nombre }} {{ alumno.apellidos }}"></option>
+          {% endfor %}
+        </datalist>
+      </div>
+
+      <div class="col-md-3">
+        <label for="filtroGrupo" class="form-label">Filtrar por grupo:</label>
+        <select id="filtroGrupo" class="form-select" onchange="aplicarFiltros()">
+          <option value="">Todos</option>
+          {% for grupo in grupos %}
+            <option value="{{ grupo.id }}">{{ grupo.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-1 text-end">
+        <button class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()" title="Limpiar filtros">
+          <i class="bi bi-x-circle"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Contador -->
+<div class="row align-items-center gy-2 mb-3">
+  <!-- Contador de amonestaciones -->
+  <div class="col-12 col-md-3">
+    <span id="contador" class="badge bg-secondary" data-total="{{ amonestaciones.total }}">
+      Mostrando {{ amonestaciones.items|length }} de {{ amonestaciones.total }} amonestación(es)
+    </span>
+  </div>
+
+  <!-- Paginación -->
+  {% if amonestaciones.pages > 1 %}
+      <div class="col-12 col-md-9">
+          <nav aria-label="Paginación de amonestaciones">
+            <ul class="pagination justify-content-center justify-content-md-end">
+              {% if amonestaciones.has_prev %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('main.crear_amonestacion', page=1) }}" aria-label="Primera">
+                    <i class="bi bi-chevron-double-left"></i>
+                  </a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('main.crear_amonestacion', page=amonestaciones.prev_num) }}" aria-label="Anterior">
+                    <i class="bi bi-chevron-left"></i>
+                  </a>
+                </li>
+              {% else %}
+                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-double-left"></i></span></li>
+                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left"></i></span></li>
+              {% endif %}
+
+              <li class="page-item disabled">
+                <span class="page-link">Página {{ amonestaciones.page }} de {{ amonestaciones.pages }}</span>
+              </li>
+
+              {% if amonestaciones.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('main.crear_amonestacion', page=amonestaciones.next_num) }}" aria-label="Siguiente">
+                    <i class="bi bi-chevron-right"></i>
+                  </a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('main.crear_amonestacion', page=amonestaciones.pages) }}" aria-label="Última">
+                    <i class="bi bi-chevron-double-right"></i>
+                  </a>
+                </li>
+              {% else %}
+                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right"></i></span></li>
+                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-double-right"></i></span></li>
+              {% endif %}
+            </ul>
+          </nav>
+      </div>
+  {% endif %}
+</div>
+
+<!-- Listado de amonestaciones -->
+<div class="row p-4">
+  {% for amonestacion in amonestaciones.items %}
+    <div class="card-escuela mb-4 position-relative
+  {% if amonestacion.estado == 'pendiente' %} bg-pendiente{% endif %}
+  {% if amonestacion.profesor.id == current_user.id %} propia{% endif %}
+  {% if es_tutor and amonestacion.alumno.grupo.id == grupo_tutoria.id %} tutoria{% endif %}"
+  data-alumno-nombre="{{ amonestacion.alumno.nombre }} {{ amonestacion.alumno.apellidos }}"
+  data-grupo-id="{{ amonestacion.alumno.grupo.id }}">
+
+      <!-- Fecha y hora arriba derecha -->
+      <div class="fecha-hora-amonestacion">
+        {{ amonestacion.fecha.strftime('%d-%m-%Y %H:%M') }}
+      </div>
+
+      <!-- Cabecera -->
+      <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+        <span class="badge-soft badge-group">{{ amonestacion.alumno.grupo.nombre }}</span>
+        <span class="badge-soft badge-profesor">{{ amonestacion.profesor.nombre }}</span>
+        {% if es_tutor and amonestacion.alumno.grupo.id == grupo_tutoria.id %}
+          <span class="badge bg-warning text-dark">Mi tutoría</span>
+        {% endif %}
+      </div>
+
+      <!-- Alumno -->
+      <div class="bg-light text-dark p-2 rounded d-flex align-items-center mb-3">
+        <i class="bi bi-person-vcard-fill me-2 text-secondary"></i>
+        <strong class="text-uppercase small">{{ amonestacion.alumno.nombre }} {{ amonestacion.alumno.apellidos }}</strong>
+      </div>
+
+      {% if amonestacion.alumno.responsables|length == 0 %}
+        <div class="alert alert-danger p-2 small mt-2" role="alert">
+          <i class="bi bi-exclamation-triangle-fill me-1"></i>
+          Este alumno no tiene responsables asignados. Inserte al menos uno para poder enviar la amonestación.
+        </div>
+      {% endif %}
+
+      <!-- Motivo -->
+      <p class="mb-1"><strong>Motivo:</strong> {{ amonestacion.motivo }}</p>
+
+      <!-- Descripción -->
+      <p class="mb-1"><strong>Descripción:</strong> {{ amonestacion.descripcion }}</p>
+
+      <!-- Acciones jefatura -->
+      {% if current_user.es_jefatura %}
+        {% if amonestacion.estado == 'pendiente' and amonestacion.alumno.responsables %}
+          <div class="mt-2 d-flex gap-2 justify-content-end">
+            <form method="POST" action="{{ url_for('main.revisar_amonestacion') }}">
+              <input type="hidden" name="id" value="{{ amonestacion.id }}">
+              <input type="hidden" name="accion" value="aceptar">
+              <button type="submit" class="btn btn-sm btn-outline-success">
+                <i class="bi bi-check-circle"></i> Aceptar
+              </button>
+            </form>
+            <form method="POST" action="{{ url_for('main.revisar_amonestacion') }}">
+              <input type="hidden" name="id" value="{{ amonestacion.id }}">
+              <input type="hidden" name="accion" value="rechazar">
+              <button type="submit" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-x-circle"></i> Rechazar
+              </button>
+            </form>
+          </div>
+        {% elif amonestacion.estado == 'aceptada' and amonestacion.alumno.responsables %}
+          <!-- Botón para desplegar envío de notificación -->
+            <div class="text-end">
+              <button class="btn btn-sm btn-success" type="button" data-bs-toggle="collapse" data-bs-target="#enviarNotificacion-{{ amonestacion.id }}">
+                <i class="bi bi-whatsapp"></i> Notificar responsables
+              </button>
+            </div>
+
+            <!-- Lista de responsables con botones -->
+            <div class="collapse mt-2" id="enviarNotificacion-{{ amonestacion.id }}">
+              {% for responsable in amonestacion.alumno.responsables %}
+                <div class="d-flex align-items-center justify-content-between border rounded p-2 mb-2">
+                  <div>
+                    <strong>{{ responsable.nombre }} {{ responsable.apellidos }}</strong>
+                    <small class="text-muted d-block">Tel: {{ responsable.telefono }}</small>
+                  </div>
+
+                  <div class="d-flex gap-2">
+                    <!-- WhatsApp -->
+                    <form method="POST" action="" class="d-inline">
+                      <input type="hidden" name="id" value="{{ amonestacion.id }}">
+                      <input type="hidden" name="responsable_id" value="{{ responsable.id }}">
+                      <button class="btn btn-sm btn-success" type="submit" title="Enviar por WhatsApp">
+                        <i class="bi bi-whatsapp"></i>
+                      </button>
+                    </form>
+
+                    <!-- SMS -->
+                    <form method="POST" action="{{ url_for('main.enviar_sms_amonestacion', amonestacion_id=amonestacion.id) }}" class="d-inline">
+                      <input type="hidden" name="id" value="{{ amonestacion.id }}">
+                      <input type="hidden" name="responsable_id" value="{{ responsable.id }}">
+                      <button class="btn btn-sm btn-secondary" type="submit" title="Enviar por SMS">
+                        <i class="bi bi-chat-dots"></i>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+        {% endif %}
+      {% endif %}
+
+      <!-- Estado final -->
+      <div class="d-flex justify-content-end align-items-start">
+        {% if amonestacion.estado == "aceptada" %}
+          <div class="text-success estado-final text-end">
+            <i class="bi bi-check2"></i> Revisado por jefatura
+          </div>
+        {% elif amonestacion.estado == "rechazada" %}
+          <div class="text-danger estado-final text-end">
+            <i class="bi bi-x-octagon"></i> Rechazada por jefatura
+          </div>
+        {% else %}
+          <div class="fw-semibold estado-final text-warning text-end">
+            <i class="bi bi-hourglass-split"></i> Pendiente
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function mostrarFormulario() {
+    const form = document.getElementById("formulario-amonestacion");
+    form.classList.toggle("d-none");
+  }
+
+  function cargarAlumnos(grupoId) {
+    const alumnoSelect = document.getElementById("alumno");
+    alumnoSelect.innerHTML = "<option>Cargando...</option>";
+
+    fetch(`/grupo/${grupoId}/alumnos`)
+      .then(response => response.json())
+      .then(data => {
+        alumnoSelect.innerHTML = '<option value="">Selecciona un alumno</option>';
+        data.forEach(alumno => {
+          const option = document.createElement("option");
+          option.value = alumno.id;
+          option.textContent = alumno.nombre;
+          alumnoSelect.appendChild(option);
+        });
+      })
+      .catch(error => {
+        alumnoSelect.innerHTML = '<option>Error al cargar</option>';
+      });
+  }
+
+  function filtrarAmonestaciones(filtro) {
+    const tarjetas = document.querySelectorAll(".card-escuela");
+    let contador = 0;
+
+    tarjetas.forEach(card => {
+      let mostrar = true;
+
+      if (filtro === "tutoria" && !card.classList.contains("tutoria")) {
+        mostrar = false;
+      } else if (filtro === "propia" && !card.classList.contains("propia")) {
+        mostrar = false;
+      }
+
+      card.classList.toggle("d-none", !mostrar);
+      if (mostrar) contador++;
+    });
+
+    document.getElementById("contador-amonestaciones").textContent = contador;
+
+    const botones = document.querySelectorAll(".btn-group .btn");
+    botones.forEach(btn => btn.classList.remove("active"));
+    event.target.classList.add("active");
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    filtrarAmonestaciones('todas');
+  });
+
+
+  let tipoFiltroSeleccionado = "todas";
+
+  function seleccionarFiltroTipo(boton) {
+    tipoFiltroSeleccionado = boton.dataset.tipo;
+
+    // Activar visualmente el botón correcto
+    document.querySelectorAll("#filtro-tipo button").forEach(btn => {
+      btn.classList.remove("active");
+    });
+    boton.classList.add("active");
+
+    aplicarFiltros();
+  }
+
+  function aplicarFiltros() {
+    const alumnoNombre = document.getElementById("inputAlumno").value.toLowerCase().trim();
+    const grupoId = document.getElementById("filtroGrupo").value;
+    const tarjetas = document.querySelectorAll(".card-escuela");
+    let contador = 0;
+
+    tarjetas.forEach(card => {
+      const cardAlumnoNombre = card.dataset.alumnoNombre.toLowerCase();
+      const cardGrupo = card.dataset.grupoId;
+
+      const cumpleTipo =
+        tipoFiltroSeleccionado === "todas" ||
+        (tipoFiltroSeleccionado === "propia" && card.classList.contains("propia")) ||
+        (tipoFiltroSeleccionado === "tutoria" && card.classList.contains("tutoria"));
+
+      const cumpleAlumno = !alumnoNombre || cardAlumnoNombre.includes(alumnoNombre);
+      const cumpleGrupo = !grupoId || grupoId === cardGrupo;
+
+      const mostrar = cumpleTipo && cumpleAlumno && cumpleGrupo;
+      card.classList.toggle("d-none", !mostrar);
+      if (mostrar) contador++;
+    });
+
+    document.getElementById("contador-amonestaciones").textContent = contador;
+
+    actualizarContador();
+  }
+
+  function limpiarFiltros() {
+    // Restaurar valores
+    document.getElementById("inputAlumno").value = "";
+    document.getElementById("filtroGrupo").value = "";
+    document.querySelectorAll("#filtro-tipo button").forEach(btn => btn.classList.remove("active"));
+    document.querySelector('#filtro-tipo button[data-tipo="todas"]').classList.add("active");
+    tipoFiltroSeleccionado = "todas";
+    aplicarFiltros();
+  }
+
+  document.addEventListener("DOMContentLoaded", aplicarFiltros);
+
+  function actualizarContador() {
+      const total = parseInt(document.getElementById("contador").dataset.total, 10);
+      const visibles = document.querySelectorAll('.card-escuela:not([style*="display: none"])').length;
+      const contador = document.getElementById("contador");
+      contador.innerText = `Mostrando ${visibles} de ${total} amonestación(es)`;
+    }
+</script>
+{% endblock %}

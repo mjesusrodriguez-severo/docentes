@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+
+  <!-- Título -->
+  <h2 class="mb-4 text-burdeos">Resumen general</h2>
+
+    <!-- BOTONES NUEVAS INCIDENCIAS -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <a href="{{ url_for('main.nueva_incidencia') }}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+          <i class="bi bi-laptop-fill me-2"></i> Nueva incidencia informática
+        </a>
+      </div>
+      <div class="col-md-6 mt-2 mt-md-0">
+        <a href="{{ url_for('main.nueva_incidencia_mantenimiento') }}" class="btn btn-warning text-dark w-100 d-flex align-items-center justify-content-center">
+          <i class="bi bi-tools me-2"></i> Nueva incidencia de mantenimiento
+        </a>
+      </div>
+    </div>
+
+  <!-- BOTONES SUPERIORES -->
+  <div class="row my-4">
+    <div class="col-md-3 col-sm-6 mb-3">
+      <a href="https://2024-25.eva.educacion.es/colegioseveroochoa/" target="_blank" class="card text-white text-center h-100" style="background-color: #343a40;">
+        <div class="card-body py-2 d-flex flex-column justify-content-center align-items-center">
+          <i class="bi bi-mortarboard-fill fs-3 mb-1"></i>
+          <h6 class="card-title mb-0">Moodle</h6>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <a href="https://edvoice.additioapp.com/access/login" target="_blank" class="card text-white text-center h-100" style="background-color: #1abc9c;">
+        <div class="card-body py-2 d-flex flex-column justify-content-center align-items-center">
+          <i class="bi bi-send-fill fs-3 mb-1"></i>
+          <h6 class="card-title mb-0">Edvoice</h6>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <a href="https://outlook.office.com/mail/" target="_blank" class="card text-white text-center h-100" style="background-color: #0078D4;">
+        <div class="card-body py-2 d-flex flex-column justify-content-center align-items-center">
+          <i class="bi bi-envelope-fill fs-3 mb-1"></i>
+          <h6 class="card-title mb-0">Outlook</h6>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <a href="https://web.additioapp.com/access/login" target="_blank" class="card text-white text-center h-100" style="background-color: #c0392b;">
+        <div class="card-body py-2 d-flex flex-column justify-content-center align-items-center">
+          <i class="bi bi-pencil-fill fs-3 mb-1"></i>
+          <h6 class="card-title mb-0">Additio</h6>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- CONTADORES -->
+  <div class="row mb-4 g-3">
+    <!-- Sustituciones -->
+    <div class="col-md-3 col-6">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <i class="bi bi-calendar-check fs-2 text-burdeos"></i>
+          <h5 class="mt-2">{{ num_sustituciones }}</h5>
+          <p class="text-muted small">Próximas Sustituciones</p>
+          {% if es_tic %}
+          <a href="{{ url_for('main.ver_sustituciones') }}" class="btn btn-outline-secondary btn-sm mt-2">Ver todas</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Reservas de sala -->
+    <div class="col-md-3 col-6">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <i class="bi bi-door-open fs-2 text-burdeos"></i>
+          <h5 class="mt-2">{{ num_reservas_sala }}</h5>
+          <p class="text-muted small">Reservas de Sala</p>
+          {% if es_tic %}
+          <a href="{{ url_for('main.ver_calendario_sala') }}" class="btn btn-outline-secondary btn-sm mt-2">Ver todas</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Reservas TIC -->
+    <div class="col-md-3 col-6">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <i class="bi bi-laptop fs-2 text-burdeos"></i>
+          <h5 class="mt-2">{{ num_reservas_tic }}</h5>
+          <p class="text-muted small">Reservas TIC</p>
+          {% if es_tic %}
+          <a href="{{ url_for('main.reservas_material') }}" class="btn btn-outline-secondary btn-sm mt-2">Ver todas</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Amonestaciones -->
+    <div class="col-md-3 col-6">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <i class="bi bi-exclamation-triangle fs-2 text-burdeos"></i>
+          <h5 class="mt-2">{{ num_amonestaciones }}</h5>
+          <p class="text-muted small">Amonestaciones</p>
+          {% if es_tic %}
+          <a href="{{ url_for('main.crear_amonestacion') }}" class="btn btn-outline-secondary btn-sm mt-2">Ver todas</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLAS PRINCIPALES -->
+  <div class="row g-4">
+
+    <!-- Sustituciones -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-burdeos text-white">
+          Próximas Sustituciones
+        </div>
+        <div class="card-body">
+          {% if sustituciones %}
+            <table class="table table-sm">
+              <thead>
+                <tr><th>Fecha</th><th>Grupo</th><th>Hora</th></tr>
+              </thead>
+              <tbody>
+                {% for s in sustituciones %}
+                  <tr>
+                    <td>{{ s.fecha.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ s.grupo.nombre }}</td>
+                    <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% if es_tic %}
+            <a href="{{ url_for('main.ver_sustituciones') }}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+            {% endif %}
+          {% else %}
+            <p class="text-muted">No tienes sustituciones próximas.</p>
+          {% endif %}
+           <div class="text-end mt-2">
+              <a href="{{ url_for('main.ver_sustituciones') }}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reservas de sala -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-burdeos text-white">
+          Próximas Reservas de Sala de Reuniones
+        </div>
+        <div class="card-body">
+          {% if reservas_sala %}
+            <table class="table table-sm">
+              <thead>
+                <tr><th>Fecha</th><th>Hora</th></tr>
+              </thead>
+              <tbody>
+                {% for r in reservas_sala %}
+                  <tr>
+                    <td>{{ r.fecha.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ r.franja_horaria }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% if es_tic %}
+            <a href="{{ url_for('main.ver_calendario_sala') }}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+            {% endif %}
+          {% else %}
+            <p class="text-muted">No tienes reservas de sala próximas.</p>
+          {% endif %}
+        <div class="text-end mt-2">
+              <a href="{{ url_for('main.ver_calendario_sala_reuniones') }}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reservas TIC -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-burdeos text-white">
+          Próximas Reservas TIC
+        </div>
+        <div class="card-body">
+          {% if reservas_tic %}
+            <table class="table table-sm">
+              <thead>
+                <tr><th>Fecha</th><th>Equipo</th><th>Hora</th></tr>
+              </thead>
+              <tbody>
+                {% for r in reservas_tic %}
+                  <tr>
+                    <td>{{ r.fecha.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ r.equipo }}</td>
+                    <td>{{ r.franja_horaria }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% if es_tic %}
+            <a href="{{ url_for('main.reservas_material') }}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+            {% endif %}
+          {% else %}
+            <p class="text-muted">No tienes reservas TIC próximas.</p>
+          {% endif %}
+        <div class="text-end mt-2">
+              <a href="{{ url_for('main.reservas_material') }}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amonestaciones -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-burdeos text-white">
+          {% if es_tutor %}
+            Amonestaciones recientes de tu tutoría
+          {% else %}
+            Amonestaciones recientes
+          {% endif %}
+        </div>
+        <div class="card-body">
+          {% if amonestaciones %}
+            <table class="table table-sm">
+              <thead>
+                <tr><th>Alumno</th><th>Motivo</th><th>Fecha</th></tr>
+              </thead>
+              <tbody>
+                {% for a in amonestaciones %}
+                  <tr>
+                    <td>{{ a.alumno.nombre }}</td>
+                    <td>{{ a.motivo }}</td>
+                    <td>{{ a.fecha.strftime('%d/%m/%Y') }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p class="text-muted">No hay amonestaciones recientes.</p>
+          {% endif %}
+            <div class="text-end mt-2">
+              <a href="{{ url_for('main.crear_amonestacion') }}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+            </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

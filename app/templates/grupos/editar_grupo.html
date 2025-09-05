@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Editar Grupo{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0 text-uppercase text-secondary">Editar Grupo</h5>
+    </div>
+
+<div class="card p-4 shadow-sm">
+  <form method="POST">
+    <input type="hidden" name="orden" value="{{ grupo.orden }}">
+
+    <div class="mb-3">
+      <label for="nombre" class="form-label">Nombre del grupo</label>
+      <input type="text" class="form-control" id="nombre" name="nombre" value="{{ grupo.nombre }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="periodo" class="form-label">Periodo</label>
+      <input type="text" class="form-control" id="periodo" name="periodo" value="{{ grupo.periodo }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="tutor_id" class="form-label">Tutor asignado</label>
+      <select name="tutor_id" id="tutor_id" class="form-select">
+        <option value="">-- Sin tutor --</option>
+        {% for profesor in tutores_posibles %}
+          <option value="{{ profesor.id }}" {% if grupo.tutor and grupo.tutor.id == profesor.id %}selected{% endif %}>
+            {{ profesor.nombre }} ({{ profesor.rol }})
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+      <div class="mb-3">
+          <label for="profesores" class="form-label">Profesores del grupo</label>
+          <select name="profesores_ids" id="profesores" class="form-select" multiple>
+            {% for profesor in profesores %}
+              <option value="{{ profesor.id }}"
+                {% if profesor in grupo.profesores %}selected{% endif %}>
+                {{ profesor.nombre }} {{ profesor.apellidos }}
+              </option>
+            {% endfor %}
+          </select>
+          <div class="form-text">Usa Ctrl (Windows) o Cmd (Mac) para seleccionar varios.</div>
+        </div>
+
+    <div class="mt-4 text-center">
+      <button type="submit" class="btn btn-primary me-2">
+        <i class="bi bi-save"></i> Guardar cambios
+      </button>
+      <a href="{{ url_for('main.listar_grupos') }}" class="btn btn-secondary">
+        <i class="bi bi-x-circle"></i> Cancelar
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

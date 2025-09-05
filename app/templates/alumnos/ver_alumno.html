@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Consultar Alumno{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0 text-uppercase text-secondary">Detalles del Alumno</h5>
+  </div>
+
+  <div class="card p-4 shadow-sm border-0">
+    <div class="row">
+      <!-- Columna izquierda: Datos del alumno -->
+      <div class="col-md-6">
+        <h4 class="fw-bold text-uppercase" style="color: var(--color-principal);">
+          {{ alumno.nombre }} {{ alumno.apellidos }}
+        </h4>
+        <ul class="list-unstyled mt-3">
+          <li><strong>Identificación:</strong> {{ alumno.identificacion or "—" }}</li>
+          <li><strong>Teléfono:</strong> {{ alumno.telefono or "—" }}</li>
+          <li><strong>Email:</strong> {{ alumno.email or "—" }}</li>
+          <li><strong>Dirección:</strong> {{ alumno.direccion or "—" }}</li>
+          <li><strong>Grupo:</strong> <span class="badge" style="background-color: var(--badge-grupo);">{{ alumno.grupo.nombre }}</span></li>
+          <li><strong>Observaciones:</strong> {{ alumno.observaciones or "—" }}</li>
+        </ul>
+      </div>
+
+      <!-- Columna derecha: Responsables -->
+      <div class="col-md-6">
+        <h5 class="fw-bold" style="color: var(--color-texto-destacado);">Responsables</h5>
+        {% if alumno.responsables %}
+          <ul class="list-group mt-3">
+            {% for r in alumno.responsables %}
+              {% set is_principal = r.id == id_responsable_principal %}
+              <li class="list-group-item border-0 shadow-sm rounded mb-2 {% if is_principal %}bg-warning-subtle border-start border-4 border-warning{% endif %}">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="fw-bold">{{ r.nombre }}</div>
+                    <div class="text-muted">{{ r.telefono }}</div>
+                  </div>
+                  {% if is_principal %}
+                    <span class="badge bg-warning text-dark">Principal</span>
+                  {% endif %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted mt-3">Sin responsables asignados.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="mt-4 text-center">
+  <a href="{{ url_for('main.editar_alumno', alumno_id=alumno.id) }}" class="btn btn-warning me-2">
+    <i class="bi bi-pencil-square"></i> Editar
+  </a>
+
+  <form action="{{ url_for('main.eliminar_alumno', alumno_id=alumno.id) }}" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este alumno?')">
+    <button type="submit" class="btn btn-danger me-2">
+      <i class="bi bi-trash3"></i> Eliminar
+    </button>
+  </form>
+
+  <a href="{{ url_for('main.listar_alumnos', grupo_id=alumno.grupo.id) }}" class="btn btn-secondary">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
+</div>
+  </div>
+{% endblock %}

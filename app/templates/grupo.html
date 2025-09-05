@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Grupo: {{ grupo.nombre }}</h2>
+
+    <table id="tablaAlumnos" class="table table-striped align-middle mt-4">
+        <thead class="table-dark">
+            <tr>
+                <th>Editar</th>
+                <th>Nombre</th>
+                <th>Apellidos</th>
+                <th>Contacto</th>
+                <th>Responsables</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alumno in alumnos %}
+            <tr>
+                <td class="text-center">
+                    <a href="{{ url_for('main.editar_alumno', alumno_id=alumno.id) }}" class="btn btn-warning btn-sm" title="Editar alumno">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                </td>
+                <td>{{ alumno.nombre }}</td>
+                <td>{{ alumno.apellidos }}</td>
+                <td>
+                    {% if alumno.telefono %}
+                        <i class="bi bi-telephone-fill me-1"></i> {{ alumno.telefono }}<br>
+                    {% endif %}
+                    {% if alumno.email %}
+                        <i class="bi bi-envelope-fill me-1"></i> {{ alumno.email }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% for responsable, rel in alumno_relaciones.get(alumno.id, []) %}
+                        <strong>{{ responsable.nombre }}</strong><br>
+                        {% if responsable.telefono %}<i class="bi bi-telephone-fill me-1"></i> {{ responsable.telefono }}<br>{% endif %}
+                        {% if responsable.email %}<i class="bi bi-envelope-fill me-1"></i> {{ responsable.email }}<br>{% endif %}
+                        <span class="fst-italic text-muted">{{ rel.tipo }}</span>
+                        {% if not loop.last %}<hr class="my-1">{% endif %}
+                    {% endfor %}
+                    <div class="mt-1 text-end d-none d-md-block">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#modalResponsables{{ alumno.id }}">
+                            <i class="bi bi-pencil-fill"></i> Editar
+                        </button>
+                    </div>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="modalResponsables{{ alumno.id }}" tabindex="-1" aria-labelledby="modalLabel{{ alumno.id }}" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="modalLabel{{ alumno.id }}">Editar responsables de {{ alumno.nombre }} {{ alumno.apellidos }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                          </div>
+                          <div class="modal-body">
+                            <form>
+                                {% for idx in range(2) %}
+                                    {% set responsable_data = alumno_relaciones.get(alumno.id, [])[idx] if alumno_relaciones.get(alumno.id)|length > idx else (None, None) %}
+                                    <div class="mb-3">
+                                        <label class="form-label">Nombre del responsable {{ idx+1 }}</label>
+                                        <input type="text" class="form-control" name="nombre_{{ idx }}" value="{{ responsable_data[0].nombre if responsable_data[0] else '' }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Teléfono</label>
+                                        <input type="text" class="form-control" name="telefono_{{ idx }}" value="{{ responsable_data[0].telefono if responsable_data[0] else '' }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" name="email_{{ idx }}" value="{{ responsable_data[0].email if responsable_data[0] else '' }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Relación</label>
+                                        <select class="form-select" name="tipo_{{ idx }}">
+                                            <option value="madre" {% if responsable_data[1] and responsable_data[1].tipo == 'madre' %}selected{% endif %}>Madre</option>
+                                            <option value="padre" {% if responsable_data[1] and responsable_data[1].tipo == 'padre' %}selected{% endif %}>Padre</option>
+                                            <option value="tutor legal" {% if responsable_data[1] and responsable_data[1].tipo == 'tutor legal' %}selected{% endif %}>Tutor legal</option>
+                                            <option value="otro" {% if responsable_data[1] and responsable_data[1].tipo == 'otro' %}selected{% endif %}>Otro</option>
+                                        </select>
+                                    </div>
+                                    {% if not loop.last %}<hr>{% endif %}
+                                {% endfor %}
+                                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

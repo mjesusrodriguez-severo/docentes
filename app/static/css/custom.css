@@ -1,0 +1,340 @@
+:root {
+  --color-fondo: #FFFFFF;
+  --color-principal: #B80000;
+  --color-principal-hover: #ce4257;
+  --color-pendiente: #fef4d7;
+  --color-aceptada: #D8E2DC;
+  --color-rechazada: #ce4257;
+  --color-texto-destacado: #003049;
+  --badge-profesor: #d8e2dc;
+  --badge-grupo: #ffdab9;
+}
+
+body {
+  font-family: 'Rubik', sans-serif;
+  background-color: var(--color-fondo);
+  color: #333;
+  font-size: 16.5px;
+  padding: 1rem;
+  line-height: 1.6;
+}
+
+/* Fondo patrón */
+.fondo-patron {
+  position: relative;
+  z-index: 0;
+  min-height: 100vh;
+  background-color: var(--color-fondo);
+  overflow: hidden;
+}
+.fondo-patron::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("../img/fondo_colegio.jpg");
+  background-repeat: repeat;
+  background-size: 500px;
+  opacity: 0.2;
+  z-index: -1;
+}
+
+/* Contenedor */
+.contenedor-principal {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Tarjetas */
+.card-escuela {
+  background-color: #fff;
+  border-left: 6px solid var(--color-principal);
+  border-radius: 8px;
+  padding: 1.2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.fecha-hora-amonestacion {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #555;
+}
+
+/* Estados */
+.bg-pendiente {
+  background-color: var(--color-pendiente) !important;
+}
+.estado-final {
+  font-size: 1rem;
+  font-weight: bold;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+.estado-final i {
+  font-size: 1.3rem;
+}
+.estado-final.text-success {
+  color: var(--color-aceptada);
+}
+.estado-final.text-danger {
+  color: var(--color-rechazada);
+}
+.estado-final.text-warning {
+  color: var(--color-pendiente);
+}
+
+/* Badges */
+.badge-soft {
+  font-size: 0.85rem;
+  padding: 0.4em 0.75em;
+  border-radius: 30px;
+  font-weight: 600;
+}
+.badge-group {
+  background-color: var(--badge-grupo) !important;
+  color: var(--color-texto-destacado);
+}
+.badge-profesor {
+  background-color: var(--badge-profesor) !important;
+  color: var(--color-texto-destacado);
+}
+
+/* Botones */
+.btn-primary {
+  background-color: var(--color-principal);
+  border-color: var(--color-principal);
+}
+.btn-primary:hover {
+  background-color: var(--color-principal-hover);
+  border-color: var(--color-principal-hover);
+}
+.btn-outline-primary {
+  color: var(--color-principal);
+  border-color: var(--color-principal);
+}
+.btn-outline-primary:hover,
+.btn-outline-primary.active {
+  background-color: var(--color-principal);
+  color: white;
+}
+
+/* WhatsApp icon color */
+.btn-outline-primary i.bi-whatsapp {
+  color: #218838 !important;
+}
+
+/* Responsables */
+.lista-responsables {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.responsable-linea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f8f9fa;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  flex-wrap: wrap;
+}
+.nombre-responsable {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #333;
+}
+.telefono {
+  color: #666;
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+/* Cabecera */
+.encabezado-colegio {
+  background: var(--color-principal);
+  color: white;
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+.logo-colegio {
+  height: 60px;
+  width: auto;
+  margin-right: 1rem;
+}
+.titulo-colegio {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .encabezado-colegio {
+    flex-direction: column;
+    text-align: center;
+  }
+  .logo-colegio {
+    margin-bottom: 0.5rem;
+  }
+  .responsable-linea {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .responsable-linea button {
+    width: 100%;
+    margin-top: 1rem;
+  }
+}
+
+/* AGENDA ALUMNADO */
+/* Títulos */
+h2, h3 {
+  color: var(--color-texto-destacado);
+  font-weight: bold;
+}
+
+/* Tabla */
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  background-color: var(--color-fondo);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.table thead {
+  background-color: var(--color-principal);
+  color: white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.table thead th {
+  padding: 0.75rem;
+  border-bottom: 2px solid var(--color-principal-hover);
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.table td,
+.table th {
+  padding: 0.75rem;
+  vertical-align: middle;
+}
+
+.table td {
+  text-align: left;
+}
+
+.table td.text-end {
+  text-align: right;
+}
+
+/* Botones de acción */
+.btn-outline-secondary,
+.btn-outline-primary,
+.btn-outline-danger {
+  font-weight: 500;
+  border-radius: 0.4rem;
+}
+
+.btn-outline-primary {
+  color: var(--color-principal);
+  border-color: var(--color-principal);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--color-principal-hover);
+  color: white;
+  border-color: var(--color-principal-hover);
+}
+
+.btn-outline-danger {
+  color: var(--color-rechazada);
+  border-color: var(--color-rechazada);
+}
+
+.btn-outline-danger:hover {
+  background-color: var(--color-rechazada);
+  color: white;
+}
+
+/* Grupo buttons */
+.grupo-btn {
+  background-color: var(--badge-profesor);
+  border: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 1.5rem;
+  color: var(--color-texto-destacado);
+}
+
+.grupo-btn.active {
+  background-color: var(--color-principal);
+  color: white;
+  font-weight: bold;
+}
+
+.accion-btns {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.accion-btns a,
+.accion-btns button {
+  background: none;
+  border: none;
+  padding: 0.3rem;
+  font-size: 1.2rem;
+  color: var(--color-texto-destacado);
+  transition: color 0.2s ease;
+}
+
+.accion-btns a:hover i,
+.accion-btns button:hover i {
+  color: var(--color-principal-hover);
+}
+
+.accion-btns button {
+  cursor: pointer;
+}
+
+.bg-burdeos {
+  background-color: #800020 !important;
+}
+
+.footer img {
+  pointer-events: none;
+  opacity: 0.03; /* Ajusta si quieres más/menos intensidad */
+}
+
+.footer {
+  position: relative;
+  overflow: hidden;
+}

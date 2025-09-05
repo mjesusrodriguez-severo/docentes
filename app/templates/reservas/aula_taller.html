@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Reservas {{ nombre_visible }}{% endblock %}
+{% block content %}
+    <style>
+  table.table {
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  .table td, .table th {
+    border: 1px solid #dee2e6 !important; /* fuerza el borde */
+    text-align: center;
+    vertical-align: middle;
+    padding: 0.5rem;
+    width: 14.28%; /* si hay 7 columnas: franja + 5 días + hueco */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .reserva-ocupada {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .reserva-ocupada strong {
+    font-weight: bold;
+  }
+
+  .btn-cancelar {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .btn-libre {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+  }
+  </style>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0 text-uppercase text-secondary">Reservas {{ nombre_visible }}</h5>
+    </div>
+
+{% macro render_semana(dias_semana, titulo) %}
+  <h6 class="mb-2">{{ titulo }}</h6>
+  <div class="table-responsive mb-5">
+    <table class="table table-bordered text-center align-middle">
+      <thead>
+        <tr>
+          <th>Franja horaria</th>
+          {% for dia in dias_semana %}
+            <th>{{ dias_es[dia.strftime('%A')] }}<br>{{ dia.strftime('%d/%m') }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for franja in franjas_horarias %}
+          <tr>
+            <td><strong>{{ franja }}</strong></td>
+            {% for dia in dias_semana %}
+              {% set reserva = reservas.get((dia, franja)) %}
+              <td>
+                  {% if reserva %}
+                      <div class="reserva-ocupada">
+                        <p class="text-muted small">Ocupado por: <br /> <b>{{ usuarios.get(reserva.usuario_id) }}</b></p>
+                        {% if reserva and reserva.usuario_id == current_user.id %}
+                            <form method="post" action="{{ url_for('main.cancelar_reserva_espacio') }}" class="d-inline cancelar-form">
+                              <input type="hidden" name="reserva_id" value="{{ reserva.id }}">
+                              <input type="hidden" name="espacio" value="{{ espacio }}">
+                              <button type="button" class="btn btn-sm btn-warning cancelar-btn"
+                                      data-fecha="{{ dia.strftime('%d/%m/%Y') }}"
+                                      data-franja="{{ franja }}">
+                                Cancelar
+                              </button>
+                            </form>
+                        {% endif %}
+                      </div>
+                  {% else %}
+                    <form method="post" action="{{ url_for('main.reservar_espacio', espacio='aula_taller') }}" class="reserva-form d-inline">
+                      <input type="hidden" name="espacio" value="{{ espacio }}">
+                      <input type="hidden" name="fecha" value="{{ dia.strftime('%Y-%m-%d') }}">
+                      <input type="hidden" name="franja" value="{{ franja }}">
+                      <button type="button" class="btn btn-sm btn-success reservar-btn"
+                              data-fecha="{{ dia.strftime('%d/%m/%Y') }}"
+                              data-franja="{{ franja }}">
+                        <i class="bi bi-check-circle"></i> Libre
+                      </button>
+                    </form>
+                  {% endif %}
+                </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endmacro %}
+
+{{ render_semana(dias_semana_actual, "Semana del " ~ dias_semana_actual[0].strftime('%d/%m') ~ " al " ~ dias_semana_actual[-1].strftime('%d/%m')) }}
+{{ render_semana(dias_semana_siguiente, "Semana del " ~ dias_semana_siguiente[0].strftime('%d/%m') ~ " al " ~ dias_semana_siguiente[-1].strftime('%d/%m')) }}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Confirmar antes de reservar
+    document.querySelectorAll('.reservar-btn').forEach(boton => {
+      boton.addEventListener('click', function () {
+        const fecha = this.dataset.fecha;
+        const franja = this.dataset.franja;
+        if (confirm(`¿Deseas reservar la sala el ${fecha} a las ${franja}?`)) {
+          this.closest('form').submit();
+        }
+      });
+    });
+
+    // Confirmar antes de cancelar
+    document.querySelectorAll('.cancelar-btn').forEach(boton => {
+      boton.addEventListener('click', function () {
+        const fecha = this.dataset.fecha;
+        const franja = this.dataset.franja;
+        if (confirm(`¿Seguro que quieres cancelar la reserva del ${fecha} a las ${franja}?`)) {
+          this.closest('form').submit();
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

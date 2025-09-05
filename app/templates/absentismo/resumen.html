@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Resumen del curso {{ anio_academico }}{% endblock %}
+
+{% block content %}
+<h2>Resumen del curso {{ anio_academico }}</h2>
+
+<table class="table table-bordered table-hover align-middle">
+  <thead>
+    <tr>
+      <th>Grupo</th>
+      <th>Nº alumnos</th>
+      <th>Meses registrados</th>
+      <th>Absentistas</th>
+      <th>Media % injustificadas</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in resumen_grupos %}
+    <tr>
+      <td>{{ item.grupo.nombre }}</td>
+      <td>{{ item.num_alumnos }}</td>
+      <td>{{ item.num_meses }}</td>
+      <td>{{ item.num_absentistas }}</td>
+      <td>{{ item.media_porcentaje }}%</td>
+      <td>
+        <div class="btn-group btn-group-sm" role="group">
+          <a href="{{ url_for('main.descargar_informe_horizontal', grupo_id=item.grupo.id) }}"
+             class="btn btn-outline-primary" title="Descargar informe horizontal">
+            <i class="bi bi-table"></i>
+          </a>
+          <a href="{{ url_for('main.ver_absentismo_mes', mes='septiembre', grupo_id=item.grupo.id) }}"
+             class="btn btn-outline-secondary" title="Ver mes actual">
+            <i class="bi bi-calendar"></i>
+          </a>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

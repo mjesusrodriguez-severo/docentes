@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Nueva incidencia de mantenimiento{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <h5 class="mb-3 text-uppercase text-secondary">Registrar nueva incidencia</h5>
+    <form method="post">
+      <div class="mb-3">
+        <label for="ubicacion" class="form-label">Ubicación</label>
+        <input type="text" class="form-control" name="ubicacion" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="descripcion" class="form-label">Descripción</label>
+        <textarea class="form-control" name="descripcion" required></textarea>
+      </div>
+
+      {% if es_admin %}
+      <div class="mb-3">
+        <label for="prioridad" class="form-label">Prioridad</label>
+        <select class="form-select" name="prioridad" required>
+          <option value="Alta">Alta</option>
+          <option value="Normal" selected>Normal</option>
+          <option value="Baja">Baja</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="estado" class="form-label">Estado</label>
+        <select class="form-select" name="estado" required>
+          <option value="Activa" selected>Activa</option>
+          <option value="Resuelta">Resuelta</option>
+          <option value="Cancelada">Cancelada</option>
+        </select>
+      </div>
+      {% endif %}
+
+      <button type="submit" class="btn btn-primary">Guardar</button>
+      <a href="{{ url_for('main.listar_incidencias_mantenimiento') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

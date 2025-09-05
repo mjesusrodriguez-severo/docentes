@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Alumno{% endblock %}
+
+{% block head %}
+  <!-- Select2 -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0 text-uppercase text-secondary">Editar Alumno</h5>
+    </div>
+
+  <div class="card p-4 shadow-sm">
+    <form method="post">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label>Nombre</label>
+          <input type="text" name="nombre" class="form-control" value="{{ alumno.nombre or "—" }}" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>Apellidos</label>
+          <input type="text" name="apellidos" class="form-control" value="{{ alumno.apellidos or "—" }}" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label>Identificación</label>
+          <input type="text" name="identificacion" class="form-control" value="{{ alumno.identificacion or "—" }}">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>Teléfono</label>
+          <input type="text" name="telefono" class="form-control" value="{{ alumno.telefono or "—" }}">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label>Email</label>
+          <input type="email" name="email" class="form-control" value="{{ alumno.email or "—" }}">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>Dirección</label>
+          <input type="text" name="direccion" class="form-control" value="{{ alumno.direccion or "—" }}">
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label>Observaciones</label>
+        <textarea name="observaciones" class="form-control">{{ alumno.observaciones or "—" }}</textarea>
+      </div>
+
+      <div class="mb-4">
+        <label>Grupo</label>
+        <select name="grupo_id" class="form-select">
+          {% for g in grupos %}
+            <option value="{{ g.id }}" {% if g.id == alumno.grupo_id %}selected{% endif %}>{{ g.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <hr>
+
+      <!-- RESPONSABLES ASIGNADOS -->
+      <h5 class="mb-3">Responsables asignados</h5>
+      {% for r in responsables_actuales %}
+        <div class="border rounded p-3 mb-3">
+          <div class="row align-items-center">
+            <div class="col-md-4">
+              <input type="text" name="nombre_responsable_{{ r.responsable.id }}" class="form-control"
+                     value="{{ r.responsable.nombre }}" placeholder="Nombre">
+            </div>
+            <div class="col-md-3">
+              <input type="text" name="telefono_responsable_{{ r.responsable.id }}" class="form-control"
+                     value="{{ r.responsable.telefono }}" placeholder="Teléfono">
+            </div>
+            <div class="col-md-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="principal" value="{{ r.responsable.id }}"
+                       {% if r.responsable.id == id_responsable_principal %}checked{% endif %}>
+                <label class="form-check-label">Principal</label>
+              </div>
+            </div>
+            <div class="col-md-2 text-end">
+              <button type="button" class="btn btn-outline-danger eliminar-btn" data-id="{{ r.responsable.id }}">
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+
+      <input type="hidden" name="eliminar_responsables" class="eliminar-input" value="">
+
+      <!-- AÑADIR RESPONSABLE EXISTENTE -->
+      <h5 class="mt-4 mb-3">Añadir responsable existente</h5>
+      <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+          <select id="nuevo_responsable" name="nuevo_responsable_id" class="form-select select2">
+            <option value="">-- Selecciona responsable --</option>
+            {% for r in responsables_no_asociados %}
+              <option value="{{ r.id }}">{{ r.nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4" id="radio_existente_container" style="display: none;">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="principal" id="radio_existente" value="">
+            <label class="form-check-label" for="radio_existente">Marcar como principal</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- CREAR NUEVO RESPONSABLE -->
+      <h5 class="mt-4 mb-3">Crear nuevo responsable</h5>
+      <div class="row mb-4 align-items-center">
+        <div class="col-md-4">
+          <input type="text" name="nuevo_nombre" class="form-control" placeholder="Nombre">
+        </div>
+        <div class="col-md-4">
+          <input type="text" name="nuevo_telefono" class="form-control" placeholder="Teléfono">
+        </div>
+        <div class="col-md-4">
+          <div class="form-check mt-2">
+            <input class="form-check-input" type="radio" name="principal" value="nuevo">
+            <label class="form-check-label">Marcar como principal</label>
+          </div>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="mt-4 text-center">
+          <button type="submit" class="btn btn-primary me-2">
+            <i class="bi bi-save"></i> Guardar Cambios
+          </button>
+          <a href="{{ url_for('main.listar_alumnos', grupo_id=alumno.grupo_id) }}" class="btn btn-secondary">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </a>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(document).ready(function () {
+    $('.select2').select2({
+      width: '100%',
+      placeholder: "-- Selecciona responsable --",
+      allowClear: true
+    });
+
+    $('#nuevo_responsable').on('change', function () {
+      const selectedId = $(this).val();
+      if (selectedId) {
+        $('#radio_existente').val(selectedId);
+        $('#radio_existente_container').show();
+      } else {
+        $('#radio_existente').val('');
+        $('#radio_existente_container').hide();
+      }
+    });
+
+    $('.eliminar-btn').on('click', function () {
+      const id = $(this).data('id');
+      if (confirm("¿Eliminar este responsable del alumno?")) {
+        const input = $('<input>')
+          .attr('type', 'hidden')
+          .attr('name', 'eliminar_responsables')
+          .val(id);
+        $('form').append(input);
+        $(this).closest('.border').remove();
+      }
+    });
+  });
+</script>
+{% endblock %}

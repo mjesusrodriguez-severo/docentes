@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Asignar dispositivos{% endblock %}
+
+{% block content %}
+<h2>Asignar dispositivos para reserva de {{ reserva.usuario.nombre }}</h2>
+<p><strong>Fecha:</strong> {{ reserva.fecha }} | <strong>Franja:</strong> {{ reserva.franja_horaria }}</p>
+
+{% if reserva.tipo_equipo == "portátil" %}
+  <!-- Filtro por carros portátiles -->
+  <div class="mb-3">
+    <div class="btn-group" role="group">
+      <a href="{{ url_for('main.asignar_dispositivos', reserva_id=reserva.id) }}"
+         class="btn btn-sm {{ 'btn-primary' if not filtro else 'btn-outline-primary' }}">Todos</a>
+      <a href="{{ url_for('main.asignar_dispositivos', reserva_id=reserva.id, filtro='p1') }}"
+         class="btn btn-sm {{ 'btn-primary' if filtro == 'p1' else 'btn-outline-primary' }}">Carro portátiles 1</a>
+      <a href="{{ url_for('main.asignar_dispositivos', reserva_id=reserva.id, filtro='p2') }}"
+         class="btn btn-sm {{ 'btn-primary' if filtro == 'p2' else 'btn-outline-primary' }}">Carro portátiles 2</a>
+      <a href="{{ url_for('main.asignar_dispositivos', reserva_id=reserva.id, filtro='p3') }}"
+         class="btn btn-sm {{ 'btn-primary' if filtro == 'p3' else 'btn-outline-primary' }}">Carro portátiles 3</a>
+    </div>
+  </div>
+{% elif reserva.tipo_equipo == "tablet" %}
+  <!-- Filtro por carros tablets -->
+  <div class="mb-3">
+    <div class="btn-group" role="group">
+      <a href="{{ url_for('main.asignar_dispositivos', reserva_id=reserva.id) }}"
+         class="btn btn-sm {{ 'btn-primary' if not filtro else 'btn-outline-primary' }}">Todos</a>
+      <a href="{{ url_for('main.asignar_dispositivos', reserva_id=reserva.id, filtro='t1') }}"
+         class="btn btn-sm {{ 'btn-primary' if filtro == 't1' else 'btn-outline-primary' }}">Carro tablets 1</a>
+      <a href="{{ url_for('main.asignar_dispositivos', reserva_id=reserva.id, filtro='t2') }}"
+         class="btn btn-sm {{ 'btn-primary' if filtro == 't2' else 'btn-outline-primary' }}">Carro tablets 2</a>
+    </div>
+  </div>
+{% endif %}
+
+<form method="POST">
+  <div class="row">
+    {% for disp in dispositivos %}
+      <div class="col-md-3 col-sm-4 col-6 mb-3">
+        <input type="checkbox" name="dispositivos"
+           id="disp{{ disp.id }}" value="{{ disp.id }}"
+           style="display: none;"
+           {% if disp.id in dispositivos_ocupados %}disabled{% endif %}>
+        <button type="button"
+                class="btn btn-outline-secondary w-100 dispositivo-btn"
+                data-id="{{ disp.id }}"
+                onclick="toggleDispositivo(this)">
+          {{ disp.etiqueta }}
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if dispositivos|length < reserva.cantidad %}
+    <div class="alert alert-warning">
+      ⚠️ Solo hay {{ dispositivos|length }} dispositivos disponibles. Se solicitaban {{ reserva.cantidad }}.
+    </div>
+  {% endif %}
+
+  <button type="submit" class="btn btn-success mt-3">Asignar y aceptar</button>
+  <a href="{{ url_for('main.gestion_reservas') }}" class="btn btn-secondary mt-3">Cancelar</a>
+</form>
+
+<!-- Script para activar botones -->
+<script>
+  function toggleDispositivo(btn) {
+    const inputId = btn.getAttribute('data-id');
+    const checkbox = document.getElementById('disp' + inputId);
+    checkbox.checked = !checkbox.checked;
+    btn.classList.toggle('btn-outline-secondary');
+    btn.classList.toggle('btn-success');
+  }
+</script>
+{% endblock %}

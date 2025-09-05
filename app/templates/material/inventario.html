@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h5 class="mb-0 text-uppercase text-secondary">Inventario de dispositivos</h5>
+</div>
+
+<!-- Accesos rápidos a otras vistas -->
+<div class="mb-3">
+  <label class="form-label text-secondary mb-1">Editar y ver detalles de:</label>
+  <div class="btn-group" role="group" aria-label="Accesos rápidos a vistas por tipo">
+    <a href="{{ url_for('main.ver_portatiles') }}"
+       class="btn btn-sm {% if vista_actual == 'portatiles' %}btn-primary{% else %}btn-outline-dark{% endif %}">
+      <i class="bi bi-laptop"></i> Portátiles
+    </a>
+    <a href="{{ url_for('main.ver_tablets') }}"
+       class="btn btn-sm {% if vista_actual == 'tablets' %}btn-primary{% else %}btn-outline-dark{% endif %}">
+      <i class="bi bi-tablet"></i> Tablets
+    </a>
+    <a href="{{ url_for('main.ver_pizarras') }}"
+       class="btn btn-sm {% if vista_actual == 'pizarras' %}btn-primary{% else %}btn-outline-dark{% endif %}">
+      <i class="bi bi-easel2"></i> Pizarras digitales
+    </a>
+    <a href="{{ url_for('main.ver_sobremesa') }}"
+       class="btn btn-sm {% if vista_actual == 'sobremesa' %}btn-primary{% else %}btn-outline-dark{% endif %}">
+      <i class="bi bi-pc-display-horizontal"></i> Sobremesas
+    </a>
+    <a href="{{ url_for('main.ver_allinone') }}"
+       class="btn btn-sm {% if vista_actual == 'allinones' %}btn-primary{% else %}btn-outline-dark{% endif %}">
+      <i class="bi bi-display"></i> All-in-One
+    </a>
+    <a href="{{ url_for('main.ver_inventario') }}"
+       class="btn btn-sm {% if vista_actual == 'inventario' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-grid-3x3-gap"></i> Vista completa
+    </a>
+  </div>
+</div>
+
+<div class="row mb-3">
+  <div class="col-md-3">
+    <label for="filtro-tipo" class="form-label">Filtrar por tipo</label>
+    <select id="filtro-tipo" class="form-select form-select-sm">
+      <option value="">Todos</option>
+      {% for tipo in tipos %}
+        <option value="{{ tipo }}">{{ tipo|capitalize }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label for="filtro-estado" class="form-label">Filtrar por estado</label>
+    <select id="filtro-estado" class="form-select form-select-sm">
+      <option value="">Todos</option>
+      {% for estado in estados %}
+        <option value="{{ estado }}">{{ estado|capitalize }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-4">
+    <label for="busqueda-dispositivo" class="form-label">Buscar dispositivo</label>
+    <select id="busqueda-dispositivo" class="form-select form-select-sm">
+      <option></option>
+      {% for d in dispositivos %}
+        <option value="{{ d.id }}">
+          {{ d.etiqueta or 'Sin etiqueta' }} – {{ d.numero_serie or 'Sin serie' }} – {{ d.tipo }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2 d-flex flex-column justify-content-end gap-2">
+      <button id="btn-filtrar" class="btn btn-primary btn-sm w-100">
+        <i class="bi bi-funnel me-1"></i> Filtrar
+      </button>
+      <button id="btn-limpiar-filtros" class="btn btn-secondary btn-sm w-100">
+        <i class="bi bi-x-circle me-1"></i> Limpiar
+      </button>
+  </div>
+</div>
+
+<table id="tabla-inventario" class="table table-sm table-hover align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>Etiqueta</th>
+      <th>Tipo</th>
+      <th>Marca</th>
+      <th>Modelo</th>
+      <th>Nº Serie</th>
+      <th>Estado</th>
+      <th>Ubicación</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in dispositivos %}
+    <tr data-id="{{ d.id }}" data-tipo="{{ d.tipo }}" data-estado="{{ d.estado }}">
+      <td>{{ d.etiqueta or '' }}</td>
+      <td>{{ d.tipo or '' }}</td>
+      <td>{{ d.marca or '' }}</td>
+      <td>{{ d.modelo or '' }}</td>
+      <td>{{ d.numero_serie or '' }}</td>
+      <td>
+        <span class="badge bg-{{ 'success' if d.estado == 'activo' else 'warning' if d.estado == 'incidencia' else 'secondary' }}">
+          {{ d.estado }}
+        </span>
+      </td>
+      <td>
+        {{ d.ubicacion.nombre if d.ubicacion else '' }}
+        {% if d.ubicacion and d.ubicacion.numero_puerta %}
+          (Puerta {{ d.ubicacion.numero_puerta }})
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<!-- Select2 + DataTables -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    let tabla = $('#tabla-inventario').DataTable({
+      language: {
+        url: "https://cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json"
+      },
+      paging: true,
+      lengthMenu: [10, 25, 50, 100],
+      order: [[0, 'asc']],
+      dom: 'lrtip' // 'l' = length, 'r' = processing, 't' = table, 'i' = info, 'p' = pagination. Quitamos 'f' (filter input).
+    });
+
+    // Select2
+    $('#busqueda-dispositivo').select2({
+      placeholder: "Busca por etiqueta, serie o tipo...",
+      allowClear: true
+    });
+
+    // Búsqueda por dispositivo (salta a la fila)
+    $('#busqueda-dispositivo').on('change', function () {
+      const id = $(this).val();
+      if (id) {
+        tabla.rows().every(function () {
+          const row = $(this.node());
+          if (row.data('id') == id) {
+            $('html, body').animate({
+              scrollTop: row.offset().top - 100
+            }, 300);
+            row.addClass('table-primary');
+          } else {
+            row.removeClass('table-primary');
+          }
+        });
+      } else {
+        tabla.rows().nodes().to$().removeClass('table-primary');
+      }
+    });
+
+    // Filtro personalizado con ext.search (solo se añade una vez)
+    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+      const tipoSeleccionado = $('#filtro-tipo').val();
+      const estadoSeleccionado = $('#filtro-estado').val();
+
+      const row = tabla.row(dataIndex).node();
+      const rowTipo = $(row).data('tipo');
+      const rowEstado = $(row).data('estado');
+
+      const coincideTipo = !tipoSeleccionado || rowTipo === tipoSeleccionado;
+      const coincideEstado = !estadoSeleccionado || rowEstado === estadoSeleccionado;
+
+      return coincideTipo && coincideEstado;
+    });
+
+    // Al hacer clic en "Filtrar", redibuja la tabla
+    $('#btn-filtrar').on('click', function () {
+      tabla.draw();
+    });
+
+    // Limpiar filtros
+    $('#btn-limpiar-filtros').on('click', function () {
+      $('#filtro-tipo').val('');
+      $('#filtro-estado').val('');
+      $('#busqueda-dispositivo').val(null).trigger('change');
+      tabla.draw();
+    });
+  });
+</script>
+{% endblock %}

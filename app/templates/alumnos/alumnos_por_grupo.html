@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Agenda Alumnado{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0 text-uppercase text-secondary">Agenda alumnado</h5>
+      {% if grupo_seleccionado and current_user.id == grupo_seleccionado.tutor_id %}
+        <!-- Botón para añadir alumno -->
+        <div class="text-end mb-3">
+          <a href="{{ url_for('main.nuevo_alumno', grupo_id=grupo_seleccionado.id) }}" class="btn btn-outline-primary">
+            <i class="bi bi-person-plus"></i> Añadir alumno
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  <div class="row justify-content-center mb-4">
+      <div>
+        <div class="btn-group w-100 flex-wrap" role="group" id="filtro-grupo">
+          {% for grupo in grupos %}
+            <button
+              class="btn btn-light {% if grupo_seleccionado and grupo.id == grupo_seleccionado.id %}active{% endif %}"
+              data-grupo="{{ grupo.id }}"
+              onclick="location.href='{{ url_for('main.listar_alumnos', grupo_id=grupo.id) }}'">
+              {{ grupo.nombre }}
+            </button>
+          {% endfor %}
+        </div>
+      </div>
+  </div>
+
+  {% if alumnos %}
+      <div class="table-responsive">
+        <table class="table table-hover">
+      <thead class="table-light text-start">
+        <tr>
+          <th>Nombre</th>
+          <th>Apellidos</th>
+          <th>Responsable Principal</th>
+          <th>Teléfono</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alumno in alumnos %}
+          <tr>
+            <td>{{ alumno.nombre }}</td>
+            <td>{{ alumno.apellidos }}</td>
+            <td>
+              {% if alumno.responsables %}
+                {{ alumno.responsables[0].nombre }}
+              {% else %}
+                <span class="text-muted">Sin responsable</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if alumno.responsables %}
+                {{ alumno.responsables[0].telefono }}
+              {% else %}
+                <span class="text-muted">No disponible</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="d-flex gap-2">
+                  <a href="{{ url_for('main.ver_alumno', alumno_id=alumno.id) }}" class="btn btn-sm btn-outline-primary" title="Consultar">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  {% if grupo_seleccionado and current_user.id == grupo_seleccionado.tutor_id %}
+                      <a href="{{ url_for('main.editar_alumno', alumno_id=alumno.id) }}" class="btn btn-sm btn-outline-warning" title="Editar">
+                        <i class="bi bi-pencil-square"></i>
+                      </a>
+                      <form action="{{ url_for('main.eliminar_alumno', alumno_id=alumno.id) }}" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este alumno?');" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                          <i class="bi bi-trash3"></i>
+                        </button>
+                      </form>
+                  {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+      </div>
+  {% elif grupo_seleccionado %}
+    <p class="text-center text-muted">Este grupo todavía no tiene alumnos registrados.</p>
+  {% else %}
+    <p class="text-center text-muted">Selecciona un grupo para ver su alumnado.</p>
+  {% endif %}
+{% endblock %}

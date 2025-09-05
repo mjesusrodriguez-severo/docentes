@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0 text-uppercase text-secondary">Reservas Material Informático</h5>
+</div>
+
+{% block content %}
+<div class="container mt-4">
+  <h4>Reserva de portátiles o tablets</h4>
+  <form method="post">
+    <input type="hidden" name="fecha" value="{{ fecha }}">
+    <input type="hidden" name="franja" value="{{ franja }}">
+
+    <div class="mb-3">
+      <label class="form-label">Docente</label>
+      <input type="text" class="form-control" value="{{ current_user.nombre }} {{ current_user.apellidos }}" readonly>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Día</label>
+      <input type="text" class="form-control" value="{{ fecha }}" readonly>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Franja horaria</label>
+      <input type="text" class="form-control" value="{{ franja }}" readonly>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Grupo</label>
+      <select name="grupo_id" class="form-select" required>
+        {% for grupo in grupos %}
+          <option value="{{ grupo.id }}">{{ grupo.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <label for="tipo_equipo">Tipo de equipo</label>
+        <select class="form-control" name="tipo_equipo" required>
+            <option value="portátil">Portátil</option>
+            <option value="tablet">Tablet</option>
+        </select>
+
+    <div class="mb-3">
+      <label class="form-label">Nº de equipos</label>
+      <input type="number" name="cantidad" class="form-control" min="1" max="30" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Observaciones</label>
+      <textarea name="observaciones" class="form-control" rows="2"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Confirmar solicitud</button>
+    <a href="{{ url_for('main.reservas_material') }}" class="btn btn-secondary ms-2">Volver</a>
+  </form>
+</div>
+{% endblock %}

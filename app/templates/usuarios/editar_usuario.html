@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Editar usuario{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-6 mx-auto">
+    <div class="card">
+      <div class="card-header">
+        <h5>Editar usuario</h5>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          <div class="mb-3">
+            <label>Email</label>
+            <input type="email" class="form-control" value="{{ usuario.email }}" disabled>
+          </div>
+          <div class="mb-3">
+            <label>Nombre</label>
+            <input type="text" name="nombre" class="form-control" value="{{ usuario.nombre }}" required>
+          </div>
+          <div class="mb-3">
+            <label>Rol</label>
+            <select name="rol" class="form-control" required>
+              <option value="profesor" {% if usuario.rol == 'profesor' %}selected{% endif %}>Profesor</option>
+              <option value="tutor" {% if usuario.rol == 'tutor' %}selected{% endif %}>Tutor</option>
+              <option value="jefatura" {% if usuario.rol == 'jefatura' %}selected{% endif %}>Jefatura</option>
+              <option value="tic" {% if usuario.rol == 'tic' %}selected{% endif %}>TIC</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label>Teléfono</label>
+            <input type="text" name="telefono" class="form-control" value="{{ usuario.telefono }}">
+          </div>
+          <button type="submit" class="btn btn-primary">Actualizar</button>
+          <a href="{{ url_for('main.listar_usuarios') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

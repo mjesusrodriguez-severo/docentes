@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Reservas Material{% endblock %}
+
+{% block content %}
+<style>
+  table.table {
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  .table td, .table th {
+    border: 1px solid #dee2e6 !important;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0.5rem;
+    width: 14.28%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .reserva-ocupada {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .btn-cancelar, .btn-libre {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .modal,
+.modal-backdrop {
+  position: fixed !important;
+  z-index: 1055 !important;
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0 text-uppercase text-secondary">Reservas Material Informático</h5>
+</div>
+
+{% macro render_semana(dias_semana, titulo) %}
+  <h6 class="mb-2">{{ titulo }}</h6>
+  <div class="table-responsive mb-5">
+    <table class="table table-bordered text-center align-middle">
+      <thead>
+        <tr>
+          <th>Franja horaria</th>
+          {% for dia in dias_semana %}
+            <th>{{ dias_es[dia.strftime('%A')] }}<br>{{ dia.strftime('%d/%m') }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+          {% for franja in franjas_horarias %}
+            <tr>
+              <td><strong>{{ franja }}</strong></td>
+              {% for dia in dias_semana %}
+                {% set reserva_data = reservas.get((dia, franja), []) %}
+                <td>
+                  {% if reserva_data %}
+                    <div class="reserva-ocupada">
+                        {# SI ES LISTA DE RESERVAS #}
+                          {% if reserva_data.__class__.__name__ == 'list' %}
+                            {% for reserva in reserva_data %}
+                              {% set texto = reserva.grupo.nombre if reserva.grupo else usuarios.get(reserva.usuario_id, 'Sin nombre') %}
+                              {% if reserva.estado == 'ACEPTADA' %}
+                                <span class="badge bg-success-subtle text-dark me-1">{{ texto }}</span>
+                              {% else %}
+                                <span class="badge bg-warning-subtle text-dark me-1">{{ texto }}</span>
+                              {% endif %}
+                            {% endfor %}
+
+                              {# SI ES UNA ÚNICA RESERVA #}
+                              {% else %}
+                                {% set texto = reserva_data.grupo.nombre if reserva_data.grupo else usuarios.get(reserva_data.usuario_id, 'Sin nombre') %}
+                                {% if reserva_data.estado == 'ACEPTADA' %}
+                                  <span class="badge bg-success-subtle text-dark me-1">{{ texto }}</span>
+                                {% else %}
+                                  <span class="badge bg-warning-subtle text-dark me-1">{{ texto }}</span>
+                                {% endif %}
+                              {% endif %}
+                    </div>
+                  {% else %}
+                    {# Si no hay reservas para esta franja, mostrar botón o guión #}
+                    {% if dia.weekday() not in [5, 6] and current_user.rol != 'tic' %}
+                      <a href="{{ url_for('main.formulario_reserva_material', fecha=dia.strftime('%Y-%m-%d'), franja=franja) }}"
+                         class="btn btn-sm btn-success btn-libre">
+                        <i class="bi bi-laptop"></i> Reservar
+                      </a>
+                    {% else %}
+                      <span class="text-muted">-</span>
+                    {% endif %}
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+  </div>
+{% endmacro %}
+
+{{ render_semana(dias_semana_actual, "Semana del " ~ dias_semana_actual[0].strftime('%d/%m') ~ " al " ~ dias_semana_actual[-1].strftime('%d/%m')) }}
+
+<hr class="mt-5 mb-4">
+
+<div class="d-flex justify-content-between align-items-center mt-5 mb-3">
+  <h5 class="text-secondary mb-0">Reservas realizadas</h5>
+
+  <div>
+    {% if reservas_usuario.pages > 1 %}
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          {% if reservas_usuario.has_prev %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('main.reservas_material', page=reservas_usuario.prev_num) }}">
+                &laquo;
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+          {% endif %}
+
+          <li class="page-item disabled">
+            <span class="page-link">
+              Página {{ reservas_usuario.page }} de {{ reservas_usuario.pages }}
+            </span>
+          </li>
+
+          {% if reservas_usuario.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('main.reservas_material', page=reservas_usuario.next_num) }}">
+                &raquo;
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
+</div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <table class="table table-striped">
+  <thead>
+    <tr>
+        <th>Fecha</th>
+        <th>Franja horaria</th>
+        <th>Grupo</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for reserva in reservas_usuario.items %}
+      <tr>
+        <td>{{ dias_es[reserva.fecha.strftime('%A')] }}<br>{{ reserva.fecha.strftime('%d/%m/%Y') }}</td>
+        <td>{{ reserva.franja_horaria }}</td>
+        <td>{{ reserva.grupo.nombre }}</td>
+        <td>
+          {% if reserva.estado == 'ACEPTADA' %}
+            <span class="badge bg-success-subtle text-dark">Reservado</span>
+          {% elif reserva.estado == 'PENDIENTE' %}
+            <span class="badge bg-warning-subtle text-dark">Solicitado</span>
+          {% elif reserva.estado == 'CANCELADA' %}
+            <span class="badge bg-danger-subtle text-dark">Cancelada</span>
+          {% else %}
+            <span class="badge bg-secondary-subtle text-dark">{{ reserva.estado }}</span>
+          {% endif %}
+        </td>
+
+        <td>
+          {% if reserva.estado == 'ACEPTADA' %}
+              {% if reserva.dispositivos %}
+                  <!-- Botón de lupa para ver dispositivos asignados -->
+                  <button class="btn btn-outline-secondary btn-sm me-1"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#equipos-{{ reserva.id }}"
+                          aria-expanded="false"
+                          aria-controls="equipos-{{ reserva.id }}"
+                          title="Ver dispositivos asignados">
+                    <i class="bi bi-search"></i>
+                  </button>
+              {% endif %}
+
+              <!-- ✅ Descargar hoja de préstamo generada (disponible siempre) -->
+              <a href="{{ url_for('main.descargar_reserva', reserva_id=reserva.id) }}"
+                 class="btn btn-outline-primary btn-sm"
+                 title="Descargar hoja de préstamo">
+                <i class="bi bi-download"></i>
+              </a>
+
+              {% if reserva.fecha > current_date %}
+                  <!-- ✅ Cancelar si aún no ha pasado -->
+                  <form method="POST" action="{{ url_for('main.cancelar_reserva_material') }}"
+                        onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta reserva?');"
+                        class="d-inline">
+                      <input type="hidden" name="reserva_id" value="{{ reserva.id }}">
+                      <button type="submit" class="btn btn-outline-danger btn-sm"
+                              title="Cancelar solicitud">
+                        <i class="bi bi-x-circle"></i>
+                      </button>
+                  </form>
+              {% endif %}
+
+              {% if reserva.fecha <= current_date %}
+                  {% if current_user.rol == 'tic' %}
+                      {% if reserva.hoja_firmada %}
+                          <!-- ✅ TIC puede descargar hoja firmada -->
+                          <a href="{{ url_for('main.descargar_hoja', reserva_id=reserva.id) }}"
+                             class="btn btn-outline-primary btn-sm"
+                             title="Descargar hoja firmada">
+                            <i class="bi bi-download"></i>
+                          </a>
+                      {% else %}
+                          <!-- ❌ No hay hoja firmada aún -->
+                          <button class="btn btn-outline-secondary btn-sm" title="No disponible" disabled>
+                            <i class="bi bi-download"></i>
+                          </button>
+                      {% endif %}
+                  {% else %}
+                      <!-- ✅ Docente puede subir hoja firmada si aún no la ha subido -->
+                      {% if not reserva.hoja_firmada %}
+                          <form method="POST" action="{{ url_for('main.subir_hoja', reserva_id=reserva.id) }}"
+                                enctype="multipart/form-data"
+                                class="d-inline">
+                            <label class="btn btn-outline-success btn-sm mb-0" title="Subir hoja firmada">
+                              <i class="bi bi-upload"></i>
+                              <input type="file" name="archivo" onchange="this.form.submit()" hidden>
+                            </label>
+                          </form>
+                      {% endif %}
+                  {% endif %}
+              {% endif %}
+
+          {% elif reserva.estado == 'PENDIENTE' and reserva.fecha > current_date %}
+              {% if current_user.rol in ['tic', 'jefatura'] %}
+                  <!-- Aceptar o denegar la reserva -->
+                  <a href="{{ url_for('main.asignar_dispositivos', reserva_id=reserva.id) }}"
+                     class="btn btn-outline-success btn-sm" title="Asignar dispositivos">
+                    <i class="bi bi-plus-circle"></i>
+                  </a>
+                  <form action="{{ url_for('main.denegar_reserva') }}" method="POST" class="d-inline">
+                    <input type="hidden" name="reserva_id" value="{{ reserva.id }}">
+                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Denegar reserva">
+                      <i class="bi bi-x-circle"></i>
+                    </button>
+                  </form>
+              {% elif current_user.rol != 'tic' %}
+                  <!-- Cancelar si es docente -->
+                  <form action="{{ url_for('main.cancelar_reserva_material') }}" method="POST" class="d-inline">
+                    <input type="hidden" name="reserva_id" value="{{ reserva.id }}">
+                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Cancelar solicitud">
+                      <i class="bi bi-x-circle"></i>
+                    </button>
+                  </form>
+              {% endif %}
+          {% endif %}
+        </td>
+      </tr>
+        {% if reserva.estado == 'ACEPTADA' and reserva.dispositivos %}
+            <tr class="collapse bg-light" id="equipos-{{ reserva.id }}">
+              <td colspan="5">
+                <strong>Equipos asignados:</strong>
+                <div class="row mt-2">
+                  {% for dispositivo in reserva.dispositivos %}
+                    <div class="col-12 col-md-6 col-lg-4 mb-3">
+                      <div class="border rounded p-3 bg-white shadow-sm h-100 w-100">
+                        <div><strong>{{ dispositivo.nombre }}</strong></div>
+                        <div class="text-muted small">{{ dispositivo.ubicacion.nombre }}</div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </td>
+            </tr>
+        {% endif %}
+    {% else %}
+      <tr>
+        <td colspan="4" class="text-center text-muted">No has realizado ninguna reserva todavía.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

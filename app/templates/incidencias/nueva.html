@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Nueva incidencia{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <h5 class="mb-3 text-uppercase text-secondary">Registrar nueva incidencia</h5>
+    <form method="post">
+      <div class="mb-3">
+        <label for="ubicacion" class="form-label">Ubicación</label>
+        <input type="text" class="form-control" name="ubicacion" placeholder="Ej. Aula 1, Despacho TIC" required>
+      </div>
+
+      <div class="mb-3">
+          <label for="tipo_equipo" class="form-label">Tipo de equipo</label>
+          <select id="tipo_equipo" name="tipo_equipo" class="form-select" required>
+            <option value="">Selecciona un tipo</option>
+            <option value="portatil">Portátil</option>
+            <option value="allinone">All in one</option>
+            <option value="sobremesa">Sobremesa</option>
+            <option value="pizarra">Pizarra digital</option>
+            <option value="tablet">Tablet</option>
+            <option value="monitor">Monitor</option>
+            <option value="impresora">Impresora</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+
+        {% if es_tic %}
+        <div class="mb-3">
+          <label for="equipo_id" class="form-label">Equipo concreto</label>
+          <select id="equipo_id" name="equipo_id" class="form-select">
+            <option value="">Selecciona un equipo</option>
+          </select>
+        </div>
+        {% endif %}
+
+      <div class="mb-3">
+        <label for="descripcion" class="form-label">Descripción del problema</label>
+        <textarea class="form-control" name="descripcion" rows="4" placeholder="Describe el problema de forma clara..." required></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Prioridad</label>
+        <input type="text" class="form-control" value="Normal" disabled>
+        <div class="form-text">La prioridad solo puede ser modificada por el responsable TIC.</div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Registrar incidencia</button>
+      <a href="{{ url_for('main.mostrar_incidencias') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+<!-- JS de Select2 -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+      const equipos = {{ equipos_json | tojson }};
+      const tipoSelect = document.getElementById('tipo_equipo');
+      const equipoSelect = document.getElementById('equipo_id');
+
+      tipoSelect?.addEventListener('change', function () {
+        const tipo = this.value;
+        if (!tipo || !equipoSelect) return;
+
+        const filtrados = equipos.filter(e => e.tipo === tipo);
+
+        equipoSelect.innerHTML = '<option value="">Selecciona un equipo</option>';
+        filtrados.forEach(eq => {
+          const option = document.createElement('option');
+          option.value = eq.id;
+          option.textContent = `${eq.nombre} (${eq.ubicacion})`;
+          equipoSelect.appendChild(option);
+        });
+      });
+
+  $(document).ready(function() {
+    $('#equipo_id').select2({
+      width: '100%',
+      placeholder: 'Selecciona un equipo',
+      allowClear: true
+    });
+  });
+</script>
+{% endblock %}

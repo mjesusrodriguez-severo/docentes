@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% block title %}Sustituciones{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0 text-uppercase text-secondary">Sustituciones</h5>
+
+      <div class="d-flex align-items-center gap-2">
+        {% if current_user.rol == "jefatura" %}
+          <button class="btn btn-outline-primary" onclick="mostrarFormulario()">
+            <i class="bi bi-exclamation-triangle"></i> Añadir Nueva Sustitución
+          </button>
+        {% endif %}
+        <a href="https://drive.google.com/drive/u/0/folders/15wiaXSjf8Pw1_ngP9msLdxlHXfai6q9J" target="_blank" class="btn btn-outline-secondary" title="Ver carpeta compartida">
+          <i class="bi bi-folder-symlink"></i> Ver carpeta compartida (Google Drive)
+        </a>
+      </div>
+    </div>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Formulario dinámico oculto -->
+  <div id="formulario-sustitución" class="card p-4 mb-4 bg-light border d-none">
+    <form method="POST" action="{{ url_for('main.nueva_sustitucion') }}">
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label for="fecha" class="form-label">Fecha</label>
+          <input type="date" class="form-control" id="fecha" name="fecha" placeholder="Selecciona una fecha" required>
+        </div>
+        <div class="col-md-4">
+          <label for="hora_inicio" class="form-label">Hora de inicio</label>
+          <input type="text" class="form-control" id="hora_inicio" name="hora_inicio" placeholder="08:30" required>
+        </div>
+
+        <div class="col-md-4">
+          <label for="hora_fin" class="form-label">Hora de fin</label>
+          <input type="text" class="form-control" id="hora_fin" name="hora_fin" placeholder="09:25" required>
+        </div>
+
+        <div class="col-md-4">
+          <label for="grupo" class="form-label">Grupo</label>
+          <select name="grupo_id" id="grupo" class="form-select" required>
+            <option value="">Selecciona un grupo</option>
+            {% for grupo in grupos %}
+              <option value="{{ grupo.id }}">{{ grupo.nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="email_sustituido" class="form-label">Profesor/a sustituido/a</label>
+          <select name="sustituido_id" id="sustituido_id" class="form-select" required>
+            <option value="">Selecciona un profesor</option>
+            {% for profesor in profesores %}
+              <option value="{{ profesor.id }}">{{ profesor.nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label for="email_sustituto" class="form-label">Profesor/a sustituto/a</label>
+          <select name="sustituto_id" id="sustituto_id" class="form-select" required>
+            <option value="">Selecciona un profesor</option>
+            {% for profesor in profesores %}
+              <option value="{{ profesor.id }}">{{ profesor.nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="observaciones" class="form-label">Observaciones</label>
+        <textarea name="observaciones" class="form-control" rows="2"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-success">
+        <i class="bi bi-check-circle"></i> Guardar sustitución
+      </button>
+    </form>
+  </div>
+
+  <!-- Próximas sustituciones -->
+<h5 class="mt-4 text-success">📅 Próximas sustituciones</h5>
+{% if sustituciones_proximas %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Hora</th>
+        <th>Grupo</th>
+        <th>Sustituido</th>
+        <th>Sustituto</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sustituciones_proximas %}
+        <tr>
+          <td>{{ s.fecha }}</td>
+          <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
+          <td>{{ s.grupo.nombre }}</td>
+          <td>{{ s.sustituido.nombre }}</td>
+          <td>{{ s.sustituto.nombre }}</td>
+          <td class="text-center">
+              {% if s.confirmado %}
+                <span class="badge bg-success">
+                  <i class="bi bi-check-circle me-1"></i> Confirmada
+                </span>
+              {% else %}
+                <span class="badge bg-warning text-dark">
+                  <i class="bi bi-exclamation-triangle me-1"></i> Pendiente
+                </span>
+              {% endif %}
+          </td>
+          <td class="text-center">
+              {% if current_user.rol in ["jefatura"] %}
+                <form action="{{ url_for('main.cancelar_sustitucion', sustitucion_id=s.id) }}" method="POST" class="d-inline" onsubmit="return confirmarCancelacion();">
+                  <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancelar sustitución">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </form>
+              {% endif %}
+              {% if current_user.is_authenticated and current_user.rol != "jefatura" and s.sustituto_id == current_user.id and not s.confirmado %}
+                <!-- Botón confirmar para el profesor sustituto asignado (excepto jefatura) -->
+                <form action="{{ url_for('main.confirmar_sustitucion', sustitucion_id=s.id) }}" method="POST" class="d-inline" onsubmit="return confirmarConfirmacion();">
+                  <button type="submit" class="btn btn-sm btn-outline-success" title="Confirmar sustitución">
+                    <i class="bi bi-check-lg"></i>
+                  </button>
+                </form>
+              {% endif %}
+              <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#detalle{{ s.id }}" aria-expanded="false" aria-controls="detalle{{ s.id }}" title="Ver detalles">
+                <i class="bi bi-search"></i>
+              </button>
+          </td>
+        </tr>
+        <tr class="collapse bg-light" id="detalle{{ s.id }}">
+          <td colspan="7">
+            <strong>Observaciones:</strong> {{ s.observaciones or "Sin observaciones" }}<br>
+            <strong>Enlace material:</strong>
+            {% if s.enlace_drive %}
+              <a href="https://drive.google.com/drive/folders/{{ s.enlace_drive }}" target="_blank">Abrir carpeta</a>
+            {% else %}
+              No disponible
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div class="alert alert-info">No hay sustituciones programadas.</div>
+{% endif %}
+
+<!-- Sustituciones pasadas -->
+<h5 class="mt-5 text-secondary">📁 Sustituciones pasadas</h5>
+{% if sustituciones_pasadas %}
+  <table class="table table-bordered table-sm">
+    <thead class="table-light">
+      <tr>
+        <th>Fecha</th>
+        <th>Hora</th>
+        <th>Grupo</th>
+        <th>Sustituido</th>
+        <th>Sustituto</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sustituciones_pasadas %}
+        <tr>
+          <td>{{ s.fecha.strftime("%d/%m/%Y") }}</td>
+          <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
+          <td>{{ s.grupo.nombre }}</td>
+          <td>{{ s.sustituido.nombre }}</td>
+          <td>{{ s.sustituto.nombre }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div class="alert alert-secondary">Aún no hay registros de sustituciones anteriores.</div>
+{% endif %}
+</div>
+
+<script>
+  function mostrarFormulario() {
+    const formDiv = document.getElementById("formulario-sustitución");
+    formDiv.classList.toggle("d-none");
+  }
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+
+<script>
+  function mostrarFormulario() {
+    const form = document.getElementById('formulario-sustitución');
+    form.classList.toggle('d-none');
+  }
+
+  flatpickr("#fecha", {
+    dateFormat: "Y-m-d",
+    locale: "es",
+    minDate: "today",
+    altInput: true,
+    altFormat: "d/m/Y",
+  });
+
+  flatpickr("#hora_inicio", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    time_24hr: true,
+    defaultHour: 8,
+    defaultMinute: 30,
+    locale: "es"
+  });
+
+  flatpickr("#hora_fin", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    time_24hr: true,
+    defaultHour: 9,
+    defaultMinute: 25,
+    locale: "es"
+  });
+
+  function confirmarCancelacion() {
+    return confirm("¿Estás seguro de que quieres cancelar esta sustitución?");
+  }
+</script>
+
+{% endblock %}

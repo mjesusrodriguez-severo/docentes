@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+
+  <h4 class="mb-3 text-burdeos"><i class="bi bi-person-dash"></i> Informes de absentismo</h4>
+
+  <!-- Selector de mes -->
+  <div class="mb-4">
+    <label class="form-label text-secondary mb-1">Selecciona un mes:</label>
+    <div class="btn-group" role="group" aria-label="Selector de mes">
+      {% for mes in meses %}
+        <a href="{{ url_for('main.ver_absentismo_mes', mes=mes) }}"
+           class="btn btn-sm {% if mes_actual == mes %}btn-primary{% else %}btn-outline-dark{% endif %}">
+          {{ mes|capitalize }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Tabla de grupos -->
+  <h5 class="text-secondary">Grupos en {{ mes_actual|capitalize }} {{ anio_actual }}</h5>
+
+  <table class="table table-sm align-middle mt-2">
+    <thead class="table-secondary">
+      <tr>
+        <th>Grupo</th>
+        <th>Faltas justificadas</th>
+        <th>Faltas injustificadas</th>
+        <th>% absentismo medio</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for grupo in grupos %}
+        {% set informe = informes_por_grupo.get(grupo.id) %}
+        {% if informe %}
+            {% set ns = namespace(justificadas=0, injustificadas=0, porcentaje=0) %}
+
+            {% for ia in informe.alumnos %}
+              {% set ns.justificadas = ns.justificadas + ia.faltas_justificadas %}
+              {% set ns.injustificadas = ns.injustificadas + ia.faltas_injustificadas %}
+              {% set ns.porcentaje = ns.porcentaje + ia.porcentaje_injustificadas %}
+            {% endfor %}
+
+            {% set total_alumnos = informe.alumnos | length %}
+            {% if total_alumnos > 0 %}
+              {% set porcentaje_medio = ns.porcentaje / total_alumnos %}
+            {% else %}
+              {% set porcentaje_medio = 0 %}
+            {% endif %}
+
+          <tr {% if porcentaje_medio >= 20 %}class="table-warning"{% endif %}>
+            <td>{{ grupo.nombre }}</td>
+            <td>{{ ns.justificadas }}</td>
+            <td>{{ ns.injustificadas }}</td>
+            <td>{{ "%.1f"|format(porcentaje_medio) }}%</td>
+            <td>
+              <div class="d-flex flex-wrap gap-2">
+                  <a href="{{ url_for('main.ver_informe_grupo', grupo_id=grupo.id, mes=mes_actual) }}"
+                     class="btn btn-outline-primary btn-sm" title="Ver informe del grupo">
+                    <i class="bi bi-search"></i> Ver
+                  </a>
+                  <a href="{{ url_for('main.descargar_informe', grupo_id=grupo.id, mes=mes_actual) }}"
+                     class="btn btn-outline-dark btn-sm" title="Descargar informe">
+                    <i class="bi bi-download"></i> Descargar
+                  </a>
+                  <form method="POST"
+                        action="{{ url_for('main.borrar_informe', grupo_id=grupo.id, mes=mes_actual) }}"
+                        onsubmit="return confirm('¿Seguro que quieres borrar el informe de este grupo y mes?');"
+                        class="d-inline">
+                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Borrar informe">
+                      <i class="bi bi-trash"></i> Borrar
+                    </button>
+                  </form>
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td>{{ grupo.nombre }}</td>
+            <td colspan="3" class="text-muted">Sin informe cargado</td>
+            <td>
+              <form method="POST"
+                      action="{{ url_for('main.subir_informe', grupo_id=grupo.id, mes=mes_actual) }}"
+                      enctype="multipart/form-data"
+                      class="d-inline">
+                  <label for="file-{{ grupo.id }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-upload"></i> Subir informe
+                  </label>
+                  <input type="file" id="file-{{ grupo.id }}" name="archivo" accept=".csv" hidden
+                         onchange="this.form.submit()">
+                </form>
+            </td>
+          </tr>
+        {% endif %}
+      {% else %}
+        <tr>
+          <td colspan="5" class="text-center text-muted">No hay grupos cargados todavía.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

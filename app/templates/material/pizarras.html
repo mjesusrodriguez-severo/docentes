@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h5 class="mb-0 text-uppercase text-secondary">Pizarras digitales</h5>
+  <button class="btn btn-outline-primary" id="toggle-edicion">
+    <i class="bi bi-pencil"></i> Activar edición
+  </button>
+</div>
+
+
+<!-- Accesos rápidos a otras vistas -->
+<div class="mb-3">
+  <label class="form-label text-secondary mb-1">Editar y ver detalles de:</label>
+  <div class="btn-group" role="group" aria-label="Accesos rápidos a vistas por tipo">
+    <a href="{{ url_for('main.ver_portatiles') }}"
+       class="btn btn-sm {% if vista_actual == 'portatiles' %}btn-primary{% else %}btn-outline-dark{% endif %}">
+      <i class="bi bi-laptop"></i> Portátiles
+    </a>
+    <a href="{{ url_for('main.ver_tablets') }}"
+       class="btn btn-sm {% if vista_actual == 'tablets' %}btn-primary{% else %}btn-outline-dark{% endif %}">
+      <i class="bi bi-tablet"></i> Tablets
+    </a>
+    <a href="{{ url_for('main.ver_pizarras') }}"
+       class="btn btn-sm {% if vista_actual == 'pizarras' %}btn-primary{% else %}btn-outline-dark{% endif %}">
+      <i class="bi bi-easel2"></i> Pizarras digitales
+    </a>
+    <a href="{{ url_for('main.ver_sobremesa') }}"
+       class="btn btn-sm {% if vista_actual == 'sobremesa' %}btn-primary{% else %}btn-outline-dark{% endif %}">
+      <i class="bi bi-pc-display-horizontal"></i> Sobremesas
+    </a>
+    <a href="{{ url_for('main.ver_allinone') }}"
+       class="btn btn-sm {% if vista_actual == 'allinones' %}btn-primary{% else %}btn-outline-dark{% endif %}">
+      <i class="bi bi-display"></i> All-in-One
+    </a>
+    <a href="{{ url_for('main.ver_inventario') }}"
+       class="btn btn-sm {% if vista_actual == 'inventario' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-grid-3x3-gap"></i> Vista completa
+    </a>
+  </div>
+</div>
+
+<p class="text-muted">Mostrando todas las pizarras digitales registradas ({{ pizarras|length }} dispositivos)</p>
+
+<table class="table table-sm table-hover align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>Etiqueta</th>
+      <th>Marca</th>
+      <th>Nº Serie</th>
+      <th>Estado</th>
+      <th>Ubicación</th>
+      <th class="text-end"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in pizarras %}
+    <tr data-id="{{ d.id }}">
+      <td><input class="form-control form-control-sm" name="etiqueta" value="{{ d.etiqueta or '' }}" disabled></td>
+      <td><input class="form-control form-control-sm" name="marca" value="{{ d.marca or '' }}" disabled></td>
+      <td><input class="form-control form-control-sm" name="numero_serie" value="{{ d.numero_serie or '' }}" disabled></td>
+      <td>
+        <select class="form-select form-select-sm" name="estado" disabled>
+          {% for estado in ['activo', 'incidencia', 'baja'] %}
+            <option value="{{ estado }}" {% if d.estado == estado %}selected{% endif %}>{{ estado }}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td>
+        <select class="form-select form-select-sm" name="ubicacion_id" disabled>
+          <option value="">-</option>
+          {% for u in ubicaciones %}
+            <option value="{{ u.id }}" {% if d.ubicacion and d.ubicacion.id == u.id %}selected{% endif %}>
+              {{ u.nombre }}{% if u.numero_puerta %} (Puerta {{ u.numero_puerta }}){% endif %}
+            </option>
+          {% endfor %}
+        </select>
+      </td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-secondary toggle-detalle">
+          <i class="bi bi-chevron-down"></i>
+        </button>
+      </td>
+    </tr>
+    <tr class="detalle-row d-none" id="detalle-{{ d.id }}">
+      <td colspan="5">
+        <div class="card card-body bg-light">
+          <div class="row">
+            <div class="col-md-4">
+              <label class="form-label">Marca</label>
+              <input class="form-control form-control-sm" name="marca" value="{{ d.marca or '' }}" disabled>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Modelo</label>
+              <input class="form-control form-control-sm" name="modelo" value="{{ d.modelo or '' }}" disabled>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Observaciones</label>
+              <input class="form-control form-control-sm" name="observaciones" value="{{ d.observaciones or '' }}" disabled>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/edicion-dispositivos.js') }}"></script>
+{% endblock %}

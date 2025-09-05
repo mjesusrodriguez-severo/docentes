@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Editar incidencia de Mantenimiento{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <h5 class="mb-3 text-uppercase text-secondary">Editar incidencia de mantenimiento</h5>
+    <form method="post">
+      <div class="mb-3">
+        <label for="ubicacion" class="form-label">Ubicación</label>
+        <input type="text" class="form-control" name="ubicacion" value="{{ incidencia.ubicacion }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="descripcion" class="form-label">Descripción</label>
+        <textarea class="form-control" name="descripcion" required>{{ incidencia.descripcion }}</textarea>
+      </div>
+
+      <div class="mb-3">
+        <label for="prioridad" class="form-label">Prioridad</label>
+        {% if es_admin %}
+          <select class="form-select" name="prioridad" required>
+            <option value="Alta" {% if incidencia.prioridad == 'Alta' %}selected{% endif %}>Alta</option>
+            <option value="Normal" {% if incidencia.prioridad == 'Normal' %}selected{% endif %}>Normal</option>
+            <option value="Baja" {% if incidencia.prioridad == 'Baja' %}selected{% endif %}>Baja</option>
+          </select>
+        {% else %}
+          <input type="text" class="form-control" value="{{ incidencia.prioridad }}" disabled>
+          <input type="hidden" name="prioridad" value="{{ incidencia.prioridad }}">
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="estado" class="form-label">Estado</label>
+        {% if es_admin %}
+          <select class="form-select" name="estado" required>
+            <option value="Activa" {% if incidencia.estado == 'Activa' %}selected{% endif %}>Activa</option>
+            <option value="Resuelta" {% if incidencia.estado == 'Resuelta' %}selected{% endif %}>Resuelta</option>
+            <option value="Cancelada" {% if incidencia.estado == 'Cancelada' %}selected{% endif %}>Cancelada</option>
+          </select>
+        {% else %}
+          <input type="text" class="form-control" value="{{ incidencia.estado }}" disabled>
+          <input type="hidden" name="estado" value="{{ incidencia.estado }}">
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-primary">Guardar cambios</button>
+      <a href="{{ url_for('main.listar_incidencias_mantenimiento') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

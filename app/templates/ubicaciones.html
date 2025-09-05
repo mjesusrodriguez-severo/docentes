@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0 text-uppercase text-secondary">Ubicaciones del centro</h5>
+
+      <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-primary" onclick="mostrarFormulario()">
+            <i class="bi bi-plus-circle"></i> Añadir Nueva Ubicación
+          </button>
+      </div>
+    </div>
+
+    <div id="formulario-ubicacion" class="card p-4 mb-4 bg-light border d-none">
+        <form method="POST" action="{{ url_for('main.nueva_ubicacion') }}">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-2">
+              <label for="tipo" class="form-label mb-0">Tipo</label>
+              <input type="text" class="form-control form-control-sm" name="tipo" required>
+            </div>
+            <div class="col-md-3">
+              <label for="nombre" class="form-label mb-0">Nombre</label>
+              <input type="text" class="form-control form-control-sm" name="nombre" required>
+            </div>
+            <div class="col-md-2">
+              <label for="numero_puerta" class="form-label mb-0">Nº Puerta</label>
+              <input type="text" class="form-control form-control-sm" name="numero_puerta">
+            </div>
+            <div class="col-md-1">
+              <label for="planta" class="form-label mb-0">Planta</label>
+              <input type="number" class="form-control form-control-sm" name="planta">
+            </div>
+            <div class="col-md-3">
+              <label for="observaciones" class="form-label mb-0">Observaciones</label>
+              <input type="text" class="form-control form-control-sm" name="observaciones">
+            </div>
+            <div class="col-md-1">
+              <button type="submit" class="btn btn-sm btn-primary w-100">
+                <i class="bi bi-plus-circle"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+    </div>
+
+<table class="table table-sm table-hover align-middle" id="tabla-ubicaciones">
+    <thead class="table-light">
+        <tr>
+            <th style="width: 100px;">Tipo</th>
+            <th style="width: 200px;">Nombre</th>
+            <th style="width: 80px;">Nº Puerta</th>
+            <th style="width: 60px;">Planta</th>
+            <th>Observaciones</th>
+            <th style="width: 80px;"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in ubicaciones %}
+        <tr data-id="{{ u.id }}">
+            <td><input class="form-control form-control-sm" name="tipo" value="{{ u.tipo }}"></td>
+            <td><input class="form-control form-control-sm" name="nombre" value="{{ u.nombre }}"></td>
+            <td><input class="form-control form-control-sm" name="numero_puerta" value="{{ u.numero_puerta or '' }}"></td>
+            <td><input class="form-control form-control-sm" name="planta" value="{{ u.planta if u.planta is not none else '' }}"></td>
+            <td><input class="form-control form-control-sm" name="observaciones" value="{{ u.observaciones or '' }}"></td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary guardar-btn" title="Guardar cambios">
+                    <i class="bi bi-save"></i>
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+document.querySelectorAll('.guardar-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const tr = btn.closest('tr');
+        const id = tr.dataset.id;
+        const data = { id };
+
+        tr.querySelectorAll('input').forEach(input => {
+            data[input.name] = input.value;
+        });
+
+        fetch("/ubicaciones/actualizar", {
+            method: "POST",
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(response => {
+            if (response.success) {
+                btn.classList.remove("btn-primary");
+                btn.classList.add("btn-success");
+                setTimeout(() => {
+                    btn.classList.remove("btn-success");
+                    btn.classList.add("btn-primary");
+                }, 1000);
+            } else {
+                alert("Error al guardar");
+            }
+        });
+    });
+});
+
+function mostrarFormulario() {
+    const form = document.getElementById('formulario-ubicacion');
+    form.classList.toggle('d-none');
+  }
+</script>
+{% endblock %}
