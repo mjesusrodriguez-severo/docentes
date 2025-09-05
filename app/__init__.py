@@ -20,7 +20,7 @@ def create_app():
         configure_mappers()
 
     login_manager.init_app(app)
-    #login_manager.login_view = "auth.login"
+    login_manager.login_view = "auth.login"
 
     from app.auth import auth_bp
     from .routes import main_bp
