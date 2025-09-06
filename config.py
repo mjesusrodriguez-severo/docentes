@@ -11,7 +11,7 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {
             "ssl": {
-                "ca": "/etc/ssl/certs/ca-certificates.crt"
+                "cert_reqs": "CERT_NONE"
             }
         }
     }
