@@ -44,6 +44,12 @@ from datetime import datetime
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route("/")
+def index():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+    return render_template("login.html")
+
+@main_bp.route("/dashboard")
 @login_required
 def dashboard():
     hoy = date.today()
