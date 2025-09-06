@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, redirect, url_for
+from flask import Blueprint, redirect, url_for, session, request
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_login import login_user, logout_user, current_user
 from app.models import Usuario
@@ -29,9 +29,16 @@ def load_user(user_id):
 
 @auth_bp.route("/login")
 def login():
+    next_url = request.args.get("next")
+
     if not google.authorized:
+        # Guarda `next` en sesión si viene una URL de redirección
+        if next_url:
+            session['next_url'] = next_url
         return redirect(url_for("google.login"))
-    return redirect(url_for("main.dashboard"))
+
+    # Ya está autorizado: redirige a `next` o al dashboard
+    return redirect(session.pop('next_url', url_for("main.dashboard")))
 
 @auth_bp.route("/auth/callback")
 def login_callback():
