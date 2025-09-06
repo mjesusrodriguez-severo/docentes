@@ -29,6 +29,8 @@ class Config:
 
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     GOOGLE_CREDENTIALS_PATH = os.path.join(BASE_DIR, 'credentials', 'google_service_account.json')
+    #PARA PRODUCCION
+    GOOGLE_CREDENTIALS_BASE64 = os.getenv("GOOGLE_CREDENTIALS_BASE64")
     FOLDER_ID = '19RcNZyhqlPJnmGdAcbB-K6NE8T-XX7NL'
 
     CARPETA_SUSTITUCIONES_RAIZ_ID = "15wiaXSjf8Pw1_ngP9msLdxlHXfai6q9J"

@@ -1,2 +1,8 @@
-credentials/google_service_account.json
 .env
+credentials/
+uploads/
+__pycache__/
+*.pyc
+encoded_credentials.txt
+*.txt
+*.json
