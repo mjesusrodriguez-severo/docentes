@@ -30,6 +30,10 @@
             <label>Teléfono</label>
             <input type="text" name="telefono" class="form-control" value="{{ usuario.telefono }}">
           </div>
+          <div class="mb-3">
+                <label for="enlace_materiales" class="form-label">Enlace a carpeta de materiales</label>
+                <input type="url" class="form-control" name="enlace_materiales" id="enlace_materiales" value="{{ usuario.enlace_materiales or '' }}">
+          </div>
           <button type="submit" class="btn btn-primary">Actualizar</button>
           <a href="{{ url_for('main.listar_usuarios') }}" class="btn btn-secondary">Cancelar</a>
         </form>

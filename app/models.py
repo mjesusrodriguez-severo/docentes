@@ -90,6 +90,7 @@ class Usuario(UserMixin, db.Model):
     rol = db.Column(db.Enum('profesor', 'tutor', 'jefatura', 'tic'), nullable=False)
     telefono = db.Column(db.String(20))
     archivado = db.Column(db.Boolean, default=False)
+    enlace_materiales = db.Column(db.String(300))
 
     @property
     def es_jefatura(self):

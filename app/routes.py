@@ -141,6 +141,8 @@ def editar_usuario(usuario_id):
         usuario.nombre = request.form["nombre"]
         usuario.rol = request.form["rol"]
         usuario.telefono = request.form["telefono"]
+        usuario.enlace_materiales = request.form.get("enlace_materiales")
+
         db.session.commit()
         flash("Usuario actualizado correctamente.")
         return redirect(url_for("main.listar_usuarios"))
@@ -1012,7 +1014,9 @@ def nueva_sustitucion():
     fecha_dt = datetime.strptime(fecha, "%Y-%m-%d").date()
 
     # Crear carpeta de Drive
-    enlace_material = crear_carpeta_sustitucion(id_sustituido, fecha_dt, hora_inicio, grupo_id)
+    #enlace_material = crear_carpeta_sustitucion(id_sustituido, fecha_dt, hora_inicio, grupo_id)
+    sustituido = Usuario.query.get(id_sustituido)
+    enlace_material = sustituido.enlace_materiales
 
     sustitucion = Sustitucion(
         sustituido_id=id_sustituido,
