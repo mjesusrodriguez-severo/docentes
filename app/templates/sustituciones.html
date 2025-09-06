@@ -13,23 +13,11 @@
             <i class="bi bi-exclamation-triangle"></i> Añadir Nueva Sustitución
           </button>
         {% endif %}
-        <a href="https://drive.google.com/drive/u/0/folders/15wiaXSjf8Pw1_ngP9msLdxlHXfai6q9J" target="_blank" class="btn btn-outline-secondary" title="Ver carpeta compartida">
-          <i class="bi bi-folder-symlink"></i> Ver carpeta compartida (Google Drive)
+        <a href="https://educeuta.sharepoint.com/:f:/s/claustroseveroochoa/EnCgB3NUIy9NlkfEmU4xS2wB4b_2_7IdW1F815rZMxEZ9A?e=zzqg5q" target="_blank" class="btn btn-outline-secondary" title="Ver carpeta compartida">
+          <i class="bi bi-folder-symlink"></i> Ver carpeta compartida (OneDrive)
         </a>
       </div>
     </div>
-
-  <!-- Flash messages -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
 
   <!-- Formulario dinámico oculto -->
   <div id="formulario-sustitución" class="card p-4 mb-4 bg-light border d-none">
