@@ -42,3 +42,13 @@ class Config:
 
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads', 'absentismo')
     ALLOWED_EXTENSIONS = {'csv'}
+
+    SESSION_COOKIE_SAMESITE = 'Lax'
+
+    if os.getenv("FLASK_ENV") == "production":
+        SESSION_COOKIE_SECURE = True
+        REMEMBER_COOKIE_SECURE = True
+    else:
+        SESSION_COOKIE_SECURE = False
+        REMEMBER_COOKIE_SECURE = False
+
