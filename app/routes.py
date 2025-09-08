@@ -1014,7 +1014,7 @@ def ver_sustituciones():
         grupos=grupos,
         profesores=profesores,
         sustituciones_proximas=sustituciones_proximas,
-        ultimas_sustituciones=ultimas_sustituciones if current_user.rol not in ["jefa_estudios", "tic"] else None
+        ultimas_sustituciones=ultimas_sustituciones if current_user.rol not in ["jefatura", "tic"] else None
     )
 
 @main_bp.route("/sustituciones/nueva", methods=["POST"])
