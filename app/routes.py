@@ -992,7 +992,7 @@ def ver_sustituciones():
     grupos = Grupo.query.order_by(Grupo.orden).all()
     profesores = Usuario.query.order_by(Usuario.nombre).all()
 
-    if current_user.rol in ["jefa_estudios", "tic"]:
+    if current_user.rol in ["jefatura", "tic"]:
         sustituciones_proximas = Sustitucion.query.filter(Sustitucion.fecha >= date.today()).order_by(
             Sustitucion.fecha.asc()).all()
     else:
