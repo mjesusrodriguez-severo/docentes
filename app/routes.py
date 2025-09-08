@@ -496,6 +496,22 @@ def crear_amonestacion():
         )
         db.session.add(amonestacion)
         db.session.commit()
+
+        alumno = Alumno.query.get(alumno_id)
+        grupo = Grupo.query.get(alumno.grupo_id)
+        tutor = Usuario.query.get(grupo.tutor_id)
+
+        if tutor and tutor.telefono:
+            mensaje = (
+                f"📢 Jefatura de estudios: "
+                f"Se ha registrado una nueva amonestación para {alumno.nombre}, del grupo {grupo.nombre}. "
+                f"Motivo: {motivo}. Por favor, revisa la plataforma."
+            )
+
+            ok, respuesta = enviar_sms_esendex(tutor.telefono, mensaje)
+            if not ok:
+                flash("Error al enviar SMS al tutor.", "danger")
+
         return redirect(url_for("main.crear_amonestacion"))
 
     # GET
@@ -1044,10 +1060,10 @@ def nueva_sustitucion():
     grupo = Grupo.query.get(grupo_id)
 
     # Dentro de tu función de envío de SMS
-    confirmar_url = url_for("main.confirmar_sustitacion", sustitucion_id=sustitucion.id, _external=True)
+    confirmar_url = url_for("main.confirmar_sustitucion", sustitucion_id=sustitucion.id, _external=True)
 
     mensaje = (
-        f"Jefatura de estudios: "
+        f"⚠️ Jefatura de estudios: "
         f"Tienes sustitución en {grupo.nombre}, "
         f"día {fecha_dt.strftime('%d/%m/%Y')} de {hora_inicio} a {hora_fin}. "
         f"Confirma la lectura del mensaje en el siguiente enlace: {confirmar_url}"
