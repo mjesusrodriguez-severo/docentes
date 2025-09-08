@@ -1066,7 +1066,8 @@ def nueva_sustitucion():
         f"⚠️ Jefatura de estudios: "
         f"Tienes sustitución en {grupo.nombre}, "
         f"día {fecha_dt.strftime('%d/%m/%Y')} de {hora_inicio} a {hora_fin}. "
-        f"Confirma la lectura del mensaje en el siguiente enlace: {confirmar_url}"
+        f"✅ Confirma lectura: {confirmar_url}\n"
+        f"📂 Material sustitución: {enlace_material}"
     )
 
     ok, respuesta = enviar_sms_esendex(sustituto.telefono, mensaje)

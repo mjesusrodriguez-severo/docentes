@@ -140,7 +140,7 @@
             <strong>Observaciones:</strong> {{ s.observaciones or "Sin observaciones" }}<br>
             <strong>Enlace material:</strong>
             {% if s.enlace_drive %}
-              <a href="https://drive.google.com/drive/folders/{{ s.enlace_drive }}" target="_blank">Abrir carpeta</a>
+              <a href="{{ s.enlace_drive }}" target="_blank">Abrir carpeta</a>
             {% else %}
               No disponible
             {% endif %}
