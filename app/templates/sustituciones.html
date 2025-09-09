@@ -83,7 +83,8 @@
   <!-- Próximas sustituciones -->
 <h5 class="mt-4 text-success">📅 Próximas sustituciones</h5>
 {% if sustituciones_proximas %}
-  <table class="table table-striped">
+    <div class="table-responsive">
+        <table class="table table-striped">
     <thead>
       <tr>
         <th>Fecha</th>
@@ -149,6 +150,7 @@
       {% endfor %}
     </tbody>
   </table>
+    </div>
 {% else %}
   <div class="alert alert-info">No hay sustituciones programadas.</div>
 {% endif %}
