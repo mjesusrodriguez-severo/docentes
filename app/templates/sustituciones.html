@@ -84,106 +84,107 @@
 <h5 class="mt-4 text-success">📅 Próximas sustituciones</h5>
 {% if sustituciones_proximas %}
     <div class="table-responsive">
-        <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Hora</th>
-        <th>Grupo</th>
-        <th>Sustituido</th>
-        <th>Sustituto</th>
-        <th>Estado</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for s in sustituciones_proximas %}
-        <tr>
-          <td>{{ s.fecha }}</td>
-          <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
-          <td>{{ s.grupo.nombre }}</td>
-          <td>{{ s.sustituido.nombre }}</td>
-          <td>{{ s.sustituto.nombre }}</td>
-          <td class="text-center">
-              {% if s.confirmado %}
-                <span class="badge bg-success">
-                  <i class="bi bi-check-circle me-1"></i> Confirmada
-                </span>
-              {% else %}
-                <span class="badge bg-warning text-dark">
-                  <i class="bi bi-exclamation-triangle me-1"></i> Pendiente
-                </span>
-              {% endif %}
-          </td>
-          <td class="text-center">
-              {% if current_user.rol in ["jefatura"] %}
-                <form action="{{ url_for('main.cancelar_sustitucion', sustitucion_id=s.id) }}" method="POST" class="d-inline" onsubmit="return confirmarCancelacion();">
-                  <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancelar sustitución">
-                    <i class="bi bi-x-lg"></i>
+        <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Grupo</th>
+            <th>Sustituido</th>
+            <th>Sustituto</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in sustituciones_proximas %}
+            <tr>
+              <td>{{ s.fecha }}</td>
+              <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
+              <td>{{ s.grupo.nombre }}</td>
+              <td>{{ s.sustituido.nombre }}</td>
+              <td>{{ s.sustituto.nombre }}</td>
+              <td class="text-center">
+                  {% if s.confirmado %}
+                    <span class="badge bg-success">
+                      <i class="bi bi-check-circle me-1"></i> Confirmada
+                    </span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">
+                      <i class="bi bi-exclamation-triangle me-1"></i> Pendiente
+                    </span>
+                  {% endif %}
+              </td>
+              <td class="text-center">
+                  {% if current_user.rol in ["jefatura"] %}
+                    <form action="{{ url_for('main.cancelar_sustitucion', sustitucion_id=s.id) }}" method="POST" class="d-inline" onsubmit="return confirmarCancelacion();">
+                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancelar sustitución">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </form>
+                  {% endif %}
+                  {% if current_user.is_authenticated and current_user.rol != "jefatura" and s.sustituto_id == current_user.id and not s.confirmado %}
+                    <!-- Botón confirmar para el profesor sustituto asignado (excepto jefatura) -->
+                    <form action="{{ url_for('main.confirmar_sustitucion', sustitucion_id=s.id) }}" method="POST" class="d-inline" onsubmit="return confirmarConfirmacion();">
+                      <button type="submit" class="btn btn-sm btn-outline-success" title="Confirmar sustitución">
+                        <i class="bi bi-check-lg"></i>
+                      </button>
+                    </form>
+                  {% endif %}
+                  <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#detalle{{ s.id }}" aria-expanded="false" aria-controls="detalle{{ s.id }}" title="Ver detalles">
+                    <i class="bi bi-search"></i>
                   </button>
-                </form>
-              {% endif %}
-              {% if current_user.is_authenticated and current_user.rol != "jefatura" and s.sustituto_id == current_user.id and not s.confirmado %}
-                <!-- Botón confirmar para el profesor sustituto asignado (excepto jefatura) -->
-                <form action="{{ url_for('main.confirmar_sustitucion', sustitucion_id=s.id) }}" method="POST" class="d-inline" onsubmit="return confirmarConfirmacion();">
-                  <button type="submit" class="btn btn-sm btn-outline-success" title="Confirmar sustitución">
-                    <i class="bi bi-check-lg"></i>
-                  </button>
-                </form>
-              {% endif %}
-              <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#detalle{{ s.id }}" aria-expanded="false" aria-controls="detalle{{ s.id }}" title="Ver detalles">
-                <i class="bi bi-search"></i>
-              </button>
-          </td>
-        </tr>
-        <tr class="collapse bg-light" id="detalle{{ s.id }}">
-          <td colspan="7">
-            <strong>Observaciones:</strong> {{ s.observaciones or "Sin observaciones" }}<br>
-            <strong>Enlace material:</strong>
-            {% if s.enlace_drive %}
-              <a href="{{ s.enlace_drive }}" target="_blank">Abrir carpeta</a>
-            {% else %}
-              No disponible
-            {% endif %}
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-    </div>
-{% else %}
-  <div class="alert alert-info">No hay sustituciones programadas.</div>
-{% endif %}
+              </td>
+            </tr>
+            <tr class="collapse bg-light" id="detalle{{ s.id }}">
+              <td colspan="7">
+                <strong>Observaciones:</strong> {{ s.observaciones or "Sin observaciones" }}<br>
+                <strong>Enlace material:</strong>
+                {% if s.enlace_drive %}
+                  <a href="{{ s.enlace_drive }}" target="_blank">Abrir carpeta</a>
+                {% else %}
+                  No disponible
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+        </div>
+    {% else %}
+      <div class="alert alert-info">No hay sustituciones programadas.</div>
+    {% endif %}
 
 <!-- Sustituciones pasadas -->
 <h5 class="mt-5 text-secondary">📁 Sustituciones pasadas</h5>
 {% if sustituciones_pasadas %}
-  <table class="table table-bordered table-sm">
-    <thead class="table-light">
-      <tr>
-        <th>Fecha</th>
-        <th>Hora</th>
-        <th>Grupo</th>
-        <th>Sustituido</th>
-        <th>Sustituto</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for s in sustituciones_pasadas %}
+  <div class="table-responsive">
+    <table class="table table-bordered">
+      <thead>
         <tr>
-          <td>{{ s.fecha.strftime("%d/%m/%Y") }}</td>
-          <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
-          <td>{{ s.grupo.nombre }}</td>
-          <td>{{ s.sustituido.nombre }}</td>
-          <td>{{ s.sustituto.nombre }}</td>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Grupo</th>
+          <th>Sustituido</th>
+          <th>Sustituto</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% for s in sustituciones_pasadas %}
+          <tr>
+            <td>{{ s.fecha.strftime("%d/%m/%Y") }}</td>
+            <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
+            <td>{{ s.grupo.nombre }}</td>
+            <td>{{ s.sustituido.nombre }}</td>
+            <td>{{ s.sustituto.nombre }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 {% else %}
   <div class="alert alert-secondary">Aún no hay registros de sustituciones anteriores.</div>
 {% endif %}
-</div>
 
 <script>
   function mostrarFormulario() {

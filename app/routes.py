@@ -987,34 +987,45 @@ def subir_hoja(reserva_id):
 @login_required
 def ver_sustituciones():
     hoy = date.today()
+    ahora = datetime.now().time()
     page = request.args.get("page", 1, type=int)
 
     grupos = Grupo.query.order_by(Grupo.orden).all()
     profesores = Usuario.query.order_by(Usuario.nombre).all()
 
     if current_user.rol in ["jefatura", "tic"]:
-        sustituciones_proximas = Sustitucion.query.filter(Sustitucion.fecha >= date.today()).order_by(
-            Sustitucion.fecha.asc()).all()
+        sustituciones_proximas = Sustitucion.query.filter(
+            (Sustitucion.fecha > hoy) |
+            ((Sustitucion.fecha == hoy) & (Sustitucion.hora_fin > ahora))
+        ).order_by(Sustitucion.fecha.asc(), Sustitucion.hora_inicio.asc()).all()
+
+        sustituciones_pasadas = Sustitucion.query.filter(
+            (Sustitucion.fecha < hoy) |
+            ((Sustitucion.fecha == hoy) & (Sustitucion.hora_fin <= ahora))
+        ).order_by(Sustitucion.fecha.desc(), Sustitucion.hora_inicio.desc()).all()
+
     else:
         sustituciones_proximas = Sustitucion.query.filter(
-            Sustitucion.fecha >= date.today(),
-            Sustitucion.sustituto_id == current_user.id
-        ).order_by(
-            Sustitucion.fecha.asc(),
-            Sustitucion.hora_inicio.asc()
-        ).all()
+            Sustitucion.sustituto_id == current_user.id,
+            (Sustitucion.fecha > hoy) |
+            ((Sustitucion.fecha == hoy) & (Sustitucion.hora_fin > ahora))
+        ).order_by(Sustitucion.fecha.asc(), Sustitucion.hora_inicio.asc()).all()
 
         ultimas_sustituciones = Sustitucion.query.filter(
             Sustitucion.sustituto_id == current_user.id,
-            Sustitucion.fecha < date.today()
-        ).order_by(Sustitucion.fecha.desc()).limit(10).all()
+            (Sustitucion.fecha < hoy) |
+            ((Sustitucion.fecha == hoy) & (Sustitucion.hora_fin <= ahora))
+        ).order_by(Sustitucion.fecha.desc(), Sustitucion.hora_inicio.desc()).limit(10).all()
+
+        sustituciones_pasadas = None  # No se muestran para docentes normales
 
     return render_template(
         "sustituciones.html",
         grupos=grupos,
         profesores=profesores,
         sustituciones_proximas=sustituciones_proximas,
-        ultimas_sustituciones=ultimas_sustituciones if current_user.rol not in ["jefatura", "tic"] else None
+        ultimas_sustituciones=ultimas_sustituciones if current_user.rol not in ["jefatura", "tic"] else None,
+        sustituciones_pasadas=sustituciones_pasadas if current_user.rol in ["jefatura", "tic"] else None
     )
 
 @main_bp.route("/sustituciones/nueva", methods=["POST"])
