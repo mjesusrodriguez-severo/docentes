@@ -99,7 +99,7 @@
         <tbody>
           {% for s in sustituciones_proximas %}
             <tr>
-              <td>{{ s.fecha }}</td>
+              <td>{{ s.fecha.strftime("%d/%m/%Y") }}</td>
               <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
               <td>{{ s.grupo.nombre }}</td>
               <td>{{ s.sustituido.nombre }}</td>
