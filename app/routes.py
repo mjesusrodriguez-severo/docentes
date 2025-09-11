@@ -19,6 +19,7 @@ from .models import Alumno, Grupo, Responsable, AlumnoResponsable, Usuario, Amon
     IncidenciaMantenimiento, InformeAlumno, InformeFaltas
 from . import db
 from datetime import datetime, date, timedelta
+from pytz import timezone
 from flask_mail import Message
 from . import mail
 import io
@@ -987,6 +988,7 @@ def subir_hoja(reserva_id):
 @login_required
 def ver_sustituciones():
     hoy = date.today()
+    zona = timezone("Europe/Madrid")
     ahora = datetime.now().time()
     page = request.args.get("page", 1, type=int)
 
