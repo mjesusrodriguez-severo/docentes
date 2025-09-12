@@ -1153,6 +1153,11 @@ def confirmar_sustitucion(sustitucion_id):
     flash("Sustitución confirmada correctamente.", "success")
     return redirect(url_for("main.ver_sustituciones"))
 
+@main_bp.route("/sustituciones/historial")
+@login_required
+def historial_sustituciones():
+    sustituciones = Sustitucion.query.order_by(Sustitucion.fecha.desc(), Sustitucion.hora_inicio).all()
+    return render_template("historial_sustituciones.html", sustituciones=sustituciones)
 # ╔════════════════════════════════════════════════════════════════════════╗
 # ║                          RUTAS DE UBICACIONES                          ║
 # ╚════════════════════════════════════════════════════════════════════════╝

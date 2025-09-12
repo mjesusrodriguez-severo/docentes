@@ -5,17 +5,29 @@
 
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="mb-0 text-uppercase text-secondary">Sustituciones</h5>
+      <h5 class="mb-0 text-uppercase text-secondary">Próximas sustituciones</h5>
 
       <div class="d-flex align-items-center gap-2">
-        {% if current_user.rol == "jefatura" %}
-          <button class="btn btn-outline-primary" onclick="mostrarFormulario()">
-            <i class="bi bi-exclamation-triangle"></i> Añadir Nueva Sustitución
-          </button>
-        {% endif %}
-        <a href="https://educeuta.sharepoint.com/:f:/s/claustroseveroochoa/EnCgB3NUIy9NlkfEmU4xS2wB4b_2_7IdW1F815rZMxEZ9A?e=zzqg5q" target="_blank" class="btn btn-outline-secondary" title="Ver carpeta compartida">
-          <i class="bi bi-folder-symlink"></i> Ver carpeta compartida (OneDrive)
-        </a>
+        {% if current_user.rol in ["jefatura", "tic"] %}
+            <a href="{{ url_for('main.historial_sustituciones') }}"
+               class="btn btn-outline-secondary"
+               title="Ver historial de sustituciones">
+              <i class="bi bi-clock-history"></i> Ver historial
+            </a>
+          {% endif %}
+
+          <a href="https://educeuta.sharepoint.com/:f:/s/claustroseveroochoa/EnCgB3NUIy9NlkfEmU4xS2wB4b_2_7IdW1F815rZMxEZ9A?e=zzqg5q"
+             target="_blank"
+             class="btn btn-outline-secondary"
+             title="Ver carpeta compartida">
+            <i class="bi bi-folder-symlink"></i> Ver carpeta compartida (OneDrive)
+          </a>
+
+          {% if current_user.rol in ["jefatura", "tic"] %}
+            <button class="btn btn-outline-primary" onclick="mostrarFormulario()">
+              <i class="bi bi-plus-circle"></i> Añadir Nueva Sustitución
+            </button>
+          {% endif %}
       </div>
     </div>
 
@@ -81,10 +93,10 @@
   </div>
 
   <!-- Próximas sustituciones -->
-<h5 class="mt-4 text-success">📅 Próximas sustituciones</h5>
+
 {% if sustituciones_proximas %}
     <div class="table-responsive">
-        <table class="table table-bordered">
+        <table class="table table-sm table-bordered text-nowrap align-middle">
         <thead>
           <tr>
             <th>Fecha</th>
@@ -154,37 +166,6 @@
     {% else %}
       <div class="alert alert-info">No hay sustituciones programadas.</div>
     {% endif %}
-
-<!-- Sustituciones pasadas -->
-<h5 class="mt-5 text-secondary">📁 Sustituciones pasadas</h5>
-{% if sustituciones_pasadas %}
-  <div class="table-responsive">
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Hora</th>
-          <th>Grupo</th>
-          <th>Sustituido</th>
-          <th>Sustituto</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for s in sustituciones_pasadas %}
-          <tr>
-            <td>{{ s.fecha.strftime("%d/%m/%Y") }}</td>
-            <td>{{ s.hora_inicio }} - {{ s.hora_fin }}</td>
-            <td>{{ s.grupo.nombre }}</td>
-            <td>{{ s.sustituido.nombre }}</td>
-            <td>{{ s.sustituto.nombre }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-{% else %}
-  <div class="alert alert-secondary">Aún no hay registros de sustituciones anteriores.</div>
-{% endif %}
 
 <script>
   function mostrarFormulario() {

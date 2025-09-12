@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de sustituciones{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0 text-uppercase text-secondary">Historial de sustituciones</h5>
+    <a href="{{ url_for('main.ver_sustituciones') }}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Volver a próximas
+    </a>
+  </div>
+
+  <table class="table table-sm table-bordered align-middle">
+    <thead class="table-light text-center">
+      <tr>
+        <th style="width: 12%;">Fecha</th>
+        <th style="width: 15%;">Hora</th>
+        <th style="width: 15%;">Grupo</th>
+        <th style="width: 20%;">Sustituido</th>
+        <th style="width: 20%;">Sustituto</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sustitucion in sustituciones %}
+      <tr class="text-center">
+        <td>{{ sustitucion.fecha.strftime('%d/%m/%Y') }}</td>
+        <td class="text-nowrap">{{ sustitucion.hora_inicio }} - {{ sustitucion.hora_fin }}</td>
+        <td>{{ sustitucion.grupo.nombre }}</td>
+        <td>{{ sustitucion.sustituido.nombre }}</td>
+        <td>{{ sustitucion.sustituto.nombre }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
