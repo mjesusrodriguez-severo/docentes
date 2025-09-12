@@ -5,13 +5,15 @@
 {% block content %}
   <div class="d-flex justify-content-between align-items-center mb-3">
       <h5 class="mb-0 text-uppercase text-secondary">Agenda alumnado</h5>
-      {% if (grupo_seleccionado and current_user.id == grupo_seleccionado.tutor_id) or current_user.rol == "tic" %}
-        <!-- Botón para añadir alumno -->
-        <div class="text-end mb-3">
-          <a href="{{ url_for('main.nuevo_alumno', grupo_id=grupo_seleccionado.id) }}" class="btn btn-outline-primary">
-            <i class="bi bi-person-plus"></i> Añadir alumno
-          </a>
-        </div>
+      {% if grupo_seleccionado %}
+          {% if current_user.id == grupo_seleccionado.tutor_id or current_user.rol == "tic" %}
+            <!-- Botón para añadir alumno -->
+            <div class="text-end mb-3">
+              <a href="{{ url_for('main.nuevo_alumno', grupo_id=grupo_seleccionado.id) }}" class="btn btn-outline-primary">
+                <i class="bi bi-person-plus"></i> Añadir alumno
+              </a>
+            </div>
+          {% endif %}
       {% endif %}
     </div>
   <div class="row justify-content-center mb-4">
