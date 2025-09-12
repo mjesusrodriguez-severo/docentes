@@ -188,7 +188,7 @@
       <p class="mb-1"><strong>Descripción:</strong> {{ amonestacion.descripcion }}</p>
 
       <!-- Acciones jefatura -->
-      {% if current_user.es_jefatura %}
+      {% if current_user.rol in ["jefatura", "tic"] %}
         {% if amonestacion.estado == 'pendiente' and amonestacion.alumno.responsables %}
           <div class="mt-2 d-flex gap-2 justify-content-end">
             <form method="POST" action="{{ url_for('main.revisar_amonestacion') }}">
