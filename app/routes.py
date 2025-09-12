@@ -470,7 +470,6 @@ def editar_grupo(grupo_id):
 
 @main_bp.route('/grupo/<int:grupo_id>/alumnos')
 @login_required
-@rol_requerido("tic")
 def obtener_alumnos(grupo_id):
     alumnos = Alumno.query.filter_by(grupo_id=grupo_id).order_by(Alumno.apellidos).all()
     alumnos_json = [{'id': a.id, 'nombre': a.nombre + " " + a.apellidos} for a in alumnos]
