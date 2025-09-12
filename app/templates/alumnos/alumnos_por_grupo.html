@@ -5,7 +5,7 @@
 {% block content %}
   <div class="d-flex justify-content-between align-items-center mb-3">
       <h5 class="mb-0 text-uppercase text-secondary">Agenda alumnado</h5>
-      {% if grupo_seleccionado and current_user.id == grupo_seleccionado.tutor_id %}
+      {% if (grupo_seleccionado and current_user.id == grupo_seleccionado.tutor_id) or current_user.rol == "tic" %}
         <!-- Botón para añadir alumno -->
         <div class="text-end mb-3">
           <a href="{{ url_for('main.nuevo_alumno', grupo_id=grupo_seleccionado.id) }}" class="btn btn-outline-primary">
@@ -65,7 +65,7 @@
                   <a href="{{ url_for('main.ver_alumno', alumno_id=alumno.id) }}" class="btn btn-sm btn-outline-primary" title="Consultar">
                     <i class="bi bi-eye"></i>
                   </a>
-                  {% if grupo_seleccionado and current_user.id == grupo_seleccionado.tutor_id %}
+                  {% if (grupo_seleccionado and current_user.id == grupo_seleccionado.tutor_id) or current_user.rol == "tic" %}
                       <a href="{{ url_for('main.editar_alumno', alumno_id=alumno.id) }}" class="btn btn-sm btn-outline-warning" title="Editar">
                         <i class="bi bi-pencil-square"></i>
                       </a>
