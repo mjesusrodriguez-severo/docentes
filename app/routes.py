@@ -1468,7 +1468,7 @@ def cancelar_incidencia(id):
 @main_bp.route('/incidencias')
 @login_required
 def mostrar_incidencias():
-    if current_user.rol == 'TIC':
+    if current_user.rol == 'tic':
         incidencias = Incidencia.query.order_by(Incidencia.fecha_hora.desc()).all()
     else:
         incidencias = Incidencia.query.filter_by(docente_id=current_user.id).order_by(Incidencia.fecha_hora.desc()).all()
