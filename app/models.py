@@ -39,7 +39,8 @@ class Alumno(db.Model):
     observaciones = db.Column(db.Text)
     grupo_id = db.Column(db.Integer, db.ForeignKey('grupos.id'))
 
-    informes = db.relationship("InformeAlumno", back_populates="alumno")
+    informes = db.relationship("InformeAlumno", back_populates="alumno", cascade="all, delete-orphan")
+
     responsables = db.relationship(
         "Responsable",
         secondary="alumno_responsable",
