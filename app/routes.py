@@ -40,9 +40,14 @@ from flask import send_file
 from io import BytesIO
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font
-from datetime import datetime
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
 
 main_bp = Blueprint('main', __name__)
+# Hora actual en España
+fecha_espana = datetime.now(ZoneInfo("Europe/Madrid"))
 
 @main_bp.route("/")
 def index():
@@ -492,7 +497,7 @@ def crear_amonestacion():
             profesor_id=current_user.id,
             motivo=motivo,
             descripcion=descripcion,
-            fecha=datetime.utcnow()
+            fecha=fecha_espana
         )
         db.session.add(amonestacion)
         db.session.commit()
@@ -517,8 +522,23 @@ def crear_amonestacion():
     # GET
     grupos = Grupo.query.order_by(Grupo.orden).all()
     page = request.args.get("page", 1, type=int)
-    amonestaciones = Amonestacion.query.order_by(Amonestacion.fecha.desc()).paginate(page=page, per_page=10)
-    return render_template("amonestaciones.html", grupos=grupos, amonestaciones=amonestaciones)
+    if current_user.rol in ["jefatura", "tic"]:
+        amonestaciones_query = Amonestacion.query
+    elif current_user.rol == "tutor":
+        grupo_tutoria = Grupo.query.filter_by(tutor_id=current_user.id).first()
+        if grupo_tutoria:
+            amonestaciones_query = Amonestacion.query.filter(
+                (Amonestacion.profesor_id == current_user.id) |
+                (Amonestacion.alumno.has(grupo_id=grupo_tutoria.id))
+            )
+        else:
+            amonestaciones_query = Amonestacion.query.filter_by(profesor_id=current_user.id)
+    else:
+        amonestaciones_query = Amonestacion.query.filter_by(profesor_id=current_user.id)
+    # Aplicar orden y paginación
+    amonestaciones = amonestaciones_query.order_by(Amonestacion.fecha.desc()).paginate(page=page, per_page=10)
+
+    return render_template("amonestaciones.html", grupos=grupos, amonestaciones=amonestaciones, es_tutor=current_user.rol == "tutor", grupo_tutoria=grupo_tutoria if current_user.rol == "tutor" else None)
 
 @main_bp.route("/enviar_amonestacion", methods=["POST"])
 @login_required
@@ -566,6 +586,7 @@ def revisar_amonestacion():
     db.session.commit()
     flash("Amonestación revisada", "success")
     return redirect(url_for("main.crear_amonestacion"))
+
 def enviar_sms_esendex_php_style(telefono, mensaje):
     user = "manolojimenez86@gmail.com"
     password = "b072431a128749aca763"
@@ -611,6 +632,9 @@ def enviar_sms_amonestacion(amonestacion_id):
     ok, respuesta = enviar_sms_amonestacion(telefono, amon)
 
     if ok:
+        amon.enviado_responsables = True
+        amon.fecha_envio_sms = fecha_espana
+        db.session.commit()
         flash("SMS enviado correctamente", "success")
     else:
         flash(f"Error al enviar SMS: {respuesta}", "danger")

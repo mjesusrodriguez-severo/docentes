@@ -199,6 +199,8 @@ class Amonestacion(db.Model):
     descripcion = db.Column(db.Text, nullable=False)
     fecha = db.Column(db.DateTime, default=datetime.utcnow)
     estado = db.Column(db.String(50), default='pendiente')
+    fecha_envio_sms = db.Column(db.DateTime, nullable=True)
+    enviado_responsables = db.Column(db.Boolean, default=False)
 
     alumno = db.relationship("Alumno", backref="amonestaciones")
     profesor = db.relationship("Usuario", backref="amonestaciones_hechas")

@@ -266,6 +266,12 @@
         {% endif %}
       </div>
 
+      {% if amonestacion.enviado_responsables %}
+          <div class="text-muted small text-end mt-2">
+            <i class="bi bi-send-check"></i> Enviado a responsables el {{ amonestacion.fecha_envio_sms.strftime('%d-%m-%Y %H:%M') }}
+          </div>
+      {% endif %}
+
     </div>
   {% endfor %}
 </div>
