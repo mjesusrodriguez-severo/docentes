@@ -31,7 +31,7 @@ from werkzeug.utils import secure_filename
 from .utils.decoradores import rol_requerido
 from .utils.drive import subir_archivo_a_drive, crear_carpeta_sustitucion
 from .utils.google_auth import build_drive_service
-from .utils.reservas import render_calendario_espacio, enviar_correo_reserva_espacio
+from .utils.reservas import render_calendario_espacio, enviar_correo_reserva_espacio, enviar_correo_reserva_material
 from .utils.sms import enviar_sms_esendex
 
 import pandas as pd
@@ -1034,7 +1034,7 @@ def subir_hoja(reserva_id):
     else:
         flash('No se ha seleccionado ningún archivo', 'danger')
 
-    return redirect(url_for('main.reservar_material'))
+    return redirect(url_for('main.reservas_material'))
 
 # ╔════════════════════════════════════════════════════════════════════════╗
 # ║                         RUTAS DE SUSTITUCIONES                         ║
@@ -1391,7 +1391,7 @@ def asignar_dispositivos(reserva_id):
         reserva.dispositivos = seleccionados
         reserva.estado = "ACEPTADA"
         db.session.commit()
-        flash("Reserva aceptada y dispositivos asignados.", "success")
+        enviar_correo_reserva_material(reserva, "ACEPTADA")
         return redirect(url_for("main.reservas_material"))
 
     return render_template("reserva_material/asignar_dispositivos.html",
@@ -1410,7 +1410,7 @@ def denegar_reserva():
     reserva = ReservaInformatica.query.get_or_404(reserva_id)
     reserva.estado = "DENEGADA"
     db.session.commit()
-    flash("Reserva denegada correctamente.", "info")
+    enviar_correo_reserva_material(reserva, "DENEGADA")
     return redirect(url_for("main.reservas_material"))
 
 @main_bp.route('/descargar-hoja/<int:reserva_id>')
@@ -1420,7 +1420,7 @@ def descargar_hoja(reserva_id):
 
     if not reserva.hoja_firmada_id:
         flash("No hay hoja firmada disponible para esta reserva", "danger")
-        return redirect(url_for('main.reservar_material'))
+        return redirect(url_for('main.reservas_material'))
 
     drive_service = build_drive_service()
 
@@ -1436,7 +1436,17 @@ def descargar_hoja(reserva_id):
 
     except Exception as e:
         flash("No se pudo descargar el archivo desde Google Drive", "danger")
-        return redirect(url_for('main.reservar_material'))
+        return redirect(url_for('main.reservas_material'))
+
+@main_bp.route("/ver-hoja/<int:reserva_id>")
+@login_required
+def ver_hoja(reserva_id):
+    reserva = ReservaInformatica.query.get_or_404(reserva_id)
+    if not reserva.hoja_firmada:
+        abort(404)
+
+    ruta = os.path.join(current_app.config['UPLOAD_FOLDER'], reserva.hoja_firmada)
+    return send_file(ruta, mimetype='application/pdf', as_attachment=False)
 
 # ╔════════════════════════════════════════════════════════════════════════╗
 # ║                          RUTAS DE INCIDENCIAS                          ║

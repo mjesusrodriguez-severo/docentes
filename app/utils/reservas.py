@@ -85,3 +85,56 @@ def enviar_correo_reserva_espacio(reserva, espacio, usuario):
         mail.send(msg)
     except Exception as e:
         current_app.logger.error(f"Error al enviar correo de reserva: {e}")
+
+def enviar_correo_reserva_material(reserva, estado):
+    usuario = reserva.usuario
+    dispositivos = reserva.dispositivos
+
+    if estado == 'ACEPTADA':
+        dispositivos_html = ""
+        if dispositivos:
+            dispositivos_html += "<ul>"
+            for dispositivo in dispositivos:
+                dispositivos_html += f"<li>{dispositivo.nombre} ({dispositivo.ubicacion.nombre})</li>"
+            dispositivos_html += "</ul>"
+        else:
+            dispositivos_html = "<p><em>No se han asignado dispositivos aún.</em></p>"
+
+        asunto = "Reserva de material ACEPTADA"
+        cuerpo_html = f"""
+        <h2 style="color:#2c3e50;">Tu reserva ha sido aceptada</h2>
+        <p><strong>📅 Fecha:</strong> {reserva.fecha}</p>
+        <p><strong>🕒 Franja horaria:</strong> {reserva.franja_horaria}</p>
+        <p><strong>👨‍🏫 Grupo:</strong> {reserva.grupo.nombre}</p>
+        <p><strong>💻 Tipo de equipo:</strong> {reserva.tipo_equipo.capitalize()}</p>
+        <p><strong>🔢 Cantidad:</strong> {reserva.cantidad}</p>
+        <p><strong>🖥️ Equipos asignados:</strong></p>
+        {dispositivos_html}
+        <hr>
+        <p><b>Recuerda descargar la hoja de préstamo desde el panel.</b></p>
+        """
+    elif estado == 'DENEGADA':
+        asunto = "❌ Reserva de material DENEGADA"
+        cuerpo_html = f"""
+        <h2 style="color:#a94442;">Tu reserva ha sido denegada</h2>
+        <p><strong>📅 Fecha:</strong> {reserva.fecha}</p>
+        <p><strong>🕒 Franja horaria:</strong> {reserva.franja_horaria}</p>
+        <p><strong>👨‍🏫 Grupo:</strong> {reserva.grupo.nombre}</p>
+        <p><strong>💻 Tipo de equipo:</strong> {reserva.tipo_equipo.capitalize()}</p>
+        <p><strong>🔢 Cantidad solicitada:</strong> {reserva.cantidad}</p>
+        <hr>
+        <p style="font-size:0.9em; color:#888;">Para más información, consulta con la coordinadora TIC.</p>
+        """
+    else:
+        return  # No enviamos nada para otros estados
+
+    try:
+        msg = Message(
+            subject=asunto,
+            sender=("Panel de Docentes", current_app.config["MAIL_USERNAME"]),
+            recipients=[usuario.email],
+            html=cuerpo_html
+        )
+        mail.send(msg)
+    except Exception as e:
+        print("❌ ERROR AL ENVIAR CORREO:", e)

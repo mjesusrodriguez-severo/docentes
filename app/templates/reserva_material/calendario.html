@@ -71,7 +71,7 @@
                         {# SI ES LISTA DE RESERVAS #}
                           {% if reserva_data.__class__.__name__ == 'list' %}
                             {% for reserva in reserva_data %}
-                              {% set texto = reserva.grupo.nombre if reserva.grupo else usuarios.get(reserva.usuario_id, 'Sin nombre') %}
+                              {% set texto = usuarios.get(reserva.usuario_id, 'Sin nombre') %}
                               {% if reserva.estado == 'ACEPTADA' %}
                                 <span class="badge bg-success-subtle text-dark me-1">{{ texto }}</span>
                               {% else %}
@@ -177,7 +177,12 @@
       <tr>
         <td>{{ dias_es[reserva.fecha.strftime('%A')] }}<br>{{ reserva.fecha.strftime('%d/%m/%Y') }}</td>
         <td>{{ reserva.franja_horaria }}</td>
-        <td>{{ reserva.grupo.nombre }}</td>
+        <td>
+          {{ usuarios.get(reserva.usuario_id, 'Sin nombre') }}
+          {% if reserva.grupo %}
+            - {{ reserva.grupo.nombre }}
+          {% endif %}
+        </td>
         <td>
           {% if reserva.estado == 'ACEPTADA' %}
             <span class="badge bg-success-subtle text-dark">Reservado</span>
@@ -226,33 +231,35 @@
               {% endif %}
 
               {% if reserva.fecha <= current_date %}
-                  {% if current_user.rol == 'tic' %}
-                      {% if reserva.hoja_firmada %}
-                          <!-- ✅ TIC puede descargar hoja firmada -->
-                          <a href="{{ url_for('main.descargar_hoja', reserva_id=reserva.id) }}"
-                             class="btn btn-outline-primary btn-sm"
-                             title="Descargar hoja firmada">
-                            <i class="bi bi-download"></i>
-                          </a>
-                      {% else %}
-                          <!-- ❌ No hay hoja firmada aún -->
-                          <button class="btn btn-outline-secondary btn-sm" title="No disponible" disabled>
-                            <i class="bi bi-download"></i>
-                          </button>
-                      {% endif %}
-                  {% else %}
-                      <!-- ✅ Docente puede subir hoja firmada si aún no la ha subido -->
-                      {% if not reserva.hoja_firmada %}
-                          <form method="POST" action="{{ url_for('main.subir_hoja', reserva_id=reserva.id) }}"
-                                enctype="multipart/form-data"
-                                class="d-inline">
+                {% if reserva.hoja_firmada %}
+                    <!-- ✅ Descargar hoja firmada (todos los roles) -->
+                    <a href="{{ url_for('main.descargar_hoja', reserva_id=reserva.id) }}"
+                       class="btn btn-outline-primary btn-sm"
+                       title="Descargar hoja firmada">
+                      <i class="bi bi-download"></i>
+                    </a>
+                {% else %}
+                    {% if reserva.hoja_firmada_id %}
+                        <!-- ✅ Mostrar botón para VER hoja firmada en Google Drive -->
+                        <a href="https://drive.google.com/file/d/{{ reserva.hoja_firmada_id }}/view"
+                           target="_blank"
+                           class="btn btn-outline-info btn-sm"
+                           title="Ver hoja firmada">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    {% else %}
+                        <!-- ✅ Subir hoja firmada si no existe (TIC o Docente) -->
+                        <form method="POST"
+                              action="{{ url_for('main.subir_hoja', reserva_id=reserva.id) }}"
+                              enctype="multipart/form-data"
+                              class="d-inline">
                             <label class="btn btn-outline-success btn-sm mb-0" title="Subir hoja firmada">
-                              <i class="bi bi-upload"></i>
-                              <input type="file" name="archivo" onchange="this.form.submit()" hidden>
+                                <i class="bi bi-upload"></i>
+                                <input type="file" name="archivo" onchange="this.form.submit()" hidden>
                             </label>
-                          </form>
-                      {% endif %}
-                  {% endif %}
+                        </form>
+                    {% endif %}
+                {% endif %}
               {% endif %}
 
           {% elif reserva.estado == 'PENDIENTE' and reserva.fecha > current_date %}
