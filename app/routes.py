@@ -120,7 +120,7 @@ def dashboard():
 
 @main_bp.route("/usuarios")
 @login_required
-@rol_requerido("tic")
+@rol_requerido("tic", "jefatura")
 def listar_usuarios():
     usuarios = Usuario.query.all()
     return render_template("usuarios/listar_usuarios.html", usuarios=usuarios)

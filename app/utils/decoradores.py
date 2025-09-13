@@ -1,14 +1,16 @@
 # decoradores.py
 from functools import wraps
 from flask_login import current_user
-from flask import abort
+from flask import abort, flash, redirect, url_for
 
-def rol_requerido(rol):
-    def wrapper(f):
+
+def rol_requerido(*roles_permitidos):
+    def decorador(f):
         @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if not current_user.is_authenticated or current_user.rol != rol:
-                abort(403)
+        def funcion_envuelta(*args, **kwargs):
+            if current_user.rol not in roles_permitidos:
+                flash("No tienes permisos para acceder a esta página.", "danger")
+                return redirect(url_for("main.index"))
             return f(*args, **kwargs)
-        return decorated_function
-    return wrapper
+        return funcion_envuelta
+    return decorador
