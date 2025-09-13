@@ -145,7 +145,7 @@ def nuevo_usuario():
 
 @main_bp.route("/usuarios/editar/<int:usuario_id>", methods=["GET", "POST"])
 @login_required
-@rol_requerido("tic")
+@rol_requerido("tic", "jefatura")
 def editar_usuario(usuario_id):
     usuario = Usuario.query.get_or_404(usuario_id)
 
