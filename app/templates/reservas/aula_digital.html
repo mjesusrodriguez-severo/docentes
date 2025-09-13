@@ -63,35 +63,43 @@
             <td><strong>{{ franja }}</strong></td>
             {% for dia in dias_semana %}
               {% set reserva = reservas.get((dia, franja)) %}
+              {% set nombre_dia = dia.strftime('%A') %}
+              {% set bloqueada = franjas_bloqueadas.get(nombre_dia, []) %}
               <td>
-                  {% if reserva %}
-                      <div class="reserva-ocupada">
-                        <p class="text-muted small">Ocupado por: <br /> <b>{{ usuarios.get(reserva.usuario_id) }}</b></p>
-                        {% if reserva and reserva.usuario_id == current_user.id %}
-                            <form method="post" action="{{ url_for('main.cancelar_reserva_espacio') }}" class="d-inline cancelar-form">
-                              <input type="hidden" name="reserva_id" value="{{ reserva.id }}">
-                              <input type="hidden" name="espacio" value="{{ espacio }}">
-                              <button type="button" class="btn btn-sm btn-warning cancelar-btn"
-                                      data-fecha="{{ dia.strftime('%d/%m/%Y') }}"
-                                      data-franja="{{ franja }}">
-                                Cancelar
-                              </button>
-                            </form>
-                        {% endif %}
-                      </div>
-                  {% else %}
-                    <form method="post" action="{{ url_for('main.reservar_espacio', espacio='aula_digital') }}" class="reserva-form d-inline">
-                      <input type="hidden" name="espacio" value="{{ espacio }}">
-                      <input type="hidden" name="fecha" value="{{ dia.strftime('%Y-%m-%d') }}">
-                      <input type="hidden" name="franja" value="{{ franja }}">
-                      <button type="button" class="btn btn-sm btn-success reservar-btn"
-                              data-fecha="{{ dia.strftime('%d/%m/%Y') }}"
-                              data-franja="{{ franja }}">
-                        <i class="bi bi-check-circle"></i> Libre
-                      </button>
-                    </form>
-                  {% endif %}
-                </td>
+                {% if franja in bloqueada %}
+                  <!-- Franja bloqueada por el centro -->
+                  <div class="text-muted small">
+                    <i class="bi bi-lock-fill"></i><br>
+                    <span class="text-danger">Bloqueada</span>
+                  </div>
+                {% elif reserva %}
+                  <div class="reserva-ocupada">
+                    <p class="text-muted small">Ocupado por: <br><b>{{ usuarios.get(reserva.usuario_id) }}</b></p>
+                    {% if reserva.usuario_id == current_user.id %}
+                      <form method="post" action="{{ url_for('main.cancelar_reserva_espacio') }}" class="d-inline cancelar-form">
+                        <input type="hidden" name="reserva_id" value="{{ reserva.id }}">
+                        <input type="hidden" name="espacio" value="{{ espacio }}">
+                        <button type="button" class="btn btn-sm btn-warning cancelar-btn"
+                                data-fecha="{{ dia.strftime('%d/%m/%Y') }}"
+                                data-franja="{{ franja }}">
+                          Cancelar
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                {% else %}
+                  <form method="post" action="{{ url_for('main.reservar_espacio', espacio='aula_taller') }}" class="reserva-form d-inline">
+                    <input type="hidden" name="espacio" value="{{ espacio }}">
+                    <input type="hidden" name="fecha" value="{{ dia.strftime('%Y-%m-%d') }}">
+                    <input type="hidden" name="franja" value="{{ franja }}">
+                    <button type="button" class="btn btn-sm btn-success reservar-btn"
+                            data-fecha="{{ dia.strftime('%d/%m/%Y') }}"
+                            data-franja="{{ franja }}">
+                      <i class="bi bi-check-circle"></i> Libre
+                    </button>
+                  </form>
+                {% endif %}
+              </td>
             {% endfor %}
           </tr>
         {% endfor %}

@@ -31,7 +31,7 @@ from werkzeug.utils import secure_filename
 from .utils.decoradores import rol_requerido
 from .utils.drive import subir_archivo_a_drive, crear_carpeta_sustitucion
 from .utils.google_auth import build_drive_service
-from .utils.reservas import render_calendario_espacio
+from .utils.reservas import render_calendario_espacio, enviar_correo_reserva_espacio
 from .utils.sms import enviar_sms_esendex
 
 import pandas as pd
@@ -671,7 +671,15 @@ def ver_calendario_sala_reuniones():
 @main_bp.route("/reservas/aula-taller")
 @login_required
 def ver_calendario_aula_taller():
+    franjas_bloqueadas = {
+        'Monday': ["12:40-13:35", "13:35-14:30"],
+        'Tuesday': ["08:30-09:25", "09:25-10:25", "11:45-12:40", "13:35-14:30"],
+        'Wednesday': ["08:30-09:25", "10:25-11:15", "11:45-12:40", "12:40-13:35"],
+        'Thursday': ["08:30-09:25", "12:40-13:35", "13:35-14:30"],
+        'Friday': ["08:30-09:25", "09:25-10:25", "12:40-13:35", "13:35-14:30"]
+    }
     return render_calendario_espacio(
+        franjas_bloqueadas=franjas_bloqueadas,
         nombre_espacio="aula_taller",
         plantilla="reservas/aula_taller.html",
         nombre_visible="Aula Taller"
@@ -698,7 +706,15 @@ def ver_calendario_aula_laboratorio():
 @main_bp.route("/reservas/aula-digital")
 @login_required
 def ver_calendario_aula_digital():
+    franjas_bloqueadas = {
+        "Monday":    [],
+        "Tuesday":   ["08:30-09:25", "09:25-10:25"],  # 1ª y 2ª hora
+        "Wednesday": ["10:25-11:15", "11:45-12:40", "12:40-13:35"],  # 3ª, 4ª y 5ª hora
+        "Thursday":  ["12:40-13:35", "13:35-14:30"],  # 5ª y 6ª hora
+        "Friday":    ["08:30-09:25", "13:35-14:30"]   # 1ª y 6ª hora
+    }
     return render_calendario_espacio(
+        franjas_bloqueadas = franjas_bloqueadas,
         nombre_espacio="aula_digital",
         plantilla="reservas/aula_digital.html",
         nombre_visible="Aula Digital"
@@ -737,6 +753,8 @@ def reservar_espacio(espacio):
         db.session.add(reserva)
         db.session.commit()
         flash("Reserva realizada con éxito.", "success")
+
+        enviar_correo_reserva_espacio(reserva, espacio, current_user)
 
     return redirect(url_for(f"main.ver_calendario_{espacio}"))
 

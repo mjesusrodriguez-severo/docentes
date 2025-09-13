@@ -1,6 +1,9 @@
 from datetime import timedelta, date
 from flask import render_template
 from app.models import Usuario, ReservaSala
+from flask_mail import Message
+from flask import current_app
+from app import mail  # Asegúrate de importar tu instancia de mail
 
 ESPACIOS_NOMBRES = {
     "sala-reuniones": "Sala de Reuniones",
@@ -20,7 +23,7 @@ FRANJAS_HORARIAS = [
     "13:35-14:30"
 ]
 
-def render_calendario_espacio(nombre_espacio, plantilla, nombre_visible):
+def render_calendario_espacio(nombre_espacio, plantilla, nombre_visible, franjas_bloqueadas=None):
     hoy = date.today()
     lunes_actual = hoy - timedelta(days=hoy.weekday())
     lunes_siguiente = lunes_actual + timedelta(days=7)
@@ -52,6 +55,7 @@ def render_calendario_espacio(nombre_espacio, plantilla, nombre_visible):
 
     return render_template(
         plantilla,
+        franjas_bloqueadas=franjas_bloqueadas or {},
         dias_semana_actual=dias_semana_actual,
         dias_semana_siguiente=dias_semana_siguiente,
         franjas_horarias=FRANJAS_HORARIAS,
@@ -60,3 +64,24 @@ def render_calendario_espacio(nombre_espacio, plantilla, nombre_visible):
         usuarios=usuarios_dict,
         nombre_visible=nombre_visible
     )
+
+def enviar_correo_reserva_espacio(reserva, espacio, usuario):
+    try:
+        espacio_visible = espacio.replace('_', ' ').title()
+        msg = Message(
+            subject="📌 Nueva reserva de espacio",
+            sender=("Panel de Docentes", current_app.config["MAIL_USERNAME"]),
+            recipients=["concertada.mariapaz.catarecha@educeuta.es"],
+            html=f"""
+                <h2 style="color:#2c3e50;">Nueva reserva de espacios comunes</h2>
+                <p><strong>📌 Espacio:</strong> {espacio_visible}</p>
+                <p><strong>📅 Fecha:</strong> {reserva.fecha}</p>
+                <p><strong>🕒 Franja horaria:</strong> {reserva.franja_horaria}</p>
+                <p><strong>👩‍🏫 Profesor/a:</strong> {usuario.nombre}</p>
+                <hr>
+                <p style="font-size:0.9em; color:#888;">Este mensaje ha sido generado automáticamente por el sistema de reservas del centro.</p>
+            """
+        )
+        mail.send(msg)
+    except Exception as e:
+        current_app.logger.error(f"Error al enviar correo de reserva: {e}")
