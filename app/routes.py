@@ -268,39 +268,30 @@ def nuevo_alumno(grupo_id):
             responsable = Responsable.query.get(int(rid))
             if responsable:
                 nuevo_alumno.responsables.append(responsable)
+                # Marcar como principal si corresponde
+                if request.form.get('principal_id') == str(rid):
+                    responsable.principal = True
 
         # ----------------------------
         # Añadir nuevos responsables
         # ----------------------------
-        index = 0
-        while True:
-            nombre_key = f'nuevo_nombre_{index}'
-            telefono_key = f'nuevo_telefono_{index}'
-            email_key = f'nuevo_email_{index}'
+        form_data = request.form
+        for key in form_data:
+            if key.startswith("nuevo_responsables[") and key.endswith("][nombre]"):
+                index = key.split("[")[1].split("]")[0]
+                nombre = form_data.get(f"nuevo_responsables[{index}][nombre]", "").strip()
+                telefono = form_data.get(f"nuevo_responsables[{index}][telefono]", "").strip()
 
-            if nombre_key not in request.form:
-                break  # No hay más nuevos responsables
+                if nombre:
+                    responsable = Responsable(nombre=nombre, telefono=telefono)
+                    db.session.add(responsable)
+                    db.session.flush()  # Obtener ID
 
-            nombre = request.form[nombre_key].strip()
-            telefono = request.form[telefono_key].strip()
-            email = request.form[email_key].strip()
+                    nuevo_alumno.responsables.append(responsable)
 
-            if nombre:
-                responsable = Responsable(
-                    nombre=nombre,
-                    telefono=telefono,
-                    email=email
-                )
-                db.session.add(responsable)
-                db.session.flush()  # Para obtener el ID
-
-                nuevo_alumno.responsables.append(responsable)
-
-                # Ver si es el responsable principal
-                if request.form.get('principal_id') == f'nuevo_{index}':
-                    responsable.principal = True
-
-            index += 1
+                    # Ver si es el responsable principal
+                    if form_data.get('principal_id') == f"nuevo_{index}":
+                        responsable.principal = True
 
         db.session.commit()
         flash('Alumno registrado correctamente.', 'success')
