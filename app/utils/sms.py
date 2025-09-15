@@ -49,7 +49,7 @@ def enviar_sms_amonestacion_utils(telefono, amonestacion):
     mensaje = (
         f"Jefatura de estudios:\n"
         f"Amonestación a {amonestacion.alumno.nombre} {amonestacion.alumno.apellidos}, "
-        f"{amonestacion.fecha.strftime('%d/%m/%Y')} en {amonestacion.hora}.\n"
+        f"{amonestacion.fecha.strftime('%d/%m/%Y')} a las {amonestacion.fecha.strftime('%H:%M')}.\n"
         f"Motivo: {amonestacion.motivo}\n"
         f"Descripción: {amonestacion.descripcion}\n"
     )
