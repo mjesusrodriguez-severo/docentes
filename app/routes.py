@@ -32,7 +32,7 @@ from .utils.decoradores import rol_requerido
 from .utils.drive import subir_archivo_a_drive, crear_carpeta_sustitucion
 from .utils.google_auth import build_drive_service
 from .utils.reservas import render_calendario_espacio, enviar_correo_reserva_espacio, enviar_correo_reserva_material
-from .utils.sms import enviar_sms_esendex
+from .utils.sms import enviar_sms_esendex, enviar_sms_amonestacion_utils
 
 import pandas as pd
 
@@ -602,37 +602,6 @@ def revisar_amonestacion():
     flash("Amonestación revisada", "success")
     return redirect(url_for("main.crear_amonestacion"))
 
-def enviar_sms_esendex_php_style(telefono, mensaje):
-    user = "manolojimenez86@gmail.com"
-    password = "b072431a128749aca763"
-    account_ref = "EX0322259"
-    remitente = "SeveroOchoa"
-
-    mensaje += " | Ver en: https://severoochoa.es/sustituciones"
-
-    xml_data = f"""
-    <messages>
-        <accountreference>{account_ref}</accountreference>
-        <message>
-            <to>{telefono}</to>
-            <body>{mensaje}</body>
-            <type>SMS</type>
-            <originator>{remitente}</originator>
-        </message>
-    </messages>
-    """.strip()
-
-    headers = {"Content-Type": "text/xml"}
-
-    response = requests.post(
-        "https://api.esendex.com/v1.0/messagedispatcher",
-        headers=headers,
-        data=xml_data.encode("utf-8"),
-        auth=HTTPBasicAuth(user, password)
-    )
-
-    return response.status_code in [200, 201], response.text
-
 @main_bp.route("/enviar_sms/<int:amonestacion_id>", methods=["POST"])
 @login_required
 def enviar_sms_amonestacion(amonestacion_id):
@@ -644,7 +613,7 @@ def enviar_sms_amonestacion(amonestacion_id):
 
     telefono = responsable.telefono
 
-    ok, respuesta = enviar_sms_amonestacion(telefono, amon)
+    ok, respuesta = enviar_sms_amonestacion_utils(telefono, amon)
 
     if ok:
         amon.enviado_responsables = True

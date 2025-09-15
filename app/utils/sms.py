@@ -42,7 +42,7 @@ def enviar_sms_sustitucion(telefono, sustitucion):
     )
     return enviar_sms_esendex(telefono, mensaje)
 
-def enviar_sms_amonestacion(telefono, amonestacion):
+def enviar_sms_amonestacion_utils(telefono, amonestacion):
     """
     Envía un SMS informando de una amonestación registrada al alumno.
     """
