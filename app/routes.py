@@ -213,7 +213,6 @@ def ver_alumno(alumno_id):
         id_responsable_principal=id_responsable_principal
     )
 
-
 @main_bp.route("/alumno/<int:alumno_id>/eliminar", methods=["POST"])
 @login_required
 def eliminar_alumno(alumno_id):
@@ -541,7 +540,7 @@ def crear_amonestacion():
     else:
         amonestaciones_query = Amonestacion.query.filter_by(profesor_id=current_user.id)
     # Aplicar orden y paginación
-    amonestaciones = amonestaciones_query.order_by(Amonestacion.fecha.desc()).paginate(page=page, per_page=10)
+    amonestaciones = amonestaciones_query.order_by(Amonestacion.fecha.desc()).paginate(page=page, per_page=20)
 
     return render_template("amonestaciones.html", grupos=grupos, amonestaciones=amonestaciones, es_tutor=current_user.rol == "tutor", grupo_tutoria=grupo_tutoria if current_user.rol == "tutor" else None)
 

@@ -19,39 +19,39 @@
       <div class="row">
         <div class="col-md-6 mb-3">
           <label>Nombre</label>
-          <input type="text" name="nombre" class="form-control" value="{{ alumno.nombre or "—" }}" required>
+          <input type="text" name="nombre" class="form-control" value="{{ alumno.nombre or "" }}" required>
         </div>
         <div class="col-md-6 mb-3">
           <label>Apellidos</label>
-          <input type="text" name="apellidos" class="form-control" value="{{ alumno.apellidos or "—" }}" required>
+          <input type="text" name="apellidos" class="form-control" value="{{ alumno.apellidos or "" }}" required>
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-6 mb-3">
           <label>Identificación</label>
-          <input type="text" name="identificacion" class="form-control" value="{{ alumno.identificacion or "—" }}">
+          <input type="text" name="identificacion" class="form-control" value="{{ alumno.identificacion or "" }}">
         </div>
         <div class="col-md-6 mb-3">
           <label>Teléfono</label>
-          <input type="text" name="telefono" class="form-control" value="{{ alumno.telefono or "—" }}">
+          <input type="text" name="telefono" class="form-control" value="{{ alumno.telefono or "" }}">
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-6 mb-3">
           <label>Email</label>
-          <input type="email" name="email" class="form-control" value="{{ alumno.email or "—" }}">
+          <input type="email" name="email" class="form-control" value="{{ alumno.email or "" }}">
         </div>
         <div class="col-md-6 mb-3">
           <label>Dirección</label>
-          <input type="text" name="direccion" class="form-control" value="{{ alumno.direccion or "—" }}">
+          <input type="text" name="direccion" class="form-control" value="{{ alumno.direccion or "" }}">
         </div>
       </div>
 
       <div class="mb-3">
         <label>Observaciones</label>
-        <textarea name="observaciones" class="form-control">{{ alumno.observaciones or "—" }}</textarea>
+        <textarea name="observaciones" class="form-control">{{ alumno.observaciones or "" }}</textarea>
       </div>
 
       <div class="mb-4">
