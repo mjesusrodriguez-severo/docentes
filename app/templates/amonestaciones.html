@@ -148,15 +148,15 @@
 <div class="row p-4">
   {% for amonestacion in amonestaciones.items %}
     <div class="card-escuela mb-4 position-relative
-  {% if amonestacion.estado == 'pendiente' %} bg-pendiente{% endif %}
-  {% if amonestacion.profesor.id == current_user.id %} propia{% endif %}
-  {% if es_tutor and amonestacion.alumno.grupo.id == grupo_tutoria.id %} tutoria{% endif %}"
-  data-alumno-nombre="{{ amonestacion.alumno.nombre }} {{ amonestacion.alumno.apellidos }}"
-  data-grupo-id="{{ amonestacion.alumno.grupo.id }}">
+      {% if amonestacion.estado == 'pendiente' %} bg-pendiente{% endif %}
+      {% if amonestacion.profesor.id == current_user.id %} propia{% endif %}
+      {% if es_tutor and amonestacion.alumno.grupo.id == grupo_tutoria.id %} tutoria{% endif %}"
+      data-alumno-nombre="{{ amonestacion.alumno.nombre }} {{ amonestacion.alumno.apellidos }}"
+      data-grupo-id="{{ amonestacion.alumno.grupo.id }}">
 
       <!-- Fecha y hora arriba derecha -->
       <div class="fecha-hora-amonestacion">
-        {{ amonestacion.fecha.strftime('%d-%m-%Y %H:%M') }}
+        {{ amonestacion.fecha | fecha_esp }}
       </div>
 
       <!-- Cabecera -->
@@ -191,20 +191,16 @@
       {% if current_user.rol in ["jefatura", "tic"] %}
         {% if amonestacion.estado == 'pendiente' and amonestacion.alumno.responsables %}
           <div class="mt-2 d-flex gap-2 justify-content-end">
-            <form method="POST" action="{{ url_for('main.revisar_amonestacion') }}">
-              <input type="hidden" name="id" value="{{ amonestacion.id }}">
-              <input type="hidden" name="accion" value="aceptar">
-              <button type="submit" class="btn btn-sm btn-outline-success">
+              <button class="btn btn-sm btn-outline-success btn-accion-amonestacion"
+                      data-id="{{ amonestacion.id }}"
+                      data-accion="aceptar">
                 <i class="bi bi-check-circle"></i> Aceptar
               </button>
-            </form>
-            <form method="POST" action="{{ url_for('main.revisar_amonestacion') }}">
-              <input type="hidden" name="id" value="{{ amonestacion.id }}">
-              <input type="hidden" name="accion" value="rechazar">
-              <button type="submit" class="btn btn-sm btn-outline-danger">
+              <button class="btn btn-sm btn-outline-danger btn-accion-amonestacion"
+                      data-id="{{ amonestacion.id }}"
+                      data-accion="rechazar">
                 <i class="bi bi-x-circle"></i> Rechazar
               </button>
-            </form>
           </div>
         {% elif amonestacion.estado == 'aceptada' and amonestacion.alumno.responsables %}
           <!-- Botón para desplegar envío de notificación -->
@@ -234,7 +230,10 @@
                     </form>
 
                     <!-- SMS -->
-                    <form method="POST" action="{{ url_for('main.enviar_sms_amonestacion', amonestacion_id=amonestacion.id) }}" class="d-inline">
+                    <form method="POST" action="{{ url_for('main.enviar_sms_amonestacion', amonestacion_id=amonestacion.id) }}"
+                          class="form-enviar-sms d-inline"
+                          data-amonestacion-id="{{ amonestacion.id }}"
+                          data-responsable-id="{{ responsable.id }}">
                       <input type="hidden" name="id" value="{{ amonestacion.id }}">
                       <input type="hidden" name="responsable_id" value="{{ responsable.id }}">
                       <button class="btn btn-sm btn-secondary" type="submit" title="Enviar por SMS">
@@ -266,11 +265,11 @@
         {% endif %}
       </div>
 
-      {% if amonestacion.enviado_responsables %}
-          <div class="text-muted small text-end mt-2">
+        {% if amonestacion.enviado_responsables and amonestacion.fecha_envio_sms %}
+          <div class="text-muted small text-end mt-2 fecha-envio-sms">
             <i class="bi bi-send-check"></i> Enviado a responsables el {{ amonestacion.fecha_envio_sms.strftime('%d-%m-%Y %H:%M') }}
           </div>
-      {% endif %}
+        {% endif %}
 
     </div>
   {% endfor %}
@@ -280,6 +279,91 @@
 
 {% block scripts %}
 <script>
+  document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".form-enviar-sms").forEach(form => {
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const amonestacionId = this.dataset.amonestacionId;
+          const responsableId = this.dataset.responsableId;
+          const url = this.action;
+          const formData = new FormData(this);
+          const button = this.querySelector("button");
+          const originalText = button.innerHTML;
+
+          button.disabled = true;
+          button.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
+
+          try {
+            const response = await fetch(url, {
+              method: "POST",
+              body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.ok) {
+              button.classList.remove("btn-secondary");
+              button.classList.add("btn-success");
+              button.innerHTML = '<i class="bi bi-check-circle"></i> Enviado';
+
+              // Mostrar la fecha actual en el campo
+              const fechaContenedor = document.getElementById(`fecha-envio-${amonestacionId}-${responsableId}`);
+              const ahora = new Date();
+              const fechaFormateada = ahora.toLocaleDateString("es-ES") + " " + ahora.toLocaleTimeString("es-ES", { hour: '2-digit', minute: '2-digit' });
+              fechaContenedor.innerHTML = `<i class="bi bi-send-check"></i> Enviado a responsables el ${fechaFormateada}`;
+
+            } else {
+              throw new Error(result.error || "Error desconocido");
+            }
+
+          } catch (err) {
+            console.error(err);
+            button.classList.remove("btn-secondary");
+            button.classList.add("btn-danger");
+            button.innerHTML = '<i class="bi bi-x-circle"></i> Error';
+          }
+        });
+      });
+  });
+
+    // AJAX para aceptar/rechazar amonestación sin recargar
+    document.querySelectorAll(".btn-accion-amonestacion").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const amonestacionId = btn.dataset.id;
+        const accion = btn.dataset.accion;
+
+        btn.disabled = true;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
+
+        const formData = new FormData();
+        formData.append("id", amonestacionId);
+        formData.append("accion", accion);
+
+        try {
+          const response = await fetch("/revisar_amonestacion_ajax", {
+            method: "POST",
+            body: formData
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.success) {
+            // Cambiar visualmente los botones por texto de confirmación
+            const container = btn.parentElement;
+            container.innerHTML = `<span class="text-success fw-bold">Amonestación ${result.nuevo_estado}</span>`;
+          } else {
+            throw new Error(result.mensaje || "Error al actualizar");
+          }
+        } catch (error) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-x-circle"></i> Error';
+          console.error(error);
+        }
+      });
+    });
+
   function mostrarFormulario() {
     const form = document.getElementById("formulario-amonestacion");
     form.classList.toggle("d-none");

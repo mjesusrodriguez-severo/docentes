@@ -503,7 +503,6 @@ def crear_amonestacion():
             profesor_id=current_user.id,
             motivo=motivo,
             descripcion=descripcion,
-            fecha=fecha_espana
         )
         db.session.add(amonestacion)
         db.session.commit()
@@ -578,20 +577,46 @@ def enviar_amonestacion():
 @login_required
 def revisar_amonestacion():
     if not current_user.es_jefatura:
-        abort(403)
+        return jsonify({"ok": False, "error": "Acceso denegado"}), 403
 
     id = request.form.get("id")
     accion = request.form.get("accion")
 
     amonestacion = Amonestacion.query.get_or_404(id)
+
     if accion == "aceptar":
         amonestacion.estado = "aceptada"
     elif accion == "rechazar":
         amonestacion.estado = "rechazada"
+    else:
+        return jsonify({"ok": False, "error": "Acción inválida"}), 400
 
     db.session.commit()
-    flash("Amonestación revisada", "success")
-    return redirect(url_for("main.crear_amonestacion"))
+
+    return jsonify({
+        "ok": True,
+        "estado": amonestacion.estado,
+        "id": amonestacion.id
+    })
+
+@main_bp.route("/revisar_amonestacion_ajax", methods=["POST"])
+@login_required
+def revisar_amonestacion_ajax():
+    amonestacion_id = request.form.get("id")
+    accion = request.form.get("accion")
+
+    amon = Amonestacion.query.get_or_404(amonestacion_id)
+
+    if accion == "aceptar":
+        amon.estado = "aceptada"
+    elif accion == "rechazar":
+        amon.estado = "rechazada"
+    else:
+        return jsonify({"success": False, "mensaje": "Acción no válida"}), 400
+
+    db.session.commit()
+
+    return jsonify({"success": True, "nuevo_estado": amon.estado})
 
 @main_bp.route("/enviar_sms/<int:amonestacion_id>", methods=["POST"])
 @login_required
@@ -608,13 +633,18 @@ def enviar_sms_amonestacion(amonestacion_id):
 
     if ok:
         amon.enviado_responsables = True
-        amon.fecha_envio_sms = fecha_espana
+        amon.fecha_envio_sms = datetime.now(ZoneInfo("Europe/Madrid"))
         db.session.commit()
-        flash("SMS enviado correctamente", "success")
+        return jsonify({
+            "success": True,
+            "mensaje": "SMS enviado correctamente",
+            "fecha_envio": amon.fecha_envio_sms.strftime('%d-%m-%Y %H:%M')
+        })
     else:
-        flash(f"Error al enviar SMS: {respuesta}", "danger")
-
-    return redirect(url_for("main.crear_amonestacion", amonestacion_id=amonestacion_id))
+        return jsonify({
+            "success": False,
+            "mensaje": f"Error al enviar SMS: {respuesta}"
+        }), 400
 
 # ╔════════════════════════════════════════════════════════════════════════╗
 # ║                            RUTAS DE RESERVAS                           ║

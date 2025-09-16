@@ -1,4 +1,7 @@
-from flask import send_file
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
 
 from . import db
 from flask_login import UserMixin

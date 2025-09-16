@@ -7,6 +7,8 @@ from sqlalchemy.orm import configure_mappers
 from flask_login import LoginManager
 from flask_mail import Mail
 
+from app.utils.fecha import formatear_fecha_esp
+
 mail = Mail()
 
 db = SQLAlchemy()
@@ -14,6 +16,7 @@ login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__)
+    app.jinja_env.filters['fecha_esp'] = formatear_fecha_esp
     app.config.from_object('config.Config')
 
     # Solo reconstruir el archivo de credenciales si no estamos en desarrollo
