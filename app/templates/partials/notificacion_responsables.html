@@ -1,0 +1,34 @@
+<!-- Lista de responsables con botones -->
+<div class="collapse mt-3 {% if mostrar_collapse %}show{% endif %}" id="enviarNotificacion-{{ amonestacion.id }}">
+  {% for responsable in amonestacion.alumno.responsables %}
+    <div class="d-flex align-items-center justify-content-between border rounded p-2 mb-2">
+      <div>
+        <strong>{{ responsable.nombre }} {{ responsable.apellidos }}</strong>
+        <small class="text-muted d-block">Tel: {{ responsable.telefono }}</small>
+      </div>
+
+      <div class="d-flex gap-2">
+        <!-- WhatsApp -->
+        <form method="POST" action="" class="d-inline">
+          <input type="hidden" name="id" value="{{ amonestacion.id }}">
+          <input type="hidden" name="responsable_id" value="{{ responsable.id }}">
+          <button class="btn btn-sm btn-success" type="submit" title="Enviar por WhatsApp">
+            <i class="bi bi-whatsapp"></i> Enviar por Whatsapp (no disponible)
+          </button>
+        </form>
+
+        <!-- SMS -->
+        <form method="POST" action="{{ url_for('main.enviar_sms_amonestacion', amonestacion_id=amonestacion.id) }}"
+              class="form-enviar-sms d-inline"
+              data-amonestacion-id="{{ amonestacion.id }}"
+              data-responsable-id="{{ responsable.id }}">
+          <input type="hidden" name="id" value="{{ amonestacion.id }}">
+          <input type="hidden" name="responsable_id" value="{{ responsable.id }}">
+          <button class="btn btn-sm btn-secondary" type="submit" title="Enviar por SMS">
+            <i class="bi bi-chat-dots"></i> Enviar por SMS
+          </button>
+        </form>
+      </div>
+    </div>
+  {% endfor %}
+</div>

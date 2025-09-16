@@ -605,18 +605,42 @@ def revisar_amonestacion_ajax():
     amonestacion_id = request.form.get("id")
     accion = request.form.get("accion")
 
-    amon = Amonestacion.query.get_or_404(amonestacion_id)
+    amonestacion = Amonestacion.query.get(amonestacion_id)
+
+    if not amonestacion or current_user.rol not in ["jefatura", "tic"]:
+        return jsonify({"success": False, "mensaje": "No autorizado"}), 403
 
     if accion == "aceptar":
-        amon.estado = "aceptada"
+        amonestacion.estado = "aceptada"
     elif accion == "rechazar":
-        amon.estado = "rechazada"
+        amonestacion.estado = "rechazada"
     else:
         return jsonify({"success": False, "mensaje": "Acción no válida"}), 400
 
     db.session.commit()
 
-    return jsonify({"success": True, "nuevo_estado": amon.estado})
+    html_notificacion = ""
+    if accion == "aceptar" and amonestacion.alumno.responsables:
+        html_notificacion = render_template(
+            "partials/notificacion_responsables.html",
+            amonestacion=amonestacion,
+            mostrar_collapse=True  # <-- ¡clave!
+        )
+        html_notificacion = f"""
+        <div class="mt-3">
+          <div class="alert alert-success text-end py-1 px-3 w-100" style="font-size: 0.9rem;">
+            <i class="bi bi-check-circle-fill"></i> Ya puedes notificar a los responsables
+          </div>
+          {html_notificacion}
+        </div>
+        """
+
+    return jsonify({
+        "success": True,
+        "nuevo_estado": amonestacion.estado,
+        "html_notificacion": html_notificacion
+    })
+
 
 @main_bp.route("/enviar_sms/<int:amonestacion_id>", methods=["POST"])
 @login_required
