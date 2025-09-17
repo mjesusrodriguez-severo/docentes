@@ -62,7 +62,8 @@ def render_calendario_espacio(nombre_espacio, plantilla, nombre_visible, franjas
         reservas=reservas_dict,
         dias_es=dias_es,
         usuarios=usuarios_dict,
-        nombre_visible=nombre_visible
+        nombre_visible=nombre_visible,
+        nombre_espacio=nombre_espacio
     )
 
 def enviar_correo_reserva_espacio(reserva, espacio, usuario):
