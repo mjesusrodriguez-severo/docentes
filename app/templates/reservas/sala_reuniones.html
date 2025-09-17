@@ -68,7 +68,7 @@
                       <div class="reserva-ocupada">
                         <p class="text-muted small">Ocupado por: <br /> <b>{{ usuarios.get(reserva.usuario_id) }}</b></p>
                         {% if reserva and reserva.usuario_id == current_user.id %}
-                            <form method="post" action="{{ url_for('main.cancelar_reserva_espacio') }}" class="d-inline cancelar-form">
+                            <form method="post" action="{{ url_for('main.cancelar_reserva_espacio', espacio=espacio) }}" class="d-inline cancelar-form">
                               <input type="hidden" name="reserva_id" value="{{ reserva.id }}">
                               <input type="hidden" name="espacio" value="{{ espacio }}">
                               <button type="button" class="btn btn-sm btn-warning cancelar-btn"
