@@ -49,16 +49,6 @@
   <div class="card-body">
     <h6 class="card-title text-uppercase text-muted mb-3">Filtros de búsqueda</h6>
     <div class="row align-items-end gy-2">
-
-      <div class="col-md-4">
-        <label class="form-label">Tipo de amonestación:</label>
-        <div class="btn-group w-100" role="group" id="filtro-tipo">
-          <button class="btn btn-light active" data-tipo="todas" onclick="seleccionarFiltroTipo(this)">Todas</button>
-          <button class="btn btn-light" data-tipo="propia" onclick="seleccionarFiltroTipo(this)">Mis amonestaciones</button>
-          <button class="btn btn-light" data-tipo="tutoria" onclick="seleccionarFiltroTipo(this)">Mi tutoría</button>
-        </div>
-      </div>
-
       <div class="col-md-4">
         <label for="inputAlumno" class="form-label">Filtrar por alumno:</label>
         <input list="listaAlumnos" id="inputAlumno" class="form-control" placeholder="Escribe un nombre..." oninput="aplicarFiltros()">
@@ -77,6 +67,20 @@
             <option value="{{ grupo.id }}">{{ grupo.nombre }}</option>
           {% endfor %}
         </select>
+      </div>
+
+      <div class="col-md-4">
+        <div class="btn-group w-100" role="group" id="filtro-tipo">
+          {% if current_user.rol == "jefatura" %}
+            <button class="btn btn-light active" data-tipo="todas" onclick="seleccionarFiltroTipo(this)">Todas</button>
+            <button class="btn btn-light" data-tipo="pendientes" onclick="seleccionarFiltroTipo(this)">Sin aceptar</button>
+            <button class="btn btn-light" data-tipo="pendientes-envio" onclick="seleccionarFiltroTipo(this)">Sin enviar</button>
+            <button class="btn btn-light" data-tipo="rechazadas" onclick="seleccionarFiltroTipo(this)">Rechazadas</button>
+          {% elif es_tutor %}
+            <button class="btn btn-light active" data-tipo="propia" onclick="seleccionarFiltroTipo(this)">Mis amonestaciones</button>
+            <button class="btn btn-light" data-tipo="tutoria" onclick="seleccionarFiltroTipo(this)">Mi tutoría</button>
+          {% endif %}
+        </div>
       </div>
 
       <div class="col-md-1 text-end">
@@ -149,6 +153,9 @@
   {% for amonestacion in amonestaciones.items %}
     <div class="card-escuela mb-4 position-relative
       {% if amonestacion.estado == 'pendiente' %} bg-pendiente{% endif %}
+      {% if amonestacion.estado == 'aceptada' and not amonestacion.enviado_responsables %} bg-warning-subtle bg-sms-pendiente{% endif %}
+      {% if amonestacion.estado == 'aceptada' and amonestacion.enviado_responsables %} bg-success-subtle bg-sms-enviado{% endif %}
+      {% if amonestacion.estado == 'rechazada' %} bg-danger-subtle bg-rechazada{% endif %}
       {% if amonestacion.profesor.id == current_user.id %} propia{% endif %}
       {% if es_tutor and amonestacion.alumno.grupo.id == grupo_tutoria.id %} tutoria{% endif %}"
       data-alumno-nombre="{{ amonestacion.alumno.nombre }} {{ amonestacion.alumno.apellidos }}"
@@ -156,7 +163,7 @@
 
       <!-- Fecha y hora arriba derecha -->
       <div class="fecha-hora-amonestacion">
-        {{ amonestacion.fecha | fecha_esp }}
+        Amonestación puesta el {{ amonestacion.fecha | fecha_esp }}
       </div>
 
       <!-- Cabecera -->
@@ -235,6 +242,12 @@
         {% if amonestacion.enviado_responsables and amonestacion.fecha_envio_sms %}
           <div class="text-muted small text-end mt-2 fecha-envio-sms">
             <i class="bi bi-send-check"></i> Enviado a responsables el {{ amonestacion.fecha_envio_sms.strftime('%d-%m-%Y %H:%M') }}
+          </div>
+        {% endif %}
+
+        {% if amonestacion.estado == "aceptada" and not amonestacion.enviado_responsables %}
+          <div class="text-warning text-end small mt-2">
+            <i class="bi bi-exclamation-triangle-fill"></i> Pendiente de enviar a responsables
           </div>
         {% endif %}
 
@@ -324,6 +337,17 @@
             </span>
           `;
 
+          const tarjeta = container.closest(".card-escuela");
+
+          // Elimina clases previas
+          tarjeta.classList.remove("bg-pendiente", "bg-rechazada", "bg-sms-pendiente", "bg-sms-enviado");
+
+          if (result.nuevo_estado === "aceptada") {
+            tarjeta.classList.add("bg-sms-pendiente");
+          } else if (result.nuevo_estado === "rechazada") {
+            tarjeta.classList.add("bg-rechazada");
+          }
+
           // Insertar bloque de notificación si está disponible
           if (result.html_notificacion) {
             const tarjeta = container.closest(".card-escuela");
@@ -375,6 +399,10 @@
                     }
 
                     envioDiv.innerHTML = `<i class="bi bi-send-check"></i> Enviado a responsables el ${result.fecha_envio}`;
+                    // Cambiar fondo de tarjeta al confirmar envío
+                    const tarjeta = envioDiv.closest(".card-escuela");
+                    tarjeta.classList.remove("bg-sms-pendiente");
+                    tarjeta.classList.add("bg-sms-enviado");
                   } else {
                     throw new Error(result.mensaje || "Error desconocido");
                   }
@@ -478,9 +506,12 @@
       const cardGrupo = card.dataset.grupoId;
 
       const cumpleTipo =
-        tipoFiltroSeleccionado === "todas" ||
-        (tipoFiltroSeleccionado === "propia" && card.classList.contains("propia")) ||
-        (tipoFiltroSeleccionado === "tutoria" && card.classList.contains("tutoria"));
+          tipoFiltroSeleccionado === "todas" ||
+          (tipoFiltroSeleccionado === "propia" && card.classList.contains("propia")) ||
+          (tipoFiltroSeleccionado === "tutoria" && card.classList.contains("tutoria")) ||
+          (tipoFiltroSeleccionado === "pendientes" && card.classList.contains("bg-pendiente")) ||
+          (tipoFiltroSeleccionado === "pendientes-envio" && card.classList.contains("bg-sms-pendiente")) ||
+          (tipoFiltroSeleccionado === "rechazadas" && card.classList.contains("bg-rechazada"));
 
       const cumpleAlumno = !alumnoNombre || cardAlumnoNombre.includes(alumnoNombre);
       const cumpleGrupo = !grupoId || grupoId === cardGrupo;

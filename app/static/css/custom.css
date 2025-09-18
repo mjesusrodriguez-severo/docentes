@@ -71,6 +71,18 @@ body {
 .bg-pendiente {
   background-color: var(--color-pendiente) !important;
 }
+
+.bg-rechazada {
+  background-color: #ffe0e0; /* rojo claro */
+}
+
+.bg-sms-pendiente {
+  background-color: #fff3cd; /* amarillo Bootstrap */
+}
+
+.bg-sms-enviado {
+  background-color: #ffffff; /* verde claro */
+}
 .estado-final {
   font-size: 1rem;
   font-weight: bold;
@@ -337,4 +349,8 @@ h2, h3 {
 .footer {
   position: relative;
   overflow: hidden;
+}
+
+:root {
+  --bs-success-bg-subtle: #fffff;
 }

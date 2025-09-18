@@ -12,6 +12,6 @@ def formatear_fecha_esp(dt):
             dt = dt.replace(tzinfo=ZoneInfo("UTC"))
         dt_madrid = dt.astimezone(ZoneInfo("Europe/Madrid"))
         print("hora en Madrid:", dt_madrid)
-        return dt_madrid.strftime('%d-%m-%Y %H:%M')
+        return dt_madrid.strftime('%d/%m/%Y %H:%M')
     except Exception as e:
         return str(dt)
