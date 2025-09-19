@@ -59,12 +59,10 @@ body {
 }
 
 .fecha-hora-amonestacion {
-  position: absolute;
-  top: 0.5rem;
-  right: 1rem;
   font-size: 0.9rem;
-  font-weight: 500;
   color: #555;
+  text-align: right;
+  margin-bottom: 0.5rem;
 }
 
 /* Estados */
@@ -77,11 +75,11 @@ body {
 }
 
 .bg-sms-pendiente {
-  background-color: #fff3cd; /* amarillo Bootstrap */
+  background-color: #ffffff !important
 }
 
 .bg-sms-enviado {
-  background-color: #ffffff; /* verde claro */
+  background-color: #ffffff;
 }
 .estado-final {
   font-size: 1rem;
