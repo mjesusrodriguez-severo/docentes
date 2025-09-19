@@ -37,7 +37,7 @@
       <div class="row mb-3">
         <div class="col-md-4">
           <label for="fecha" class="form-label">Fecha</label>
-          <input type="date" class="form-control" id="fecha" name="fecha" placeholder="Selecciona una fecha" required>
+          <input type="text" class="form-control" id="fecha" name="fecha" placeholder="Selecciona una fecha" required>
         </div>
         <div class="col-md-4">
           <label for="hora_inicio" class="form-label">Hora de inicio</label>
@@ -167,13 +167,6 @@
       <div class="alert alert-info">No hay sustituciones programadas.</div>
     {% endif %}
 
-<script>
-  function mostrarFormulario() {
-    const formDiv = document.getElementById("formulario-sustitución");
-    formDiv.classList.toggle("d-none");
-  }
-</script>
-
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
@@ -184,12 +177,12 @@
     form.classList.toggle('d-none');
   }
 
-  flatpickr("#fecha", {
-    dateFormat: "Y-m-d",
-    locale: "es",
-    minDate: "today",
-    altInput: true,
-    altFormat: "d/m/Y",
+flatpickr("#fecha", {
+      altInput: true,
+      altFormat: "d/m/Y",
+      dateFormat: "Y-m-d",
+      locale: "es",
+      minDate: "today"
   });
 
   flatpickr("#hora_inicio", {
@@ -217,4 +210,5 @@
   }
 </script>
 
+</div>
 {% endblock %}
