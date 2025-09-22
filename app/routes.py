@@ -16,7 +16,7 @@ import unicodedata
 
 from .models import Alumno, Grupo, Responsable, AlumnoResponsable, Usuario, Amonestacion, ReservaSala, \
     ReservaInformatica, Sustitucion, Ubicacion, Dispositivo, dispositivos_reservados, Incidencia, \
-    IncidenciaMantenimiento, InformeAlumno, InformeFaltas
+    IncidenciaMantenimiento, InformeAlumno, InformeFaltas, ComentarioIncidencia
 from . import db
 from datetime import datetime, date, timedelta
 from pytz import timezone
@@ -31,6 +31,7 @@ from werkzeug.utils import secure_filename
 from .utils.decoradores import rol_requerido
 from .utils.drive import subir_archivo_a_drive, crear_carpeta_sustitucion
 from .utils.google_auth import build_drive_service
+from .utils.incidencias import enviar_correo_incidencia, enviar_correo_comentario_incidencia
 from .utils.reservas import render_calendario_espacio, enviar_correo_reserva_espacio, enviar_correo_reserva_material
 from .utils.sms import enviar_sms_esendex, enviar_sms_amonestacion_utils
 
@@ -651,6 +652,8 @@ def enviar_sms_amonestacion(amonestacion_id):
     responsable = Responsable.query.get_or_404(responsable_id)
 
     telefono = responsable.telefono
+    print("su responsable es:", responsable.nombre)
+    print("el teléfono de su responsable es:", telefono)
 
     ok, respuesta = enviar_sms_amonestacion_utils(telefono, amon)
 
@@ -1483,6 +1486,7 @@ def nueva_incidencia():
         db.session.add(nueva)
         db.session.commit()
         flash('Incidencia registrada correctamente.', 'success')
+        enviar_correo_incidencia(nueva, current_user)
         return redirect(url_for('main.mostrar_incidencias'))
 
     equipos = Dispositivo.query.all()
@@ -1537,10 +1541,8 @@ def editar_incidencia(id):
     if current_user.id != incidencia.docente_id and not es_tic:
         abort(403)
 
-    # Obtener el equipo actual (por id)
     equipo_actual = incidencia.equipo
     tipo_equipo_actual = equipo_actual.tipo if equipo_actual else ""
-
     estado_anterior = incidencia.estado
 
     if request.method == 'POST':
@@ -1554,9 +1556,26 @@ def editar_incidencia(id):
             incidencia.prioridad = request.form['prioridad']
 
         db.session.commit()
-
+        flash("Cambios guardados correctamente.", "success")
         return redirect(url_for('main.mostrar_incidencias'))
 
+    # Obtener todos los equipos y pasarlos en formato JSON
+    equipos = Dispositivo.query.all()
+    equipos_json = [
+        {'id': e.id, 'nombre': e.nombre, 'ubicacion': e.ubicacion, 'tipo': e.tipo}
+        for e in equipos
+    ]
+
+    # Crear diccionario de usuarios para mostrar nombres de autores en los comentarios
+    usuarios = Usuario.query.all()
+    usuarios_dict = {u.id: u.nombre for u in usuarios}
+
+    return render_template('incidencias/editar.html',
+                           incidencia=incidencia,
+                           es_tic=es_tic,
+                           tipo_equipo_actual=tipo_equipo_actual,
+                           equipos_json=equipos_json,
+                           usuarios_dict=usuarios_dict)
 
     # Obtener todos los equipos y pasarlos en formato JSON
     equipos = Dispositivo.query.all()
@@ -1571,6 +1590,34 @@ def editar_incidencia(id):
                            es_tic=es_tic,
                            tipo_equipo_actual=tipo_equipo_actual,
                            equipos_json=equipos_json)
+
+@main_bp.route('/incidencias/<int:incidencia_id>/comentario', methods=['POST'])
+@login_required
+def nuevo_comentario_incidencia(incidencia_id):
+    if current_user.rol != 'tic':
+        abort(403)
+
+    incidencia = Incidencia.query.get_or_404(incidencia_id)
+    contenido = request.form['contenido']
+
+    nuevo_comentario = ComentarioIncidencia(
+        contenido=contenido,
+        autor_id=current_user.id,
+        incidencia_id=incidencia.id
+    )
+    db.session.add(nuevo_comentario)
+    db.session.commit()
+
+    # Enviar notificación al docente que creó la incidencia
+    enviar_correo_comentario_incidencia(
+        comentario=nuevo_comentario,
+        incidencia=incidencia,
+        autor=current_user,
+        destinatario=incidencia.docente
+    )
+
+    flash('Comentario añadido correctamente.', 'success')
+    return redirect(url_for('main.editar_incidencia', id=incidencia_id))
 
 # ╔════════════════════════════════════════════════════════════════════════╗
 # ║                         RUTAS DE MANTENIMIENTO                         ║

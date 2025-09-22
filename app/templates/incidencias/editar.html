@@ -13,7 +13,7 @@
 
       <div class="mb-3">
           <label for="equipo" class="form-label">Equipo</label>
-          <select class="form-select" name="equipo" required>
+          <select class="form-select" name="equipo">
             <option value="">-- Selecciona un equipo --</option>
             {% for equipo in equipos_json %}
               <option value="{{ equipo.id }}" {% if equipo.id == incidencia.equipo_id %}selected{% endif %}>
@@ -47,6 +47,7 @@
         {% if es_tic %}
           <select class="form-select" name="estado" required>
             <option value="Activa" {% if incidencia.estado == 'Activa' %}selected{% endif %}>Activa</option>
+            <option value="En curso" {% if incidencia.estado == 'En curso' %}selected{% endif %}>En curso</option>
             <option value="Resuelta" {% if incidencia.estado == 'Resuelta' %}selected{% endif %}>Resuelta</option>
             <option value="Cancelada" {% if incidencia.estado == 'Cancelada' %}selected{% endif %}>Cancelada</option>
           </select>
@@ -59,6 +60,39 @@
       <button type="submit" class="btn btn-primary">Guardar cambios</button>
       <a href="{{ url_for('main.mostrar_incidencias') }}" class="btn btn-secondary">Cancelar</a>
     </form>
+
+    {% if es_tic %}
+        <hr class="my-4">
+        <h6 class="text-secondary text-uppercase">Comentarios del TIC</h6>
+
+        <!-- Comentarios existentes -->
+        {% if incidencia.comentarios %}
+          <ul class="list-group mb-3">
+            {% for comentario in incidencia.comentarios %}
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                  <strong>{{ usuarios_dict[comentario.autor_id] }}</strong>
+                  <small class="text-muted">{{ comentario.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
+                </div>
+                <p class="mb-0">{{ comentario.contenido }}</p>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted">No hay comentarios aún.</p>
+        {% endif %}
+
+        <!-- Formulario para nuevo comentario -->
+        <form method="post" action="{{ url_for('main.nuevo_comentario_incidencia', incidencia_id=incidencia.id) }}">
+          <div class="mb-3">
+            <label for="contenido" class="form-label">Nuevo comentario</label>
+            <textarea class="form-control" name="contenido" rows="3" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-chat-dots"></i> Añadir comentario
+          </button>
+        </form>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

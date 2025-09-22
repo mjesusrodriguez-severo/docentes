@@ -57,16 +57,30 @@
             <td>{{ usuarios_dict[inc.docente_id] }}</td>
           {% endif %}
           <td class="text-end">
-              <a href="{{ url_for('main.editar_incidencia', id=inc.id) }}" class="btn btn-sm btn-outline-warning" title="Editar">
-                <i class="bi bi-pencil-square"></i>
-              </a>
-              {% if inc.estado == 'Activa' %}
-              <form action="{{ url_for('main.cancelar_incidencia', id=inc.id) }}" method="post" style="display:inline;" onsubmit="return confirm('¿Cancelar esta incidencia?')">
-                <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancelar">
-                  <i class="bi bi-x-circle"></i>
-                </button>
-              </form>
-              {% endif %}
+          <div class="d-flex gap-1 justify-content-end align-items-center">
+            <a href="{{ url_for('main.editar_incidencia', id=inc.id) }}" class="btn btn-sm btn-outline-warning" title="Editar">
+              <i class="bi bi-pencil-square"></i>
+            </a>
+
+            {% if inc.estado == 'Activa' %}
+            <form action="{{ url_for('main.cancelar_incidencia', id=inc.id) }}" method="post" onsubmit="return confirm('¿Cancelar esta incidencia?')">
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancelar">
+                <i class="bi bi-x-circle"></i>
+              </button>
+            </form>
+            {% endif %}
+
+            <button class="btn btn-sm btn-outline-secondary toggle-descripcion" data-id="{{ inc.id }}" title="Ver descripción">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </td>
+        </tr>
+        <tr class="fila-descripcion d-none" id="descripcion-{{ inc.id }}">
+          <td colspan="{% if es_tic %}7{% else %}6{% endif %}">
+            <div class="alert alert-secondary mb-0">
+              <strong>Descripción:</strong> {{ inc.descripcion }}
+            </div>
           </td>
         </tr>
         {% endfor %}
@@ -74,4 +88,15 @@
     </table>
   </div>
 </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".toggle-descripcion").forEach(btn => {
+      btn.addEventListener("click", function () {
+        const id = this.dataset.id;
+        const fila = document.getElementById("descripcion-" + id);
+        fila.classList.toggle("d-none");
+      });
+    });
+  });
+</script>
 {% endblock %}

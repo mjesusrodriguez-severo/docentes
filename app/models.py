@@ -296,4 +296,20 @@ class InformeAlumno(db.Model):
         db.UniqueConstraint("informe_id", "alumno_id", name="uq_informe_alumno"),
     )
 
+class ComentarioIncidencia(db.Model):
+    __tablename__ = 'comentario_incidencia'
+
+    id = db.Column(db.Integer, primary_key=True)
+    contenido = db.Column(db.Text, nullable=False)
+    fecha = db.Column(db.DateTime, default=datetime.utcnow)
+
+    autor_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='CASCADE'), nullable=False)
+    incidencia_id = db.Column(db.Integer, db.ForeignKey('incidencias.id', ondelete='CASCADE'), nullable=False)
+
+    # Relaciones (opcional, pero útil para acceder directamente desde el comentario al autor/incidencia)
+    autor = db.relationship('Usuario', backref=db.backref('comentarios_incidencias', lazy='dynamic', cascade='all, delete'))
+    incidencia = db.relationship('Incidencia', backref=db.backref('comentarios', lazy='dynamic', cascade='all, delete'))
+
+    def __repr__(self):
+        return f'<ComentarioIncidencia {self.id} de Usuario {self.autor_id} en Incidencia {self.incidencia_id}>'
 
