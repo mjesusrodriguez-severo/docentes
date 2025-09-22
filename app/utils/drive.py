@@ -29,7 +29,7 @@ def subir_archivo_a_drive(drive_service, file_path, nombre_usuario, carpeta_raiz
         print(f"✔️ Carpeta del mes {mes_actual} ya existe: {carpetas[0]['id']}")
         carpeta_mes_id = carpetas[0]['id']
     else:
-        print(f"✔️ Carpeta del mes {mes_actual} no existe: {carpetas[0]['id']}")
+        print(f"✔️ Carpeta del mes {mes_actual} no existe.")
         # Crear la carpeta del mes si no existe
         file_metadata = {
             'name': mes_actual,
