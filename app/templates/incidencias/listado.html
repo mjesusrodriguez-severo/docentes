@@ -9,6 +9,16 @@
   </a>
 </div>
 
+<div class="mb-3">
+  <div class="btn-group" role="group">
+    <button type="button" class="btn btn-outline-secondary filtro-estado active" data-estado="todos">Todos</button>
+    <button type="button" class="btn btn-outline-warning filtro-estado" data-estado="Activa">Activas</button>
+    <button type="button" class="btn btn-outline-secondary filtro-estado" data-estado="En curso">En curso</button> <!-- NUEVO -->
+    <button type="button" class="btn btn-outline-success filtro-estado" data-estado="Resuelta">Resueltas</button>
+    <button type="button" class="btn btn-outline-danger filtro-estado" data-estado="Cancelada">Canceladas</button>
+  </div>
+</div>
+
 <div class="card shadow-sm">
   <div class="table-responsive">
     <table class="table table-hover align-middle mb-0">
@@ -27,7 +37,7 @@
       </thead>
       <tbody>
         {% for inc in incidencias %}
-        <tr>
+        <tr class="incidencia-row" data-estado="{{ inc.estado }}" data-fecha="{{ inc.fecha_hora.isoformat() }}">
           <td>{{ inc.ubicacion }}</td>
           <td>{{ inc.equipo.nombre }}</td>
           <td>
@@ -90,6 +100,7 @@
 </div>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    // Toggle de descripción (ya lo tenías)
     document.querySelectorAll(".toggle-descripcion").forEach(btn => {
       btn.addEventListener("click", function () {
         const id = this.dataset.id;
@@ -97,6 +108,51 @@
         fila.classList.toggle("d-none");
       });
     });
+
+    // Filtrado por estado
+    const botonesFiltro = document.querySelectorAll(".filtro-estado");
+    const tbody = document.querySelector("tbody");
+    const filas = Array.from(document.querySelectorAll(".incidencia-row"));
+
+    function aplicarFiltro(estadoFiltro) {
+      // Reset botones
+      botonesFiltro.forEach(b => b.classList.remove("active"));
+      document.querySelector(`.filtro-estado[data-estado="${estadoFiltro}"]`).classList.add("active");
+
+      // Filtrar
+      const visibles = filas.filter(fila => {
+        const estado = fila.dataset.estado;
+        return estadoFiltro === "todos" || estado === estadoFiltro;
+      });
+
+      // Separar en resueltas y no resueltas
+      const noResueltas = visibles.filter(f => f.dataset.estado !== "Resuelta");
+      const resueltas = visibles.filter(f => f.dataset.estado === "Resuelta");
+
+      // Ordenar por fecha descendente
+      noResueltas.sort((a, b) => new Date(b.dataset.fecha) - new Date(a.dataset.fecha));
+      resueltas.sort((a, b) => new Date(b.dataset.fecha) - new Date(a.dataset.fecha));
+
+      // Limpiar y reinsertar
+      tbody.innerHTML = "";
+      [...noResueltas, ...resueltas].forEach(fila => {
+        tbody.appendChild(fila);
+        const id = fila.querySelector(".toggle-descripcion")?.dataset.id;
+        const desc = document.getElementById("descripcion-" + id);
+        if (desc) tbody.appendChild(desc);
+      });
+    }
+
+    // Escuchar clics en botones
+    botonesFiltro.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const estado = btn.dataset.estado;
+        aplicarFiltro(estado);
+      });
+    });
+
+    // Inicial
+    aplicarFiltro("todos");
   });
 </script>
 {% endblock %}
