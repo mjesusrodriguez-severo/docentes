@@ -59,7 +59,8 @@
   <div class="row mb-4 g-3">
     <!-- Sustituciones -->
     <div class="col-md-3 col-6">
-      <div class="card text-center shadow-sm h-100">
+        <a href="{{ url_for('main.ver_sustituciones') }}" class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
         <div class="card-body">
           <i class="bi bi-calendar-check fs-2 text-burdeos"></i>
           <h5 class="mt-2">{{ num_sustituciones }}</h5>
@@ -69,11 +70,13 @@
           {% endif %}
         </div>
       </div>
+        </a>
     </div>
 
     <!-- Reservas de sala -->
     <div class="col-md-3 col-6">
-      <div class="card text-center shadow-sm h-100">
+        <a href="{{ url_for('main.ver_calendario_sala_reuniones') }}" class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
         <div class="card-body">
           <i class="bi bi-door-open fs-2 text-burdeos"></i>
           <h5 class="mt-2">{{ num_reservas_sala }}</h5>
@@ -83,11 +86,13 @@
           {% endif %}
         </div>
       </div>
+        </a>
     </div>
 
     <!-- Reservas TIC -->
     <div class="col-md-3 col-6">
-      <div class="card text-center shadow-sm h-100">
+        <a href="{{ url_for('main.reservas_material') }}" class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
         <div class="card-body">
           <i class="bi bi-laptop fs-2 text-burdeos"></i>
           <h5 class="mt-2">{{ num_reservas_tic }}</h5>
@@ -97,11 +102,13 @@
           {% endif %}
         </div>
       </div>
+        </a>
     </div>
 
     <!-- Amonestaciones -->
     <div class="col-md-3 col-6">
-      <div class="card text-center shadow-sm h-100">
+        <a href="{{ url_for('main.crear_amonestacion') }}" class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
         <div class="card-body">
           <i class="bi bi-exclamation-triangle fs-2 text-burdeos"></i>
           <h5 class="mt-2">{{ num_amonestaciones }}</h5>
@@ -111,6 +118,7 @@
           {% endif %}
         </div>
       </div>
+        </a>
     </div>
   </div>
 
