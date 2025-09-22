@@ -641,11 +641,9 @@ def revisar_amonestacion_ajax():
         "html_notificacion": html_notificacion
     })
 
-
 @main_bp.route("/enviar_sms/<int:amonestacion_id>", methods=["POST"])
 @login_required
 def enviar_sms_amonestacion(amonestacion_id):
-    amonestacion_id = request.form.get("id")
     responsable_id = request.form.get("responsable_id")
 
     amon = Amonestacion.query.get_or_404(amonestacion_id)
