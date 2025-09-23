@@ -547,7 +547,6 @@ def crear_amonestacion():
 
 @main_bp.route("/enviar_amonestacion", methods=["POST"])
 @login_required
-@rol_requerido("jefatura")
 def enviar_amonestacion():
     amonestacion_id = request.form.get("id")
     responsable_id = request.form.get("responsable_id")
@@ -562,7 +561,8 @@ def enviar_amonestacion():
     mensaje = f"Amonestación para {amonestacion.alumno.nombre} {amonestacion.alumno.apellidos}:\n"
     mensaje += f"Motivo: {amonestacion.motivo}\n"
     mensaje += f"Descripción: {amonestacion.descripcion}\n"
-    mensaje += f"Fecha: {amonestacion.fecha.strftime('%d/%m/%Y %H:%M')}"
+    hora_madrid = amonestacion.fecha.astimezone(ZoneInfo("Europe/Madrid"))
+    mensaje += f"Fecha: {hora_madrid.strftime('%d/%m/%Y %H:%M')}"
 
     # Mostrar la URL de WhatsApp en consola (puedes integrarla en HTML si quieres)
     from urllib.parse import quote

@@ -257,46 +257,45 @@
 
 {% block scripts %}
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll(".form-enviar-sms").forEach(form => {
-        form.addEventListener("submit", async function (e) {
-          e.preventDefault();
+      document.addEventListener("submit", async function (e) {
+      const form = e.target;
 
-          const amonestacionId = this.dataset.amonestacionId;
-          const responsableId = this.dataset.responsableId;
-          const url = this.action;
-          const formData = new FormData(this);
-          const button = this.querySelector("button");
-          const originalText = button.innerHTML;
+      if (form.classList.contains("form-enviar-sms")) {
+        e.preventDefault();
 
-          button.disabled = true;
-          button.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
+        const amonestacionId = form.dataset.amonestacionId;
+        const responsableId = form.dataset.responsableId;
+        const url = form.action;
+        const formData = new FormData(form);
+        const button = form.querySelector("button");
+        const originalText = button.innerHTML;
 
-          try {
-            const response = await fetch(url, {
-              method: "POST",
-              body: formData
-            });
+        button.disabled = true;
+        button.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
 
-            const result = await response.json();
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            body: formData
+          });
 
-            if (response.ok && result.success) {
-              button.classList.remove("btn-secondary");
-              button.classList.add("btn-success");
-              button.innerHTML = '<i class="bi bi-check-circle"></i> Enviado';
-            } else {
-              throw new Error(result.error || "Error desconocido");
-            }
+          const result = await response.json();
 
-          } catch (err) {
-            console.error(err);
+          if (response.ok && result.success) {
             button.classList.remove("btn-secondary");
-            button.classList.add("btn-danger");
-            button.innerHTML = '<i class="bi bi-x-circle"></i> Error';
+            button.classList.add("btn-success");
+            button.innerHTML = '<i class="bi bi-check-circle"></i> Enviado';
+          } else {
+            throw new Error(result.mensaje || "Error desconocido");
           }
-        });
-      });
-  });
+        } catch (err) {
+          console.error(err);
+          button.classList.remove("btn-secondary");
+          button.classList.add("btn-danger");
+          button.innerHTML = '<i class="bi bi-x-circle"></i> Error';
+        }
+      }
+    });
 
     // AJAX para aceptar/rechazar amonestación sin recargar
     document.querySelectorAll(".btn-accion-amonestacion").forEach(btn => {
@@ -367,48 +366,6 @@
                 const bsCollapse = new bootstrap.Collapse(collapseElement, { toggle: false });
                 bsCollapse.show();
               }
-
-              // ✅ Re-asociar eventos para nuevos formularios de envío SMS
-              const nuevoForm = tarjeta.querySelector(".form-enviar-sms");
-
-              if (nuevoForm) {
-                nuevoForm.addEventListener("submit", async function (e) {
-                  e.preventDefault();
-
-                  const amonestacionId = this.dataset.amonestacionId;
-                  const responsableId = this.dataset.responsableId;
-                  const url = this.action;
-                  const formData = new FormData(this);
-                  const button = this.querySelector("button");
-                  const originalText = button.innerHTML;
-
-                  button.disabled = true;
-                  button.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
-
-                  try {
-                    const response = await fetch(url, {
-                      method: "POST",
-                      body: formData
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok && result.success) {
-                      console.log(result);
-                      button.classList.remove("btn-secondary");
-                      button.classList.add("btn-success");
-                      button.innerHTML = '<i class="bi bi-check-circle"></i> Enviado';
-                    } else {
-                      throw new Error(result.mensaje || "Error desconocido");
-                    }
-                  } catch (err) {
-                    console.error(err);
-                    button.classList.remove("btn-secondary");
-                    button.classList.add("btn-danger");
-                    button.innerHTML = '<i class="bi bi-x-circle"></i> Error';
-                  }
-                });
-              }
             }
         }
           else {
@@ -466,7 +423,6 @@
 
     const botones = document.querySelectorAll(".btn-group .btn");
     botones.forEach(btn => btn.classList.remove("active"));
-    event.target.classList.add("active");
   }
 
   document.addEventListener("DOMContentLoaded", () => {
