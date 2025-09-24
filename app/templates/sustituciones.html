@@ -177,12 +177,12 @@
     form.classList.toggle('d-none');
   }
 
-flatpickr("#fecha", {
-      altInput: true,
-      altFormat: "d/m/Y",
-      dateFormat: "Y-m-d",
-      locale: "es",
-      minDate: "today"
+  flatpickr("#fecha", {
+    altInput: true,
+    altFormat: "d/m/Y",
+    dateFormat: "Y-m-d",
+    locale: "es",
+    minDate: "today"
   });
 
   flatpickr("#hora_inicio", {
@@ -208,6 +208,15 @@ flatpickr("#fecha", {
   function confirmarCancelacion() {
     return confirm("¿Estás seguro de que quieres cancelar esta sustitución?");
   }
+
+  // Refuerzo en cliente: no permitir enviar sin fecha
+  document.querySelector("#formulario-sustitución form").addEventListener("submit", e => {
+    const fecha = document.getElementById("fecha").value.trim();
+    if (!fecha) {
+      e.preventDefault();
+      alert("Por favor, selecciona una fecha antes de guardar la sustitución.");
+    }
+  });
 </script>
 
 </div>
