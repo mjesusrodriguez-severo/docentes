@@ -1,3 +1,8 @@
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
+
 import requests
 from requests.auth import HTTPBasicAuth
 from flask import current_app, url_for
@@ -46,10 +51,14 @@ def enviar_sms_amonestacion_utils(telefono, amonestacion):
     """
     Envía un SMS informando de una amonestación registrada al alumno.
     """
+    # Convertir la hora UTC (guardada en la BD) a hora española
+    fecha_madrid = amonestacion.fecha.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Madrid"))
+    print("Fecha original (UTC):", amonestacion.fecha)
+    print("Fecha convertida (Madrid):", fecha_madrid)
     mensaje = (
         f"Jefatura de estudios:\n"
         f"Amonestación a {amonestacion.alumno.nombre} {amonestacion.alumno.apellidos}, "
-        f"{amonestacion.fecha.strftime('%d/%m/%Y')} a las {amonestacion.fecha.strftime('%H:%M')}.\n"
+        f"{fecha_madrid.strftime('%d/%m/%Y')} a las {fecha_madrid.strftime('%H:%M')}.\n"
         f"Motivo: {amonestacion.motivo}\n"
         f"Descripción: {amonestacion.descripcion}\n"
     )

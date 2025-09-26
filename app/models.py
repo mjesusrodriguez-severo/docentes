@@ -5,7 +5,8 @@ except ImportError:
 
 from . import db
 from flask_login import UserMixin
-from datetime import datetime
+#from datetime import datetime, timezone
+import datetime
 
 profesor_grupo = db.Table('profesor_grupo',
     db.Column('profesor_id', db.Integer, db.ForeignKey('usuarios.id'), primary_key=True),
@@ -201,7 +202,7 @@ class Amonestacion(db.Model):
     profesor_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     motivo = db.Column(db.String(255), nullable=False)
     descripcion = db.Column(db.Text, nullable=False)
-    fecha = db.Column(db.DateTime, default=datetime.utcnow)
+    fecha = db.Column(db.DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
     estado = db.Column(db.String(50), default='pendiente')
     fecha_envio_sms = db.Column(db.DateTime, nullable=True)
     enviado_responsables = db.Column(db.Boolean, default=False)
@@ -267,7 +268,7 @@ class InformeFaltas(db.Model):
     grupo_id = db.Column(db.Integer, db.ForeignKey("grupos.id"), nullable=False)
     mes = db.Column(db.String(20), nullable=False)  # ejemplo: "junio"
     anio = db.Column(db.Integer, nullable=False)    # ejemplo: 2025
-    fecha_subida = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    fecha_subida = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     archivo_csv = db.Column(db.String(255), nullable=True)  # ruta al archivo en disco o Drive
 
     grupo = db.relationship("Grupo", back_populates="informes")
@@ -301,7 +302,7 @@ class ComentarioIncidencia(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     contenido = db.Column(db.Text, nullable=False)
-    fecha = db.Column(db.DateTime, default=datetime.utcnow)
+    fecha = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     autor_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='CASCADE'), nullable=False)
     incidencia_id = db.Column(db.Integer, db.ForeignKey('incidencias.id', ondelete='CASCADE'), nullable=False)

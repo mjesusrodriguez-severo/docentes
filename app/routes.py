@@ -503,6 +503,7 @@ def crear_amonestacion():
             profesor_id=current_user.id,
             motivo=motivo,
             descripcion=descripcion,
+
         )
         db.session.add(amonestacion)
         db.session.commit()
@@ -541,7 +542,7 @@ def crear_amonestacion():
     else:
         amonestaciones_query = Amonestacion.query.filter_by(profesor_id=current_user.id)
     # Aplicar orden y paginación
-    amonestaciones = amonestaciones_query.order_by(Amonestacion.fecha.desc()).paginate(page=page, per_page=20)
+    amonestaciones = amonestaciones_query.order_by(Amonestacion.fecha.desc()).all()
 
     return render_template("amonestaciones.html", grupos=grupos, amonestaciones=amonestaciones, es_tutor=current_user.rol == "tutor", grupo_tutoria=grupo_tutoria if current_user.rol == "tutor" else None)
 
@@ -1060,7 +1061,6 @@ def ver_sustituciones():
     hoy = date.today()
     zona = timezone("Europe/Madrid")
     ahora = datetime.now().time()
-    page = request.args.get("page", 1, type=int)
 
     grupos = Grupo.query.order_by(Grupo.orden).all()
     profesores = Usuario.query.order_by(Usuario.nombre).all()

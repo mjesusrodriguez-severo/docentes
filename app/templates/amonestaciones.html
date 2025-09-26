@@ -97,60 +97,15 @@
 <div class="row align-items-center gy-2 mb-3">
   <!-- Contador de amonestaciones -->
   <div class="col-12 col-md-3">
-    <span id="contador" class="badge bg-secondary" data-total="{{ amonestaciones.total }}">
-      Mostrando {{ amonestaciones.items|length }} de {{ amonestaciones.total }} amonestación(es)
+    <span id="contador" class="badge bg-secondary" data-total="{{ amonestaciones|length }}">
+      Mostrando {{ amonestaciones|length }} amonestación(es)
     </span>
   </div>
-
-  <!-- Paginación -->
-  {% if amonestaciones.pages > 1 %}
-      <div class="col-12 col-md-9">
-          <nav aria-label="Paginación de amonestaciones">
-            <ul class="pagination justify-content-center justify-content-md-end">
-              {% if amonestaciones.has_prev %}
-                <li class="page-item">
-                  <a class="page-link" href="{{ url_for('main.crear_amonestacion', page=1) }}" aria-label="Primera">
-                    <i class="bi bi-chevron-double-left"></i>
-                  </a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link" href="{{ url_for('main.crear_amonestacion', page=amonestaciones.prev_num) }}" aria-label="Anterior">
-                    <i class="bi bi-chevron-left"></i>
-                  </a>
-                </li>
-              {% else %}
-                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-double-left"></i></span></li>
-                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left"></i></span></li>
-              {% endif %}
-
-              <li class="page-item disabled">
-                <span class="page-link">Página {{ amonestaciones.page }} de {{ amonestaciones.pages }}</span>
-              </li>
-
-              {% if amonestaciones.has_next %}
-                <li class="page-item">
-                  <a class="page-link" href="{{ url_for('main.crear_amonestacion', page=amonestaciones.next_num) }}" aria-label="Siguiente">
-                    <i class="bi bi-chevron-right"></i>
-                  </a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link" href="{{ url_for('main.crear_amonestacion', page=amonestaciones.pages) }}" aria-label="Última">
-                    <i class="bi bi-chevron-double-right"></i>
-                  </a>
-                </li>
-              {% else %}
-                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right"></i></span></li>
-                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-double-right"></i></span></li>
-              {% endif %}
-            </ul>
-          </nav>
-      </div>
-  {% endif %}
 </div>
 
 <!-- Listado de amonestaciones -->
 <div class="row p-4">
-  {% for amonestacion in amonestaciones.items %}
+  {% for amonestacion in amonestaciones %}
     <div class="card-escuela mb-4 position-relative
       {% if amonestacion.estado == 'pendiente' %} bg-warning-subtle{% endif %}
       {% if amonestacion.estado == 'rechazada' %} bg-danger-subtle{% endif %}
