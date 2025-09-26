@@ -251,7 +251,7 @@
                 {% endif %}
               {% endif %}
 
-          {% elif reserva.estado == 'PENDIENTE' and reserva.fecha > current_date %}
+          {% elif reserva.estado == 'PENDIENTE' and reserva.fecha >= current_date %}
               {% if current_user.rol in ['tic', 'jefatura'] %}
                   <!-- Aceptar o denegar la reserva -->
                   <a href="{{ url_for('main.asignar_dispositivos', reserva_id=reserva.id) }}"
