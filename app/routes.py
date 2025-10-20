@@ -1887,8 +1887,8 @@ def subir_informe(grupo_id, mes):
         valores = [str(v).strip().upper() for v in valores]
 
         # Contar tipos de faltas
-        cj = valores.count('CJ')
-        ci = valores.count('CI')
+        cj = valores.count('J')
+        ci = valores.count('I')
 
         # Calcular % CI sobre días lectivos
         porcentaje = (ci / dias_lectivos_totales * 100) if dias_lectivos_totales > 0 else 0
