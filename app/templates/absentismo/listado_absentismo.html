@@ -49,7 +49,13 @@
               {% set porcentaje_medio = 0 %}
             {% endif %}
 
-          <tr {% if porcentaje_medio >= 20 %}class="table-warning"{% endif %}>
+            <tr
+                  {% if porcentaje_medio > 25 %}
+                    class="table-danger"
+                  {% elif porcentaje_medio >= 10 %}
+                    class="table-warning"
+                  {% endif %}
+            >
             <td>{{ grupo.nombre }}</td>
             <td>{{ ns.justificadas }}</td>
             <td>{{ ns.injustificadas }}</td>

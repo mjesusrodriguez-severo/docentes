@@ -2068,7 +2068,7 @@ def descargar_informe_horizontal(grupo_id):
 
     # Estilo para absentistas
     fill_amarillo = PatternFill(start_color="FFFACD", end_color="FFFACD", fill_type="solid")
-    font_bold = Font(bold=True)
+    fill_rojo = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
 
     # Alumnos
     todos_alumnos = Alumno.query.filter_by(grupo_id=grupo_id).order_by(Alumno.apellidos).all()
@@ -2094,8 +2094,9 @@ def descargar_informe_horizontal(grupo_id):
         for i, inf in enumerate(informes_ordenados):
             entrada = next((e for e in inf.alumnos if e.alumno_id == alumno.id), None)
             if entrada and entrada.absentista:
+                color = fill_rojo if entrada.porcentaje_injustificadas > 25 else fill_amarillo
                 for col in range(2 + i * 3, 5 + i * 3):  # columnas CJ, CI, %
-                    ws.cell(row=row, column=col).fill = fill_amarillo
+                    ws.cell(row=row, column=col).fill = color
 
     # Ajustar ancho
     for col in ws.columns:
