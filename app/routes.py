@@ -62,7 +62,6 @@ def index():
 @login_required
 def dashboard():
     hoy = date.today()
-    print(f"ROL ACTUAL: {current_user.rol}")
     if current_user.rol.lower() == "tic":
         ultimas_incidencias = Incidencia.query.order_by(Incidencia.fecha_hora.desc()).limit(5).all()
         ultimas_reservas_portatiles = ReservaInformatica.query \
@@ -736,7 +735,7 @@ def descargar_amonestacion_pdf(amonestacion_id):
     elements.append(Spacer(1, 20))
 
     # Datos principales
-    alumno = amonestacion.alumno.nombre if amonestacion.alumno else "Sin alumno"
+    alumno = f"{amonestacion.alumno.nombre} {amonestacion.alumno.apellidos}" if amonestacion.alumno else "Sin alumno"
     profesor = amonestacion.profesor.nombre if amonestacion.profesor else "Sin profesor"
     fecha = amonestacion.fecha.strftime("%d/%m/%Y %H:%M")
 
