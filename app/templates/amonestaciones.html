@@ -165,6 +165,9 @@
         {% elif amonestacion.estado == 'aceptada' and amonestacion.alumno.responsables %}
           <!-- Botón para desplegar envío de notificación -->
             <div class="text-end">
+                <a href="{{ url_for('main.descargar_amonestacion_pdf', amonestacion_id=amonestacion.id) }}" class="btn btn-sm btn-outline-danger">
+                  <i class="bi bi-file-earmark-pdf-fill"></i> Descargar en PDF
+                </a>
               <button class="btn btn-sm btn-success" type="button" data-bs-toggle="collapse" data-bs-target="#enviarNotificacion-{{ amonestacion.id }}">
                 <i class="bi bi-whatsapp"></i> Notificar responsables
               </button>

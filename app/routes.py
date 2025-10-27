@@ -3,13 +3,15 @@ import traceback
 from collections import defaultdict
 from pathlib import Path
 
+from reportlab.lib.enums import TA_LEFT
+from reportlab.pdfgen import canvas
 from sqlalchemy import func  # Asegúrate de tener este import
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, abort, current_app, send_file, make_response
 from flask_login import login_required, current_user
 from reportlab.lib.units import cm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, HRFlowable
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from sqlalchemy.orm import joinedload, selectinload
 import unicodedata
@@ -53,13 +55,32 @@ fecha_espana = datetime.now(ZoneInfo("Europe/Madrid"))
 @main_bp.route("/")
 def index():
     if current_user.is_authenticated:
-        return redirect(url_for("main.dashboard"))
+        return redirect(url_for("main.dashboard"))  # SIEMPRE a dashboard()
     return render_template("login.html")
 
 @main_bp.route("/dashboard")
 @login_required
 def dashboard():
     hoy = date.today()
+    print(f"ROL ACTUAL: {current_user.rol}")
+    if current_user.rol.lower() == "tic":
+        ultimas_incidencias = Incidencia.query.order_by(Incidencia.fecha_hora.desc()).limit(5).all()
+        ultimas_reservas_portatiles = ReservaInformatica.query \
+            .filter(ReservaInformatica.tipo_equipo == 'portátil') \
+            .order_by(ReservaInformatica.fecha.desc()) \
+            .limit(5).all()
+
+        # 🔧 Añade esto para filtrar incidencias pendientes
+        incidencias_pendientes = Incidencia.query \
+            .filter(Incidencia.estado == 'Activa') \
+            .order_by(Incidencia.fecha_hora.desc()) \
+            .limit(5) \
+            .all()
+
+        return render_template("admin_dashboard.html",
+                               ultimas_incidencias=ultimas_incidencias,
+                               ultimas_reservas_portatiles=ultimas_reservas_portatiles,
+                               incidencias_pendientes=incidencias_pendientes)
 
     # Sustituciones
     if current_user.rol == "jefatura":
@@ -670,6 +691,99 @@ def enviar_sms_amonestacion(amonestacion_id):
             "success": False,
             "mensaje": f"Error al enviar SMS: {respuesta}"
         }), 400
+
+@main_bp.route("/amonestaciones/<int:amonestacion_id>/pdf")
+@login_required
+def descargar_amonestacion_pdf(amonestacion_id):
+    amonestacion = Amonestacion.query.get_or_404(amonestacion_id)
+
+    # Creamos el buffer PDF en memoria
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=2 * cm, leftMargin=2 * cm, topMargin=2 * cm,
+                            bottomMargin=2 * cm)
+
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name="CustomTitle", fontSize=16, leading=20, spaceAfter=20, alignment=TA_LEFT))
+    styles.add(ParagraphStyle(name="Heading", fontSize=12, spaceBefore=12, spaceAfter=6, alignment=TA_LEFT))
+    styles.add(ParagraphStyle(name="Body", fontSize=11, spaceAfter=10))
+
+    elements = []
+
+    # Logo del centro (ajusta la ruta si usas otra)
+    ruta_logo = os.path.join(current_app.root_path, 'static', 'img', 'logo.JPG')
+    try:
+        logo = Image(ruta_logo, width=3 * cm, height=3 * cm)
+    except:
+        logo = None
+
+    title = Paragraph("<b>AMONESTACIÓN DISCIPLINARIA</b>", styles["CustomTitle"])
+
+    # Tabla de 2 columnas: logo (izquierda), título (centrado)
+    header_table = Table(
+        [[logo, title]],
+        colWidths=[4 * cm, 12 * cm]
+    )
+
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ALIGN', (1, 0), (1, 0), 'CENTER'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+    ]))
+
+    elements.append(header_table)
+    elements.append(Spacer(1, 20))
+
+    # Datos principales
+    alumno = amonestacion.alumno.nombre if amonestacion.alumno else "Sin alumno"
+    profesor = amonestacion.profesor.nombre if amonestacion.profesor else "Sin profesor"
+    fecha = amonestacion.fecha.strftime("%d/%m/%Y %H:%M")
+
+    elements.append(Paragraph(f"<b>Alumno:</b> {alumno}", styles["Body"]))
+    elements.append(Paragraph(f"<b>Fecha y hora:</b> {fecha}", styles["Body"]))
+    elements.append(Paragraph(f"<b>Profesor:</b> {profesor}", styles["Body"]))
+
+    # Motivo y descripción
+    elements.append(Spacer(1, 12))
+    elements.append(Paragraph("<b>Motivo:</b>", styles["Heading"]))
+    elements.append(Paragraph(amonestacion.motivo or "Sin motivo", styles["Body"]))
+
+    elements.append(Spacer(1, 12))
+    elements.append(Paragraph("<b>Descripción:</b>", styles["Heading"]))
+    elements.append(Paragraph(amonestacion.descripcion or "Sin descripción", styles["Body"]))
+
+    # Línea divisoria
+    elements.append(Spacer(1, 30))
+    elements.append(HRFlowable(width="100%", thickness=1, color="#000000"))
+    elements.append(Spacer(1, 12))
+
+    # Campos para firma del tutor legal
+    fields_style = styles["Body"]
+    fields_style.leading = 16
+
+    elements.append(Paragraph("<b>Padre/Madre/Tutor/a:</b>", fields_style))
+    elements.append(Spacer(1, 20))
+    elements.append(Paragraph("<b>Nombre:</b>", fields_style))
+    elements.append(Spacer(1, 20))
+    elements.append(Paragraph("<b>DNI:</b>", fields_style))
+    elements.append(Spacer(1, 20))
+    elements.append(Paragraph("<b>Teléfono:</b>", fields_style))
+    elements.append(Spacer(1, 30))
+
+    # Función para añadir metadatos al PDF
+    def set_pdf_metadata(canvas, doc):
+        canvas.setAuthor("Colegio Severo Ochoa")
+        canvas.setTitle("Amonestación disciplinaria - " + alumno)
+        canvas.setSubject("Amonestación a estudiante")
+        canvas.setKeywords("amonestación, disciplina, alumno")
+
+    # Generar PDF
+    doc.build(elements, onFirstPage=set_pdf_metadata)
+    buffer.seek(0)
+
+    filename = f"amonestacion_{alumno.replace(' ', '_')}.pdf"
+    return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
 
 # ╔════════════════════════════════════════════════════════════════════════╗
 # ║                            RUTAS DE RESERVAS                           ║

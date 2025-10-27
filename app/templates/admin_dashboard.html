@@ -1,10 +1,202 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
 
-</body>
-</html>
+  <!-- Título -->
+  <h2 class="mb-4 text-burdeos">Resumen general</h2>
+
+    <!-- BOTONES NUEVAS INCIDENCIAS -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <a href="{{ url_for('main.nueva_incidencia') }}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+          <i class="bi bi-laptop-fill me-2"></i> Nueva incidencia informática
+        </a>
+      </div>
+      <div class="col-md-6 mt-2 mt-md-0">
+        <a href="{{ url_for('main.nueva_incidencia_mantenimiento') }}" class="btn btn-warning text-dark w-100 d-flex align-items-center justify-content-center">
+          <i class="bi bi-tools me-2"></i> Nueva incidencia de mantenimiento
+        </a>
+      </div>
+    </div>
+
+  <!-- BOTONES SUPERIORES -->
+  <div class="row my-4">
+    <div class="col-md-3 col-sm-6 mb-3">
+      <a href="https://2024-25.eva.educacion.es/colegioseveroochoa/" target="_blank" class="card text-white text-center h-100" style="background-color: #343a40;">
+        <div class="card-body py-2 d-flex flex-column justify-content-center align-items-center">
+          <i class="bi bi-mortarboard-fill fs-3 mb-1"></i>
+          <h6 class="card-title mb-0">Moodle</h6>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <a href="https://edvoice.additioapp.com/access/login" target="_blank" class="card text-white text-center h-100" style="background-color: #1abc9c;">
+        <div class="card-body py-2 d-flex flex-column justify-content-center align-items-center">
+          <i class="bi bi-send-fill fs-3 mb-1"></i>
+          <h6 class="card-title mb-0">Edvoice</h6>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <a href="https://outlook.office.com/mail/" target="_blank" class="card text-white text-center h-100" style="background-color: #0078D4;">
+        <div class="card-body py-2 d-flex flex-column justify-content-center align-items-center">
+          <i class="bi bi-envelope-fill fs-3 mb-1"></i>
+          <h6 class="card-title mb-0">Outlook</h6>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <a href="https://web.additioapp.com/access/login" target="_blank" class="card text-white text-center h-100" style="background-color: #c0392b;">
+        <div class="card-body py-2 d-flex flex-column justify-content-center align-items-center">
+          <i class="bi bi-pencil-fill fs-3 mb-1"></i>
+          <h6 class="card-title mb-0">Additio</h6>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- CONTADORES -->
+  <div class="row mb-4 g-3">
+    <!-- Sustituciones -->
+    <div class="col-md-3 col-6">
+        <a href="{{ url_for('main.ver_sustituciones') }}" class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <i class="bi bi-calendar-check fs-2 text-burdeos"></i>
+          <h5 class="mt-2">{{ num_sustituciones }}</h5>
+          <p class="text-muted small">Próximas Sustituciones</p>
+          {% if es_tic %}
+          <a href="{{ url_for('main.ver_sustituciones') }}" class="btn btn-outline-secondary btn-sm mt-2">Ver todas</a>
+          {% endif %}
+        </div>
+      </div>
+        </a>
+    </div>
+
+    <!-- Reservas de sala -->
+    <div class="col-md-3 col-6">
+        <a href="{{ url_for('main.ver_calendario_sala_reuniones') }}" class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <i class="bi bi-door-open fs-2 text-burdeos"></i>
+          <h5 class="mt-2">{{ num_reservas_sala }}</h5>
+          <p class="text-muted small">Reservas de Sala</p>
+          {% if es_tic %}
+          <a href="{{ url_for('main.ver_calendario_sala') }}" class="btn btn-outline-secondary btn-sm mt-2">Ver todas</a>
+          {% endif %}
+        </div>
+      </div>
+        </a>
+    </div>
+
+    <!-- Reservas TIC -->
+    <div class="col-md-3 col-6">
+        <a href="{{ url_for('main.reservas_material') }}" class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <i class="bi bi-laptop fs-2 text-burdeos"></i>
+          <h5 class="mt-2">{{ num_reservas_tic }}</h5>
+          <p class="text-muted small">Reservas TIC</p>
+          {% if es_tic %}
+          <a href="{{ url_for('main.reservas_material') }}" class="btn btn-outline-secondary btn-sm mt-2">Ver todas</a>
+          {% endif %}
+        </div>
+      </div>
+        </a>
+    </div>
+
+    <!-- Amonestaciones -->
+    <div class="col-md-3 col-6">
+        <a href="{{ url_for('main.crear_amonestacion') }}" class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <i class="bi bi-exclamation-triangle fs-2 text-burdeos"></i>
+          <h5 class="mt-2">{{ num_amonestaciones }}</h5>
+          <p class="text-muted small">Amonestaciones</p>
+          {% if es_tic %}
+          <a href="{{ url_for('main.crear_amonestacion') }}" class="btn btn-outline-secondary btn-sm mt-2">Ver todas</a>
+          {% endif %}
+        </div>
+      </div>
+        </a>
+    </div>
+  </div>
+
+  <!-- TABLAS PRINCIPALES -->
+  <div class="row g-2">
+
+    <!-- Reservas TIC -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-burdeos text-white">
+          Próximas Reservas Mat. Informático
+        </div>
+        <div class="card-body">
+          {% if reservas_tic %}
+            <table class="table table-sm">
+              <thead>
+                <tr><th>Fecha</th><th>Equipo</th><th>Hora</th></tr>
+              </thead>
+              <tbody>
+                {% for r in reservas_tic %}
+                  <tr>
+                    <td>{{ r.fecha.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ r.equipo }}</td>
+                    <td>{{ r.franja_horaria }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% if es_tic %}
+            <a href="{{ url_for('main.reservas_material') }}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+            {% endif %}
+          {% else %}
+            <p class="text-muted">No tienes reservas de material informático.</p>
+          {% endif %}
+        <div class="text-end mt-2">
+              <a href="{{ url_for('main.reservas_material') }}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Incidencias TIC -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-burdeos text-white">
+          Incidencias TIC pendientes
+        </div>
+        <div class="card-body">
+          {% if incidencias_pendientes %}
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Ubicación</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for inc in incidencias_pendientes %}
+                  <tr>
+                    <td>{{ inc.fecha_hora.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ inc.ubicacion }}</td>
+                    <td>{{ inc.estado }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% if es_tic %}
+            <div class="text-end mt-2">
+              <a href="{{ url_for('main.mostrar_incidencias') }}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+            </div>
+            {% endif %}
+          {% else %}
+            <p class="text-muted">No hay incidencias pendientes.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
