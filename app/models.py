@@ -323,6 +323,7 @@ class Expulsion(db.Model):
     alumno_id = db.Column(db.Integer, db.ForeignKey('alumnos.id'), nullable=False)
     alumno = db.relationship('Alumno', backref='expulsiones')
 
+    fecha_expulsion = db.Column(db.Date, default=datetime.date.today)
     articulo = db.Column(db.String(100), nullable=False)
     dias_expulsion = db.Column(db.Integer, nullable=False)
     fecha_inicio = db.Column(db.Date, nullable=False)
