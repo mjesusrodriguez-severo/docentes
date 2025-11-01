@@ -821,10 +821,10 @@ def ver_expulsiones():
     return render_template("expulsiones.html", expulsiones=expulsiones, grupos = grupos)
 
 # Asegura que la fecha salga en español
-try:
-    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
-except:
-    locale.setlocale(locale.LC_TIME, 'es_ES')
+#try:
+#    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+#except:
+#    locale.setlocale(locale.LC_TIME, 'es_ES')
 
 from docxtpl import DocxTemplate
 from babel.dates import format_date
@@ -869,7 +869,6 @@ def descargar_expulsion_docx(expulsion_id):
     # Descargar como archivo Word
     filename = f"expulsion_{alumno.nombre}_{alumno.apellidos}.docx"
     return send_file(output, as_attachment=True, download_name=filename, mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-
 
 # ╔════════════════════════════════════════════════════════════════════════╗
 # ║                            RUTAS DE RESERVAS                           ║
