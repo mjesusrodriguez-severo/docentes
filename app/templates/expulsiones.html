@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Expulsiones{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+    <h5 class="mb-0 text-uppercase text-secondary">Expulsiones</h5>
+    <div class="d-flex gap-2 ms-auto">
+        <button class="btn btn-danger text-white" onclick="mostrarFormularioExpulsion()">
+          <i class="bi bi-person-dash-fill"></i> Expulsar alumno
+        </button>
+    </div>
+</div>
+
+<!-- Formulario dinámico para expulsiones oculto -->
+<div id="formulario-expulsion" class="card p-4 mb-4 bg-light border d-none">
+  <form method="POST" action="{{ url_for('main.crear_expulsion') }}">
+    <div class="mb-3">
+      <label for="grupo_expulsion" class="form-label">Grupo</label>
+      <select name="grupo_id" id="grupo_expulsion" class="form-select" required onchange="cargarAlumnosExpulsion(this.value)">
+        <option value="">Selecciona un grupo</option>
+        {% for grupo in grupos %}
+        <option value="{{ grupo.id }}">{{ grupo.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="alumno_expulsion" class="form-label">Alumno</label>
+      <select name="alumno_id" id="alumno_expulsion" class="form-select" required>
+        <option value="">Selecciona un alumno</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="articulo" class="form-label">Artículo vulnerado</label>
+      <input type="text" name="articulo" id="articulo" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="dias" class="form-label">Días de expulsión</label>
+      <input type="number" name="dias_expulsion" id="dias" class="form-control" required min="1">
+    </div>
+
+    <div class="mb-3">
+      <label for="fecha_inicio" class="form-label">Fecha de inicio</label>
+      <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="fecha_fin" class="form-label">Fecha de fin</label>
+      <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" required>
+    </div>
+
+    <button type="submit" class="btn btn-danger">Guardar expulsión</button>
+  </form>
+</div>
+
+<div class="row p-4">
+  {% for expulsion in expulsiones %}
+    <div class="card-escuela mb-4 position-relative"
+      data-alumno-nombre="{{ expulsion.alumno.nombre }} {{ expulsion.alumno.apellidos }}"
+      data-grupo-id="{{ expulsion.alumno.grupo.id }}">
+
+      <!-- Fecha y hora arriba derecha -->
+      <div class="fecha-hora-amonestacion d-flex justify-content-end mb-2">
+          <b><i class="bi bi-calendar-event me-1"></i> Expulsión realizada el {{ expulsion.fecha }}</b>
+      </div>
+
+      <!-- Cabecera -->
+      <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+        <span class="badge-soft badge-group">{{ expulsion.alumno.grupo.nombre }}</span>
+      </div>
+
+      <!-- Alumno -->
+      <div class="bg-light text-dark p-2 rounded d-flex align-items-center mb-3">
+        <i class="bi bi-person-vcard-fill me-2 text-secondary"></i>
+        <strong class="text-uppercase small">{{ expulsion.alumno.nombre }} {{ expulsion.alumno.apellidos }}</strong>
+      </div>
+
+
+      <!-- Artículo -->
+      <p class="mb-1"><strong>Artículo vulnerado:</strong> {{ expulsion.articulo }}</p>
+      <p class="card-text mb-1"><strong>Inicio de la expulsión:</strong> {{ expulsion.fecha_inicio.strftime('%d/%m/%Y') }}</p>
+      <p class="card-text mb-1"><strong>Incorporación al centro:</strong> {{ expulsion.fecha_fin.strftime('%d/%m/%Y') }}</p>
+
+      <!-- Exportar pdF -->
+
+          <div class="mt-2 d-flex gap-2 justify-content-end">
+              <a href="{{ url_for('main.descargar_expulsion_docx', expulsion_id=expulsion.id) }}"
+                 class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-file-earmark-text"></i> Descargar Expulsión
+              </a>
+          </div>
+
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    function mostrarFormularioExpulsion() {
+        const form = document.getElementById("formulario-expulsion");
+        form.classList.toggle("d-none");
+    }
+
+    function cargarAlumnosExpulsion(grupoId) {
+    const alumnoSelect = document.getElementById("alumno_expulsion");
+    alumnoSelect.innerHTML = "<option>Cargando...</option>";
+
+    fetch(`/grupo/${grupoId}/alumnos`)
+      .then(response => response.json())
+      .then(data => {
+        alumnoSelect.innerHTML = '<option value="">Selecciona un alumno</option>';
+        data.forEach(alumno => {
+          const option = document.createElement("option");
+          option.value = alumno.id;
+          option.textContent = alumno.nombre;
+          alumnoSelect.appendChild(option);
+        });
+      })
+      .catch(error => {
+        console.error("Error al cargar alumnos:", error);
+        alumnoSelect.innerHTML = '<option>Error al cargar</option>';
+      });
+    }
+</script>
+{% endblock %}

@@ -43,7 +43,7 @@ class Alumno(db.Model):
     observaciones = db.Column(db.Text)
     grupo_id = db.Column(db.Integer, db.ForeignKey('grupos.id'))
 
-    informes = db.relationship("InformeAlumno", back_populates="alumno", cascade="all, delete-orphan")
+    informes = db.relationship("InformeAlumno", back_populates="alumno")
 
     responsables = db.relationship(
         "Responsable",
@@ -272,12 +272,11 @@ class InformeFaltas(db.Model):
     archivo_csv = db.Column(db.String(255), nullable=True)  # ruta al archivo en disco o Drive
 
     grupo = db.relationship("Grupo", back_populates="informes")
-    alumnos = db.relationship("InformeAlumno", backref="informe", cascade="all, delete-orphan")
+    alumnos = db.relationship("InformeAlumno", back_populates="informe", cascade="all, delete-orphan")
 
     __table_args__ = (
         db.UniqueConstraint("grupo_id", "mes", "anio", name="uq_grupo_mes_anio"),
     )
-
 
 class InformeAlumno(db.Model):
     __tablename__ = "informe_alumno"
@@ -290,7 +289,9 @@ class InformeAlumno(db.Model):
     faltas_injustificadas = db.Column(db.Integer, nullable=False)
     porcentaje_injustificadas = db.Column(db.Float, nullable=False)
     absentista = db.Column(db.Boolean, default=False)
+    orden_csv = db.Column(db.Integer)
 
+    informe = db.relationship("InformeFaltas", back_populates="alumnos")
     alumno = db.relationship("Alumno", back_populates="informes")
 
     __table_args__ = (
@@ -313,4 +314,19 @@ class ComentarioIncidencia(db.Model):
 
     def __repr__(self):
         return f'<ComentarioIncidencia {self.id} de Usuario {self.autor_id} en Incidencia {self.incidencia_id}>'
+
+class Expulsion(db.Model):
+    __tablename__ = 'expulsiones'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    alumno_id = db.Column(db.Integer, db.ForeignKey('alumnos.id'), nullable=False)
+    alumno = db.relationship('Alumno', backref='expulsiones')
+
+    articulo = db.Column(db.String(100), nullable=False)
+    dias_expulsion = db.Column(db.Integer, nullable=False)
+    fecha_inicio = db.Column(db.Date, nullable=False)
+    fecha_fin = db.Column(db.Date, nullable=False)
+
+    fecha_creacion = db.Column(db.DateTime, default=db.func.current_timestamp())
 

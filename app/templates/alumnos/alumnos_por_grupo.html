@@ -6,6 +6,7 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
       <h5 class="mb-0 text-uppercase text-secondary">Agenda alumnado</h5>
       {% if grupo_seleccionado %}
+          <p><strong>Mostrando {{ alumnos|length }} alumnos del grupo {{ grupo_seleccionado.nombre }}.</strong></p>
           {% if current_user.id == grupo_seleccionado.tutor_id or current_user.rol == "tic" %}
             <!-- Botón para añadir alumno -->
             <div class="text-end mb-3">

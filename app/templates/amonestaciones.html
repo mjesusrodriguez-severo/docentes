@@ -3,15 +3,66 @@
 {% block title %}Amonestaciones{% endblock %}
 
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="mb-0 text-uppercase text-secondary">Amonestaciones</h5>
-      <button class="btn btn-outline-primary" onclick="mostrarFormulario()">
-          <i class="bi bi-exclamation-triangle"></i> Añadir amonestación
-        </button>
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <h5 class="mb-0 text-uppercase text-secondary">Amonestaciones</h5>
+
+        <div class="d-flex gap-2 ms-auto">
+          {% if current_user.rol in ["jefatura", "tic"] %}
+            <button class="btn btn-danger text-white" onclick="mostrarFormularioExpulsion()">
+              <i class="bi bi-person-dash-fill"></i> Expulsar alumno
+            </button>
+          {% endif %}
+          <button class="btn btn-outline-primary" onclick="mostrarFormularioAmonestacion()">
+            <i class="bi bi-exclamation-triangle"></i> Añadir amonestación
+          </button>
+        </div>
     </div>
 
+<!-- Formulario dinámico para expulsiones oculto -->
+<div id="formulario-expulsion" class="card p-4 mb-4 bg-light border d-none">
+  <form method="POST" action="{{ url_for('main.crear_expulsion') }}">
+    <div class="mb-3">
+      <label for="grupo_expulsion" class="form-label">Grupo</label>
+      <select name="grupo_id" id="grupo_expulsion" class="form-select" required onchange="cargarAlumnosExpulsion(this.value)">
+        <option value="">Selecciona un grupo</option>
+        {% for grupo in grupos %}
+        <option value="{{ grupo.id }}">{{ grupo.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
 
-<!-- Formulario dinámico oculto -->
+    <div class="mb-3">
+      <label for="alumno_expulsion" class="form-label">Alumno</label>
+      <select name="alumno_id" id="alumno_expulsion" class="form-select" required>
+        <option value="">Selecciona un alumno</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="articulo" class="form-label">Artículo vulnerado</label>
+      <input type="text" name="articulo" id="articulo" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="dias" class="form-label">Días de expulsión</label>
+      <input type="number" name="dias_expulsion" id="dias" class="form-control" required min="1">
+    </div>
+
+    <div class="mb-3">
+      <label for="fecha_inicio" class="form-label">Fecha de inicio</label>
+      <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="fecha_fin" class="form-label">Fecha de fin</label>
+      <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" required>
+    </div>
+
+    <button type="submit" class="btn btn-danger">Guardar expulsión</button>
+  </form>
+</div>
+
+<!-- Formulario dinámico para amonestaciones oculto -->
 <div id="formulario-amonestacion" class="card p-4 mb-4 bg-light border d-none">
   <form method="POST" action="{{ url_for('main.crear_amonestacion') }}">
     <div class="mb-3">
@@ -71,7 +122,7 @@
 
       <div class="col-md-4">
         <div class="btn-group w-100" role="group" id="filtro-tipo">
-          {% if current_user.rol == "jefatura" %}
+          {% if current_user.rol in ["jefatura", "tic"] %}
             <button class="btn btn-light active" data-tipo="todas" onclick="seleccionarFiltroTipo(this)">Todas</button>
             <button class="btn btn-light" data-tipo="pendientes" onclick="seleccionarFiltroTipo(this)">Sin aceptar</button>
             <button class="btn btn-light" data-tipo="pendientes-envio" onclick="seleccionarFiltroTipo(this)">Sin enviar</button>
@@ -340,6 +391,37 @@
   function mostrarFormulario() {
     const form = document.getElementById("formulario-amonestacion");
     form.classList.toggle("d-none");
+  }
+
+  function mostrarFormularioAmonestacion() {
+      document.getElementById("formulario-amonestacion").classList.remove("d-none");
+      document.getElementById("formulario-expulsion").classList.add("d-none");
+  }
+
+  function mostrarFormularioExpulsion() {
+      document.getElementById("formulario-expulsion").classList.remove("d-none");
+      document.getElementById("formulario-amonestacion").classList.add("d-none");
+  }
+
+  function cargarAlumnosExpulsion(grupoId) {
+    const alumnoSelect = document.getElementById("alumno_expulsion");
+    alumnoSelect.innerHTML = "<option>Cargando...</option>";
+
+    fetch(`/grupo/${grupoId}/alumnos`)
+      .then(response => response.json())
+      .then(data => {
+        alumnoSelect.innerHTML = '<option value="">Selecciona un alumno</option>';
+        data.forEach(alumno => {
+          const option = document.createElement("option");
+          option.value = alumno.id;
+          option.textContent = alumno.nombre;
+          alumnoSelect.appendChild(option);
+        });
+      })
+      .catch(error => {
+        console.error("Error al cargar alumnos:", error);
+        alumnoSelect.innerHTML = '<option>Error al cargar</option>';
+      });
   }
 
   function cargarAlumnos(grupoId) {

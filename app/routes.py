@@ -1,15 +1,19 @@
+import locale
 import os
+import re
 import traceback
 from collections import defaultdict
 from pathlib import Path
 
-from reportlab.lib.enums import TA_LEFT
+from reportlab.lib.enums import TA_LEFT, TA_JUSTIFY, TA_RIGHT, TA_CENTER
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from sqlalchemy import func  # Asegúrate de tener este import
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, abort, current_app, send_file, make_response
 from flask_login import login_required, current_user
-from reportlab.lib.units import cm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, HRFlowable
+from reportlab.lib.units import cm, mm
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, HRFlowable, Frame
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
@@ -18,7 +22,7 @@ import unicodedata
 
 from .models import Alumno, Grupo, Responsable, AlumnoResponsable, Usuario, Amonestacion, ReservaSala, \
     ReservaInformatica, Sustitucion, Ubicacion, Dispositivo, dispositivos_reservados, Incidencia, \
-    IncidenciaMantenimiento, InformeAlumno, InformeFaltas, ComentarioIncidencia
+    IncidenciaMantenimiento, InformeAlumno, InformeFaltas, ComentarioIncidencia, Expulsion
 from . import db
 from datetime import datetime, date, timedelta
 from pytz import timezone
@@ -62,7 +66,7 @@ def index():
 @login_required
 def dashboard():
     hoy = date.today()
-    if current_user.rol.lower() == "tic":
+    if current_user.rol.lower() in ["tic", "jefatura"]:
         ultimas_incidencias = Incidencia.query.order_by(Incidencia.fecha_hora.desc()).limit(5).all()
         ultimas_reservas_portatiles = ReservaInformatica.query \
             .filter(ReservaInformatica.tipo_equipo == 'portátil') \
@@ -783,6 +787,89 @@ def descargar_amonestacion_pdf(amonestacion_id):
 
     filename = f"amonestacion_{alumno.replace(' ', '_')}.pdf"
     return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
+
+@main_bp.route("/expulsiones/nueva", methods=["POST"])
+@login_required
+def crear_expulsion():
+
+    alumno_id = request.form.get("alumno_id")
+    articulo = request.form.get("articulo")
+    dias_expulsion = int(request.form.get("dias_expulsion"))
+    fecha_inicio = request.form.get("fecha_inicio")
+    fecha_fin = request.form.get("fecha_fin")
+
+    nueva_expulsion = Expulsion(
+        alumno_id=alumno_id,
+        articulo=articulo,
+        dias_expulsion=dias_expulsion,
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin
+    )
+    db.session.add(nueva_expulsion)
+    db.session.commit()
+
+    flash("Expulsión registrada correctamente.", "success")
+    return redirect(url_for("main.ver_expulsiones"))
+
+@main_bp.route("/expulsiones")
+@login_required
+def ver_expulsiones():
+    if current_user.rol not in ["jefatura", "tic"]:
+        abort(403)
+    grupos = Grupo.query.order_by(Grupo.orden).all()
+    expulsiones = Expulsion.query.join(Alumno).join(Grupo).order_by(Expulsion.fecha_creacion.desc()).all()
+    return render_template("expulsiones.html", expulsiones=expulsiones, grupos = grupos)
+
+# Asegura que la fecha salga en español
+try:
+    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+except:
+    locale.setlocale(locale.LC_TIME, 'es_ES')
+
+from docxtpl import DocxTemplate
+from babel.dates import format_date
+@main_bp.route('/expulsion/<int:expulsion_id>/descargar')
+@login_required
+def descargar_expulsion_docx(expulsion_id):
+    expulsion = Expulsion.query.get_or_404(expulsion_id)
+    alumno = expulsion.alumno
+    grupo = alumno.grupo
+
+    # Formatear fechas
+    fecha_inicio = format_date(expulsion.fecha_inicio, locale='es_ES', format='d \'de\' MMMM')
+    fecha_fin = format_date(expulsion.fecha_fin, locale='es_ES', format='d \'de\' MMMM')
+    fecha_actual = format_date(datetime.now(), locale='es_ES', format="d 'de' MMMM 'de' y")
+
+    # Ruta a la plantilla
+    template_path = current_app.root_path + "/static/docs/plantilla_expulsion.docx"
+
+    # Cargar plantilla
+    doc = DocxTemplate(template_path)
+
+    # Contexto con los campos que has definido
+    context = {
+        "articulo": expulsion.articulo,
+        "nombre_alumno": alumno.nombre,
+        "apellidos_alumno": alumno.apellidos,
+        "grupo": grupo.nombre if grupo else "Grupo no asignado",
+        "dias_expulsion": expulsion.dias_expulsion,
+        "fecha_inicio": fecha_inicio,
+        "fecha_fin": fecha_fin,
+        "fecha_actual": fecha_actual
+    }
+
+    # Rellenar plantilla
+    doc.render(context)
+
+    # Guardar en memoria
+    output = BytesIO()
+    doc.save(output)
+    output.seek(0)
+
+    # Descargar como archivo Word
+    filename = f"expulsion_{alumno.nombre}_{alumno.apellidos}.docx"
+    return send_file(output, as_attachment=True, download_name=filename, mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+
 
 # ╔════════════════════════════════════════════════════════════════════════╗
 # ║                            RUTAS DE RESERVAS                           ║
@@ -1917,8 +2004,12 @@ def normalizar(texto):
         return ''
     texto = unicodedata.normalize('NFKD', texto)
     texto = ''.join(c for c in texto if not unicodedata.combining(c))
-    return texto.lower().strip()
+    texto = texto.upper()
+    texto = re.sub(r'\s+', ' ', texto)  # Elimina espacios repetidos
+    texto = texto.replace(',', '')      # Elimina comas
+    return texto.strip()
 
+'''
 @main_bp.route('/subir-informe/<int:grupo_id>/<mes>', methods=['POST'])
 @login_required
 def subir_informe(grupo_id, mes):
@@ -1969,9 +2060,9 @@ def subir_informe(grupo_id, mes):
     # Borrar registros anteriores del informe
     InformeAlumno.query.filter_by(informe_id=informe.id).delete()
 
-    # Crear diccionario de alumnos del grupo
+    # Crear diccionario de alumnos del grupo por nombre completo normalizado
     alumnos_dict = {
-        (normalizar(a.nombre), normalizar(a.apellidos)): a
+        normalizar(f"{a.apellidos}, {a.nombre}"): a
         for a in Alumno.query.filter_by(grupo_id=grupo.id).all()
     }
 
@@ -1982,14 +2073,14 @@ def subir_informe(grupo_id, mes):
 
     for _, fila in df.iterrows():
         nombre_completo = fila.get("Alumno/a", "").strip()
-        if ',' not in nombre_completo:
-            continue
+        clave = normalizar(nombre_completo)
 
-        # Separar "Apellidos, Nombre"
-        apellidos_csv, nombre_csv = [parte.strip() for parte in nombre_completo.split(',', 1)]
-        clave = (normalizar(nombre_csv), normalizar(apellidos_csv))
+        alumno = None
+        for clave_db, a in alumnos_dict.items():
+            if normalizar(a.nombre) in clave and normalizar(a.apellidos) in clave:
+                alumno = a
+                break
 
-        alumno = alumnos_dict.get(clave)
         if not alumno:
             continue  # Alumno no encontrado en este grupo
 
@@ -2028,6 +2119,124 @@ def subir_informe(grupo_id, mes):
         flash(f"Informe subido correctamente. {registros_insertados} alumnos procesados.", "success")
 
     return redirect(url_for("main.ver_absentismo_mes", mes=mes))
+'''
+
+@main_bp.route('/subir-informe/<int:grupo_id>/<mes>', methods=['POST'])
+@login_required
+def subir_informe(grupo_id, mes):
+    grupo = Grupo.query.get_or_404(grupo_id)
+    anio = 2025 if mes in ['septiembre', 'octubre', 'noviembre', 'diciembre'] else 2026
+
+    archivo = request.files.get('archivo')
+    if not archivo or archivo.filename == '':
+        flash("Debes seleccionar un archivo CSV", "danger")
+        return redirect(url_for('main.ver_absentismo_mes', mes=mes))
+
+    filename = secure_filename(archivo.filename)
+    carpeta_destino = Path(current_app.config['UPLOAD_FOLDER']) / str(anio) / mes
+    carpeta_destino.mkdir(parents=True, exist_ok=True)
+    ruta_completa = carpeta_destino / filename
+    archivo.save(str(ruta_completa))
+
+    # Leer CSV
+    try:
+        df = pd.read_csv(ruta_completa, encoding='utf-8', sep=',', dtype=str)
+    except UnicodeDecodeError:
+        df = pd.read_csv(ruta_completa, encoding='latin1', sep=',', dtype=str)
+
+    df.columns = [col.strip().strip('"') for col in df.columns]
+
+    if "Alumno/a" not in df.columns:
+        flash("El archivo no contiene una columna 'Alumno/a'", "danger")
+        return redirect(url_for('main.ver_absentismo_mes', mes=mes))
+
+    # Normalizamos nombres y eliminamos duplicados en el CSV
+    df["Alumno/a"] = df["Alumno/a"].astype(str).str.strip().str.upper()
+    df = df.drop_duplicates(subset=["Alumno/a"])
+
+    # Buscar o crear informe
+    informe = InformeFaltas.query.filter_by(grupo_id=grupo.id, mes=mes, anio=anio).first()
+
+    if not informe:
+        informe = InformeFaltas(grupo_id=grupo.id, mes=mes, anio=anio, archivo_csv=filename)
+        db.session.add(informe)
+        db.session.flush()
+    else:
+        # Elimina registros antiguos de ese informe
+        InformeAlumno.query.filter_by(informe_id=informe.id).delete()
+        db.session.flush()
+
+    informe.archivo_csv = filename
+
+    alumnos = Alumno.query.filter_by(grupo_id=grupo.id).all()
+    columnas_fecha = df.columns[1:]
+    dias_lectivos_totales = len(columnas_fecha)
+    registros_insertados = 0
+
+    for _, fila in df.iterrows():
+        texto_csv = normalizar(fila.get("Alumno/a", "").strip())
+        alumno_encontrado = None
+        posibles = []
+
+        for a in alumnos:
+            nombre_bd = normalizar(a.nombre)
+            apellidos_bd = normalizar(a.apellidos)
+            apellidos_bd_lista = apellidos_bd.split()
+
+            nombre_completo_bd = normalizar(f"{apellidos_bd} {nombre_bd}")  # sin coma
+
+            if nombre_completo_bd == texto_csv:
+                alumno_encontrado = a
+                break
+
+            # Coincidencia parcial: nombre + primer apellido
+            primer_apellido = apellidos_bd_lista[0] if apellidos_bd_lista else ""
+            if nombre_bd in texto_csv and primer_apellido in texto_csv:
+                posibles.append(a)
+
+        # Si no hay coincidencia exacta, probamos con la parcial si es segura
+        if not alumno_encontrado:
+            if len(posibles) == 1:
+                alumno_encontrado = posibles[0]
+            elif len(posibles) > 1:
+                print(f"[AMBIGUO] {texto_csv} coincide parcialmente con varios alumnos:")
+                for p in posibles:
+                    print(f"  - {p.nombre} {p.apellidos}")
+            else:
+                print(f"[NO COINCIDE] {texto_csv} -> No se encontró coincidencia en grupo {grupo.id}")
+                continue
+
+        valores = [str(v).strip().upper() for v in fila[columnas_fecha]]
+        cj = valores.count('J')
+        ci = valores.count('I')
+        porcentaje = (ci / dias_lectivos_totales * 100) if dias_lectivos_totales > 0 else 0
+        absentista = porcentaje >= 20
+
+        # Antes de insertar, aseguramos que no existe ya ese par
+        existente = InformeAlumno.query.filter_by(
+            informe_id=informe.id,
+            alumno_id=alumno_encontrado.id
+        ).first()
+
+        if not existente:
+            db.session.add(InformeAlumno(
+                informe_id=informe.id,
+                alumno_id=alumno_encontrado.id,
+                faltas_justificadas=cj,
+                faltas_injustificadas=ci,
+                porcentaje_injustificadas=porcentaje,
+                absentista=absentista
+            ))
+            registros_insertados += 1
+
+    db.session.commit()
+
+    if registros_insertados == 0:
+        flash("Archivo subido pero no se han encontrado coincidencias de alumnos", "warning")
+    else:
+        flash(f"Informe subido correctamente. {registros_insertados} alumnos procesados.", "success")
+
+    return redirect(url_for("main.ver_absentismo_mes", mes=mes))
 
 @main_bp.route('/absentismo/<mes>/grupo/<int:grupo_id>')
 @login_required
@@ -2044,12 +2253,22 @@ def ver_informe_grupo(mes, grupo_id):
         flash("No se encontró el informe para este grupo y mes.", "warning")
         return redirect(url_for('main.ver_absentismo_mes', mes=mes))
 
+    # Ordenar por apellidos del alumno
+    alumnos_ordenados = sorted(
+        informe.alumnos,
+        key=lambda ia: ((ia.alumno.apellidos or '').upper(), (ia.alumno.nombre or '').upper())
+    )
+
+    total_alumnos_grupo = Alumno.query.filter_by(grupo_id=grupo_id).count()
+
     return render_template(
         'absentismo/informe_grupo.html',
         grupo=grupo,
         mes=mes,
         anio=anio,
-        informe=informe
+        informe=informe,
+        alumnos=alumnos_ordenados,
+        total_alumnos_grupo=total_alumnos_grupo
     )
 
 @main_bp.route('/descargar-informe/<int:grupo_id>/<mes>')
@@ -2058,6 +2277,11 @@ def descargar_informe(grupo_id, mes):
     anio_actual = calcular_anio_academico(mes)
 
     informe = InformeFaltas.query.filter_by(grupo_id=grupo_id, mes=mes, anio=anio_actual).first()
+
+    print(f"Informe ID: {informe.id} | Grupo: {informe.grupo.nombre} | Mes: {mes} | Año: {anio_actual}")
+    print(f"Número de alumnos en el informe: {len(informe.alumnos)}")
+    for entrada in informe.alumnos:
+        print(f"- {entrada.alumno.nombre} {entrada.alumno.apellidos} (ID alumno: {entrada.alumno.id})")
 
     if not informe:
         flash("No se encontró el informe solicitado.", "warning")
@@ -2068,40 +2292,45 @@ def descargar_informe(grupo_id, mes):
     ws = wb.active
     ws.title = "Informe de absentismo"
 
-    # Establecer tamaño de fuente para toda la hoja
-    fuente_general = Font(size=12)
-    for row in ws.iter_rows(min_row=2, max_row=ws.max_row):  # desde la segunda fila, saltamos encabezado
-        for cell in row:
-            cell.font = fuente_general
-
     # Encabezados
     encabezados = ["Alumno", "Faltas justificadas", "Faltas injustificadas", "% Injustificadas"]
     ws.append(encabezados)
 
-    # Estilo para absentistas
-    fill_amarillo = PatternFill(start_color="FFFACD", end_color="FFFACD", fill_type="solid")
+    # Estilos
+    fill_amarillo = PatternFill(start_color="FFFACD", end_color="FFFACD", fill_type="solid")  # amarillo
+    fill_rojo = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")      # rojo
 
-    for entrada in informe.alumnos:
-        # Añadir fila con nombre completo y valores
+    # Ordenar los alumnos por apellido
+    alumnos_ordenados = sorted(informe.alumnos, key=lambda e: e.alumno.apellidos.upper())
+
+    for entrada in alumnos_ordenados:
+        alumno = entrada.alumno
+        porcentaje = entrada.porcentaje_injustificadas
+
+        # Formato de nombre: "APELLIDOS, Nombre"
+        nombre_completo = f"{alumno.apellidos.upper()}, {alumno.nombre}"
+
+        # Añadir fila
         ws.append([
-            f"{entrada.alumno.nombre} {entrada.alumno.apellidos}",
+            nombre_completo,
             entrada.faltas_justificadas,
             entrada.faltas_injustificadas,
-            None  # dejamos temporalmente la celda del porcentaje en blanco
+            None  # % CI se añade aparte para formatearlo bien
         ])
 
-        # Obtenemos la fila actual
+        # Obtener la fila actual
         fila_actual = ws.max_row
 
-        # Insertamos el porcentaje en formato correcto
+        # Escribir % CI como número formateado
         celda_porcentaje = ws.cell(row=fila_actual, column=4)
-        celda_porcentaje.value = round(entrada.porcentaje_injustificadas / 100, 4)  # 10 -> 0.10
-        celda_porcentaje.number_format = '0.0%'  # Formato de porcentaje en Excel
+        celda_porcentaje.value = round(porcentaje / 100, 4)
+        celda_porcentaje.number_format = '0.0%'
 
-        # Si es absentista, rellenamos toda la fila con color
-        if entrada.absentista:
+        # Colorear fila si procede
+        if porcentaje >= 10:
+            color = fill_rojo if porcentaje > 25 else fill_amarillo
             for cell in ws[fila_actual]:
-                cell.fill = fill_amarillo
+                cell.fill = color
 
     # Ajustar ancho de columnas
     for col in ws.columns:
@@ -2179,15 +2408,15 @@ def descargar_informe_horizontal(grupo_id):
 
     ws.append(cabecera)
 
-    # Estilo para absentistas
-    fill_amarillo = PatternFill(start_color="FFFACD", end_color="FFFACD", fill_type="solid")
-    fill_rojo = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
+    # Estilos por niveles de absentismo
+    fill_amarillo = PatternFill(start_color="FFFACD", end_color="FFFACD", fill_type="solid")  # 10%-25%
+    fill_rojo = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")  # >25%
 
     # Alumnos
     todos_alumnos = Alumno.query.filter_by(grupo_id=grupo_id).order_by(Alumno.apellidos).all()
 
     for alumno in todos_alumnos:
-        fila = [f"{alumno.nombre} {alumno.apellidos}"]
+        fila = [f"{alumno.apellidos.upper()}, {alumno.nombre}"]
 
         for inf in informes_ordenados:
             entrada = next((e for e in inf.alumnos if e.alumno_id == alumno.id), None)

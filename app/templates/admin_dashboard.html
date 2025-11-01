@@ -5,16 +5,20 @@
   <!-- Título -->
   <h2 class="mb-4 text-burdeos">Resumen general</h2>
 
-    <!-- BOTONES NUEVAS INCIDENCIAS -->
-    <div class="row mb-4">
-      <div class="col-md-6">
-        <a href="{{ url_for('main.nueva_incidencia') }}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
-          <i class="bi bi-laptop-fill me-2"></i> Nueva incidencia informática
+  <div class="row mb-4">
+      <div class="col-md-4">
+        <a href="{{ url_for('main.crear_amonestacion') }}" class="btn btn-danger w-100 d-flex align-items-center justify-content-center">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i> Amonestaciones
         </a>
       </div>
-      <div class="col-md-6 mt-2 mt-md-0">
-        <a href="{{ url_for('main.nueva_incidencia_mantenimiento') }}" class="btn btn-warning text-dark w-100 d-flex align-items-center justify-content-center">
-          <i class="bi bi-tools me-2"></i> Nueva incidencia de mantenimiento
+      <div class="col-md-4 mt-2 mt-md-0">
+        <a href="{{ url_for('main.ver_expulsiones') }}" class="btn btn-secondary w-100 d-flex align-items-center justify-content-center">
+          <i class="bi bi-person-x-fill me-2"></i> Expulsiones
+        </a>
+      </div>
+      <div class="col-md-4 mt-2 mt-md-0">
+        <a href="{{ url_for('main.ver_absentismo') }}" class="btn btn-info text-white w-100 d-flex align-items-center justify-content-center">
+          <i class="bi bi-calendar-x-fill me-2"></i> Absentismo
         </a>
       </div>
     </div>
@@ -22,7 +26,7 @@
   <!-- BOTONES SUPERIORES -->
   <div class="row my-4">
     <div class="col-md-3 col-sm-6 mb-3">
-      <a href="https://2024-25.eva.educacion.es/colegioseveroochoa/" target="_blank" class="card text-white text-center h-100" style="background-color: #343a40;">
+      <a href="https://eva.educacion.es/colegioseveroochoa/?redirect=0" target="_blank" class="card text-white text-center h-100" style="background-color: #343a40;">
         <div class="card-body py-2 d-flex flex-column justify-content-center align-items-center">
           <i class="bi bi-mortarboard-fill fs-3 mb-1"></i>
           <h6 class="card-title mb-0">Moodle</h6>
