@@ -794,6 +794,7 @@ def crear_expulsion():
 
     alumno_id = request.form.get("alumno_id")
     articulo = request.form.get("articulo")
+    apartado = request.form.get("apartado")
     dias_expulsion = int(request.form.get("dias_expulsion"))
     fecha_inicio = request.form.get("fecha_inicio")
     fecha_fin = request.form.get("fecha_fin")
@@ -801,6 +802,7 @@ def crear_expulsion():
     nueva_expulsion = Expulsion(
         alumno_id=alumno_id,
         articulo=articulo,
+        apartado = apartado,
         dias_expulsion=dias_expulsion,
         fecha_inicio=fecha_inicio,
         fecha_fin=fecha_fin
@@ -849,6 +851,7 @@ def descargar_expulsion_docx(expulsion_id):
     # Contexto con los campos que has definido
     context = {
         "articulo": expulsion.articulo,
+        "apartado": expulsion.articulo,
         "nombre_alumno": alumno.nombre,
         "apellidos_alumno": alumno.apellidos,
         "grupo": grupo.nombre if grupo else "Grupo no asignado",

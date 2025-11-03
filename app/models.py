@@ -325,6 +325,7 @@ class Expulsion(db.Model):
 
     fecha_expulsion = db.Column(db.Date, default=datetime.date.today)
     articulo = db.Column(db.String(100), nullable=False)
+    apartado = db.Column(db.String(100))
     dias_expulsion = db.Column(db.Integer, nullable=False)
     fecha_inicio = db.Column(db.Date, nullable=False)
     fecha_fin = db.Column(db.Date, nullable=False)

@@ -31,9 +31,15 @@
       </select>
     </div>
 
-    <div class="mb-3">
-      <label for="articulo" class="form-label">Artículo vulnerado</label>
-      <input type="text" name="articulo" id="articulo" class="form-control" required>
+    <<div class="row mb-3">
+      <div class="col-md-6">
+        <label for="articulo" class="form-label">Artículo</label>
+        <input type="text" name="articulo" id="articulo" class="form-control" required>
+      </div>
+      <div class="col-md-6">
+        <label for="apartado" class="form-label">Apartado</label>
+        <input type="text" name="apartado" id="apartado" class="form-control" required>
+      </div>
     </div>
 
     <div class="mb-3">
@@ -79,7 +85,7 @@
 
 
       <!-- Artículo -->
-      <p class="mb-1"><strong>Artículo vulnerado:</strong> {{ expulsion.articulo }}</p>
+      <p class="mb-1"><strong>Artículo vulnerado:</strong> {{ expulsion.articulo }}, apartado {{ expulsion.apartado }}</p>
       <p class="card-text mb-1"><strong>Inicio de la expulsión:</strong> {{ expulsion.fecha_inicio.strftime('%d/%m/%Y') }}</p>
       <p class="card-text mb-1"><strong>Incorporación al centro:</strong> {{ expulsion.fecha_fin.strftime('%d/%m/%Y') }}</p>
 
