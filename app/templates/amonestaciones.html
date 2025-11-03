@@ -8,9 +8,9 @@
 
         <div class="d-flex gap-2 ms-auto">
           {% if current_user.rol in ["jefatura", "tic"] %}
-            <button class="btn btn-danger text-white" onclick="mostrarFormularioExpulsion()">
+            <a href="{{ url_for('main.ver_expulsiones') }}" class="btn btn-danger text-white">
               <i class="bi bi-person-dash-fill"></i> Expulsar alumno
-            </button>
+            </a>
           {% endif %}
           <button class="btn btn-outline-primary" onclick="mostrarFormularioAmonestacion()">
             <i class="bi bi-exclamation-triangle"></i> Añadir amonestación
