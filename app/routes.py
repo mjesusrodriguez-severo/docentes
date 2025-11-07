@@ -850,8 +850,8 @@ def descargar_expulsion_docx(expulsion_id):
 
     # Contexto con los campos que has definido
     context = {
-        "articulo": expulsion.articulo,
-        "apartado": expulsion.apartado,
+        "articulo": expulsion.articulo.strip() if expulsion.articulo else "",
+        "apartado": expulsion.apartado.strip() if expulsion.apartado else "",
         "nombre_alumno": alumno.nombre.title(),
         "apellidos_alumno": alumno.apellidos.title(),
         "grupo": grupo.nombre if grupo else "Grupo no asignado",
