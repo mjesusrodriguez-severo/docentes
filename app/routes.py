@@ -38,7 +38,8 @@ from .utils.decoradores import rol_requerido
 from .utils.drive import subir_archivo_a_drive, crear_carpeta_sustitucion
 from .utils.google_auth import build_drive_service
 from .utils.incidencias import enviar_correo_incidencia, enviar_correo_comentario_incidencia
-from .utils.reservas import render_calendario_espacio, enviar_correo_reserva_espacio, enviar_correo_reserva_material
+from .utils.reservas import render_calendario_espacio, enviar_correo_reserva_espacio, enviar_correo_reserva_material, \
+    render_calendario_espacio_primaria
 from .utils.sms import enviar_sms_esendex, enviar_sms_amonestacion_utils
 
 import pandas as pd
@@ -940,8 +941,16 @@ def ver_calendario_aula_digital():
 @main_bp.route("/reservas/biblioteca")
 @login_required
 def ver_calendario_biblioteca():
-    return render_calendario_espacio(
+    franjas_bloqueadas = {
+        "Monday": ["09:00-09:45", "09:45-10:30", "11:00-11:45", "11:45-12:30", "12:30-13:15"],  # 2ª, 3ª, 4ª y 5ª hora
+        "Tuesday": ["09:00-09:45", "09:45-10:30"],  # 1ª y 2ª hora
+        "Wednesday": ["11:00-11:45", "12:30-13:15", "13:15-14:00"],  # 3ª, 4ª y 5ª hora
+        "Thursday": ["09:45-10:30", "11:00-11:45", "11:45-12:30", "12:30-13:15"],  # 5ª y 6ª hora
+        "Friday": ["11:00-11:45","11:45-12:30", "12:30-13:15", "13:15-14:00"]  # 1ª y 6ª hora
+    }
+    return render_calendario_espacio_primaria(
         nombre_espacio="biblioteca",
+        franjas_bloqueadas=franjas_bloqueadas,
         plantilla="reservas/biblioteca.html",
         nombre_visible="Biblioteca"
     )
