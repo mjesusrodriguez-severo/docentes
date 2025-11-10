@@ -926,9 +926,9 @@ def ver_calendario_aula_laboratorio():
 def ver_calendario_aula_digital():
     franjas_bloqueadas = {
         "Monday":    [],
-        "Tuesday":   ["08:30-09:25", "09:25-10:25"],  # 1ª y 2ª hora
+        "Tuesday":   ["08:30-09:25", "09:25-10:25","12:40-13:35"],  # 1ª y 2ª hora
         "Wednesday": ["10:25-11:15", "11:45-12:40", "12:40-13:35"],  # 3ª, 4ª y 5ª hora
-        "Thursday":  ["12:40-13:35", "13:35-14:30"],  # 5ª y 6ª hora
+        "Thursday":  ["11:45-12:40", "12:40-13:35", "13:35-14:30"],  # 5ª y 6ª hora
         "Friday":    ["08:30-09:25", "13:35-14:30"]   # 1ª y 6ª hora
     }
     return render_calendario_espacio(

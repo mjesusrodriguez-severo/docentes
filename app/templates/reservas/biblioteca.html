@@ -88,7 +88,7 @@
                     {% endif %}
                   </div>
                 {% else %}
-                  <form method="post" action="{{ url_for('main.reservar_espacio', espacio='aula_taller') }}" class="reserva-form d-inline">
+                  <form method="post" action="{{ url_for('main.reservar_espacio', espacio='biblioteca') }}" class="reserva-form d-inline">
                     <input type="hidden" name="espacio" value="{{ espacio }}">
                     <input type="hidden" name="fecha" value="{{ dia.strftime('%Y-%m-%d') }}">
                     <input type="hidden" name="franja" value="{{ franja }}">
