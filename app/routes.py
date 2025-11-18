@@ -1037,14 +1037,10 @@ def reservas_material():
     page = request.args.get('page', 1, type=int)
     if current_user.rol == "tic":
         # Mostrar todas las reservas si eres TIC
-        reservas_usuario = ReservaInformatica.query \
-            .order_by(ReservaInformatica.fecha.desc(), ReservaInformatica.franja_horaria.desc()) \
-            .paginate(page=page, per_page=5)
+        reservas_usuario = ReservaInformatica.query.order_by(ReservaInformatica.fecha.desc(), ReservaInformatica.franja_horaria.desc()).paginate(page=page, per_page=10)
     else:
         # Solo mostrar las del propio usuario
-        reservas_usuario = ReservaInformatica.query.filter_by(usuario_id=current_user.id) \
-            .order_by(ReservaInformatica.fecha.desc(), ReservaInformatica.franja_horaria.desc()) \
-            .paginate(page=page, per_page=5)
+        reservas_usuario = ReservaInformatica.query.filter_by(usuario_id=current_user.id).order_by(ReservaInformatica.fecha.desc(), ReservaInformatica.franja_horaria.desc()).paginate(page=page, per_page=10)
 
     # DEBUG: mostrar tipo de cada valor en el diccionario 'reservas'
     for clave, valor in reservas_dict.items():

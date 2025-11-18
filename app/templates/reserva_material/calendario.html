@@ -276,22 +276,27 @@
           {% endif %}
         </td>
       </tr>
-        {% if reserva.estado == 'ACEPTADA' and reserva.dispositivos %}
-            <tr class="collapse bg-light" id="equipos-{{ reserva.id }}">
-              <td colspan="5">
-                <strong>Equipos asignados:</strong>
-                <div class="row mt-2">
-                  {% for dispositivo in reserva.dispositivos %}
-                    <div class="col-12 col-md-6 col-lg-4 mb-3">
-                      <div class="border rounded p-3 bg-white shadow-sm h-100 w-100">
-                        <div><strong>{{ dispositivo.nombre }}</strong></div>
-                        <div class="text-muted small">{{ dispositivo.ubicacion.nombre }}</div>
-                      </div>
-                    </div>
-                  {% endfor %}
-                </div>
-              </td>
-            </tr>
+        {% if reserva.estado == 'ACEPTADA' %}
+            <p>Número de equipos solicitados: {{ reserva.cantidad }}</p>
+            <li><strong>Clase:</strong> {{ reserva.grupo.nombre if reserva.grupo else 'No asignado' }}</li>
+            <li><strong>Franja horaria:</strong> {{ reserva.franja_horaria }}</li>
+            {% if reserva.dispositivos %}
+                <tr class="collapse bg-light" id="equipos-{{ reserva.id }}">
+                    <td colspan="5">
+                        <strong>Equipos asignados:</strong>
+                        <div class="row mt-2">
+                          {% for dispositivo in reserva.dispositivos %}
+                            <div class="col-12 col-md-6 col-lg-4 mb-3">
+                              <div class="border rounded p-3 bg-white shadow-sm h-100 w-100">
+                                <div><strong>{{ dispositivo.nombre }}</strong></div>
+                                <div class="text-muted small">{{ dispositivo.ubicacion.nombre }}</div>
+                              </div>
+                            </div>
+                          {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+            {% endif %}
         {% endif %}
     {% else %}
       <tr>
