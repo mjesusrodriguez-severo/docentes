@@ -69,17 +69,13 @@ def dashboard():
     hoy = date.today()
     if current_user.rol.lower() in ["tic", "jefatura"]:
         ultimas_incidencias = Incidencia.query.order_by(Incidencia.fecha_hora.desc()).limit(5).all()
-        ultimas_reservas_portatiles = ReservaInformatica.query \
-            .filter(ReservaInformatica.tipo_equipo == 'portátil') \
-            .order_by(ReservaInformatica.fecha.desc()) \
-            .limit(5).all()
-
+        hoy = date.today()
+        ultimas_reservas_portatiles = ReservaInformatica.query.filter(
+            ReservaInformatica.tipo_equipo == 'portátil',
+            ReservaInformatica.fecha == hoy
+        ).order_by(ReservaInformatica.fecha.desc()).all()
         # 🔧 Añade esto para filtrar incidencias pendientes
-        incidencias_pendientes = Incidencia.query \
-            .filter(Incidencia.estado == 'Activa') \
-            .order_by(Incidencia.fecha_hora.desc()) \
-            .limit(5) \
-            .all()
+        incidencias_pendientes = Incidencia.query.filter(Incidencia.estado == 'Activa').order_by(Incidencia.fecha_hora.desc()).limit(5).all()
 
         return render_template("admin_dashboard.html",
                                ultimas_incidencias=ultimas_incidencias,
