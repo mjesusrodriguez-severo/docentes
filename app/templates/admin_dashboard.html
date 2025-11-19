@@ -133,19 +133,19 @@
     <div class="col-md-6">
       <div class="card shadow-sm">
         <div class="card-header bg-burdeos text-white">
-          Próximas Reservas Mat. Informático
+          Reservas de material informático para hoy
         </div>
         <div class="card-body">
-          {% if reservas_tic %}
+          {% if ultimas_reservas_portatiles %}
             <table class="table table-sm">
               <thead>
-                <tr><th>Fecha</th><th>Equipo</th><th>Hora</th></tr>
+                <tr><th>Profesor</th><th>Clase</th><th>Hora</th></tr>
               </thead>
               <tbody>
-                {% for r in reservas_tic %}
-                  <tr>
-                    <td>{{ r.fecha.strftime('%d/%m/%Y') }}</td>
-                    <td>{{ r.equipo }}</td>
+                {% for r in ultimas_reservas_portatiles %}
+                  <tr class="{% if r.estado == 'ACEPTADA' %}table-success{% else %}table-danger{% endif %}">
+                    <td>{{ r.usuario.nombre }}</td>
+                    <td>{{ r.grupo.nombre }}</td>
                     <td>{{ r.franja_horaria }}</td>
                   </tr>
                 {% endfor %}
@@ -155,7 +155,7 @@
             <a href="{{ url_for('main.reservas_material') }}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
             {% endif %}
           {% else %}
-            <p class="text-muted">No tienes reservas de material informático.</p>
+            <p class="text-muted">No tienes reservas de material informático para hoy.</p>
           {% endif %}
         <div class="text-end mt-2">
               <a href="{{ url_for('main.reservas_material') }}" class="btn btn-sm btn-outline-secondary">Ver todas</a>

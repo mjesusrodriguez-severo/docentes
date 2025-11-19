@@ -185,20 +185,18 @@
         </td>
 
         <td>
-          {% if reserva.estado == 'ACEPTADA' %}
-              {% if reserva.dispositivos %}
-                  <!-- Botón de lupa para ver dispositivos asignados -->
-                  <button class="btn btn-outline-secondary btn-sm me-1"
-                          type="button"
-                          data-bs-toggle="collapse"
-                          data-bs-target="#equipos-{{ reserva.id }}"
-                          aria-expanded="false"
-                          aria-controls="equipos-{{ reserva.id }}"
-                          title="Ver dispositivos asignados">
-                    <i class="bi bi-search"></i>
-                  </button>
-              {% endif %}
 
+              <!-- Botón de lupa para ver dispositivos asignados y detalles -->
+              <button class="btn btn-outline-secondary btn-sm me-1"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#equipos-{{ reserva.id }}"
+                      aria-expanded="false"
+                      aria-controls="equipos-{{ reserva.id }}"
+                      title="Ver dispositivos asignados">
+                <i class="bi bi-search"></i>
+              </button>
+              {% if reserva.estado == 'ACEPTADA' %}
               <!-- ✅ Descargar hoja de préstamo generada (disponible siempre) -->
               <a href="{{ url_for('main.descargar_reserva', reserva_id=reserva.id) }}"
                  class="btn btn-outline-primary btn-sm"
@@ -276,28 +274,31 @@
           {% endif %}
         </td>
       </tr>
-        {% if reserva.estado == 'ACEPTADA' %}
-            <p>Número de equipos solicitados: {{ reserva.cantidad }}</p>
-            <li><strong>Clase:</strong> {{ reserva.grupo.nombre if reserva.grupo else 'No asignado' }}</li>
-            <li><strong>Franja horaria:</strong> {{ reserva.franja_horaria }}</li>
-            {% if reserva.dispositivos %}
-                <tr class="collapse bg-light" id="equipos-{{ reserva.id }}">
-                    <td colspan="5">
-                        <strong>Equipos asignados:</strong>
-                        <div class="row mt-2">
-                          {% for dispositivo in reserva.dispositivos %}
-                            <div class="col-12 col-md-6 col-lg-4 mb-3">
-                              <div class="border rounded p-3 bg-white shadow-sm h-100 w-100">
-                                <div><strong>{{ dispositivo.nombre }}</strong></div>
-                                <div class="text-muted small">{{ dispositivo.ubicacion.nombre }}</div>
-                              </div>
-                            </div>
-                          {% endfor %}
-                        </div>
-                    </td>
-                </tr>
-            {% endif %}
+
+    <tr class="collapse bg-light" id="equipos-{{ reserva.id }}">
+      <td colspan="5">
+        <p class="mb-2"><strong>Número de equipos solicitados:</strong> {{ reserva.cantidad }}</p>
+        <p class="mb-2"><strong>Clase:</strong> {{ reserva.grupo.nombre if reserva.grupo else 'No asignado' }}</p>
+        <p class="mb-2"><strong>Franja horaria:</strong> {{ reserva.franja_horaria }}</p>
+
+        {% if reserva.dispositivos %}
+          <strong>Equipos asignados:</strong>
+          <div class="row mt-2">
+            {% for dispositivo in reserva.dispositivos %}
+              <div class="col-12 col-md-6 col-lg-4 mb-3">
+                <div class="border rounded p-3 bg-white shadow-sm h-100 w-100">
+                  <div><strong>{{ dispositivo.nombre }}</strong></div>
+                  <div class="text-muted small">{{ dispositivo.ubicacion.nombre }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <em class="text-muted">Aún no se han asignado equipos a esta reserva.</em>
         {% endif %}
+      </td>
+    </tr>
+
     {% else %}
       <tr>
         <td colspan="5" class="text-center text-muted">No has realizado ninguna reserva todavía.</td>
