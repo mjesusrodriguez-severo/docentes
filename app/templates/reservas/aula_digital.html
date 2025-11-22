@@ -3,10 +3,6 @@
 {% block title %}Reservas {{ nombre_visible }}{% endblock %}
 {% block content %}
     <style>
-  table.table {
-    table-layout: fixed;
-    width: 100%;
-  }
 
   .table td, .table th {
     border: 1px solid #dee2e6 !important; /* fuerza el borde */
@@ -64,13 +60,14 @@
             {% for dia in dias_semana %}
               {% set reserva = reservas.get((dia, franja)) %}
               {% set nombre_dia = dia.strftime('%A') %}
-              {% set bloqueada = franjas_bloqueadas.get(nombre_dia, []) %}
+              {% set bloqueos = franjas_bloqueadas.get(nombre_dia, []) %}
+              {% set bloqueo = bloqueos | selectattr('franja', 'equalto', franja) | list | first %}
               <td>
-                {% if franja in bloqueada %}
+                {% if bloqueo %}
                   <!-- Franja bloqueada por el centro -->
                   <div class="text-muted small">
                     <i class="bi bi-lock-fill"></i><br>
-                    <span class="text-danger">Bloqueada</span>
+                    <span>{{ bloqueo.asignatura }}</span>
                   </div>
                 {% elif reserva %}
                   <div class="reserva-ocupada">
@@ -120,7 +117,7 @@
       boton.addEventListener('click', function () {
         const fecha = this.dataset.fecha;
         const franja = this.dataset.franja;
-        if (confirm(`¿Deseas reservar la sala el ${fecha} a las ${franja}?`)) {
+        if (confirm(`¿Deseas reservar el aula el ${fecha} a las ${franja}?`)) {
           this.closest('form').submit();
         }
       });

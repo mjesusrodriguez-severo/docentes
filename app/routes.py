@@ -887,11 +887,33 @@ def ver_calendario_sala_reuniones():
 @login_required
 def ver_calendario_aula_taller():
     franjas_bloqueadas = {
-        'Monday': ["12:40-13:35", "13:35-14:30"],
-        'Tuesday': ["08:30-09:25", "09:25-10:25", "11:45-12:40", "13:35-14:30"],
-        'Wednesday': ["08:30-09:25", "10:25-11:15", "11:45-12:40", "12:40-13:35"],
-        'Thursday': ["08:30-09:25", "12:40-13:35", "13:35-14:30"],
-        'Friday': ["08:30-09:25", "09:25-10:25", "12:40-13:35", "13:35-14:30"]
+        'Monday': [
+            {"franja": "12:40-13:35", "asignatura": "Tecnología 3º ESO"},
+            {"franja": "13:35-14:30", "asignatura": "Taller Mates 2º ESO"}
+        ],
+        'Tuesday': [
+            {"franja": "09:25-10:25", "asignatura": "Francés 4º ESO"},
+            {"franja": "11:15-11:45", "asignatura": "PCT Mates (12:30 - 13:15)"},
+            {"franja": "11:45-12:40", "asignatura": "Economía 4º ESO"},
+            {"franja": "13:35-14:30", "asignatura": "Biología 4º ESO"}
+        ],
+        'Wednesday': [
+            {"franja": "08:30-09:25", "asignatura": "Tecnología 2º ESO"},
+            {"franja": "10:25-11:15", "asignatura": "FyQ 3º ESO"},
+            {"franja": "11:45-12:40", "asignatura": "FyQ 4º ESO"},
+            {"franja": "12:40-13:35", "asignatura": "Biología 3º ESO"}
+        ],
+        'Thursday': [
+            {"franja": "08:30-09:25", "asignatura": "Biología 4º ESO"},
+            {"franja": "13:35-14:30", "asignatura": "FyQ 2º ESO"},
+        ],
+        'Friday': [
+            {"franja": "08:30-09:25", "asignatura": "FyQ 4º ESO"},
+            {"franja": "09:25-10:25", "asignatura": "Taller Mates 2º ESO"},
+            {"franja": "11:45-12:40", "asignatura": "PCT Mates (12:30 - 13:15)"},
+            {"franja": "13:35-14:30", "asignatura": "Biología 1º ESO"}
+
+        ]
     }
     return render_calendario_espacio(
         franjas_bloqueadas=franjas_bloqueadas,
@@ -922,11 +944,30 @@ def ver_calendario_aula_laboratorio():
 @login_required
 def ver_calendario_aula_digital():
     franjas_bloqueadas = {
-        "Monday":    [],
-        "Tuesday":   ["08:30-09:25", "09:25-10:25","12:40-13:35"],  # 1ª y 2ª hora
-        "Wednesday": ["10:25-11:15", "11:45-12:40", "12:40-13:35"],  # 3ª, 4ª y 5ª hora
-        "Thursday":  ["11:45-12:40", "12:40-13:35", "13:35-14:30"],  # 5ª y 6ª hora
-        "Friday":    ["08:30-09:25", "13:35-14:30"]   # 1ª y 6ª hora
+        "Monday": [],
+
+        "Tuesday": [
+            {"franja": "08:30-09:25", "asignatura": "Digitalización 4º ESO"},
+            {"franja": "09:25-10:25", "asignatura": "Proyecto 2ºCFGB"},
+            {"franja": "12:40-13:35", "asignatura": "PCT Mat. (12:30 – 13:15)"}
+        ],
+
+        "Wednesday": [
+            {"franja": "10:25-11:15", "asignatura": "PCT Mat. (09:45 – 10:50)"},
+            {"franja": "11:45-12:40", "asignatura": "Biología 4º ESO"},
+            {"franja": "12:40-13:35", "asignatura": "Digitalización 4º ESO"}
+        ],
+
+        "Thursday": [
+            {"franja": "11:45-12:40", "asignatura": "PCT Mat. (11:45 - 12:30)"},
+            {"franja": "12:40-13:35", "asignatura": "Proyecto 2ºCFGB"},
+            {"franja": "13:35-14:30", "asignatura": "MRD 1º ESO"}
+        ],
+
+        "Friday": [
+            {"franja": "12:40-13:35", "asignatura": "MRD 1º ESO"},
+            {"franja": "13:35-14:30", "asignatura": "Filosofía 4ºESO"}
+        ]
     }
     return render_calendario_espacio(
         franjas_bloqueadas = franjas_bloqueadas,
@@ -939,11 +980,34 @@ def ver_calendario_aula_digital():
 @login_required
 def ver_calendario_biblioteca():
     franjas_bloqueadas = {
-        "Monday": ["09:00-09:45", "09:45-10:30", "11:00-11:45", "11:45-12:30", "12:30-13:15"],  # 2ª, 3ª, 4ª y 5ª hora
-        "Tuesday": ["09:00-09:45", "09:45-10:30"],  # 1ª y 2ª hora
-        "Wednesday": ["11:00-11:45", "12:30-13:15", "13:15-14:00"],  # 3ª, 4ª y 5ª hora
-        "Thursday": ["09:45-10:30", "11:00-11:45", "11:45-12:30", "12:30-13:15"],  # 5ª y 6ª hora
-        "Friday": ["11:00-11:45","11:45-12:30", "12:30-13:15", "13:15-14:00"]  # 1ª y 6ª hora
+        "Monday": [
+            {"franja": "09:00-09:45", "asignatura": "PCT Mates"},
+            {"franja": "09:45-10:30", "asignatura": "PCT Lengua"},
+            {"franja": "11:00-11:45", "asignatura": "PCT Lengua"},
+            {"franja": "11:45-12:30", "asignatura": "PCT Lengua"},
+            {"franja": "12:30-13:15", "asignatura": "PCT Lengua"},
+        ],
+        "Tuesday": [
+            {"franja": "09:00-09:45", "asignatura": "PCT Lengua"},
+            {"franja": "09:45-10:30", "asignatura": "PCT Lengua"},
+        ],
+        "Wednesday": [
+            {"franja": "11:00-11:45", "asignatura": "PCT Mates"},
+            {"franja": "12:30-13:15", "asignatura": "PCT Lengua"},
+            {"franja": "13:15-14:00", "asignatura": "PCT Lengua"},
+        ],
+        "Thursday": [
+            {"franja": "09:45-10:30", "asignatura": "PCT Lengua"},
+            {"franja": "11:00-11:45", "asignatura": "PCT Mates"},
+            {"franja": "11:45-12:30", "asignatura": "PCT Lengua"},
+            {"franja": "12:30-13:15", "asignatura": "PCT Lengua"},
+        ],
+        "Friday": [
+            {"franja": "11:00-11:45", "asignatura": "PCT Lengua"},
+            {"franja": "11:45-12:30", "asignatura": "PCT Lengua"},
+            {"franja": "12:30-13:15", "asignatura": "PCT Lengua"},
+            {"franja": "13:15-14:00", "asignatura": "PCT Lengua"},
+        ]
     }
     return render_calendario_espacio_primaria(
         nombre_espacio="biblioteca",
