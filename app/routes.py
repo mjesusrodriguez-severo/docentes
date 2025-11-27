@@ -992,6 +992,7 @@ def ver_calendario_biblioteca():
             {"franja": "09:45-10:30", "asignatura": "PCT Lengua"},
         ],
         "Wednesday": [
+            {"franja": "09:45-10:30", "asignatura": "PCT Mates"},
             {"franja": "11:00-11:45", "asignatura": "PCT Mates"},
             {"franja": "12:30-13:15", "asignatura": "PCT Lengua"},
             {"franja": "13:15-14:00", "asignatura": "PCT Lengua"},
