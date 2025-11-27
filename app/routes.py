@@ -965,6 +965,7 @@ def ver_calendario_aula_digital():
         ],
 
         "Friday": [
+            {"franja": "08:30-09:25", "asignatura": "Digitalización 4º ESO"},
             {"franja": "12:40-13:35", "asignatura": "MRD 1º ESO"},
             {"franja": "13:35-14:30", "asignatura": "Filosofía 4ºESO"}
         ]
