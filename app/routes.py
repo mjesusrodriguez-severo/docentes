@@ -1065,6 +1065,7 @@ def cancelar_reserva_espacio(espacio):
 @main_bp.route("/reservar-material", methods=["GET", "POST"])
 @login_required
 def reservas_material():
+    return "Esta ruta está desactivada temporalmente.", 403
     if request.method == "POST":
         reserva = ReservaInformatica(
             usuario_id=current_user.id,
