@@ -34,10 +34,13 @@ def enviar_whatsapp(telefono, mensaje):
 
     payload = {
         "messaging_product": "whatsapp",
-        "to": telefono,
-        "type": "text",
-        "text": {
-            "body": mensaje
+        "to": "34675151146",
+        "type": "template",
+        "template": {
+            "name": "hello_world",
+            "language": {
+                "code": "en_US"
+            }
         }
     }
 
