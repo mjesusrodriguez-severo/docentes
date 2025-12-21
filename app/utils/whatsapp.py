@@ -1,4 +1,5 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
+import requests
 
 whatsapp_bp = Blueprint("whatsapp", __name__)
 
@@ -18,3 +19,46 @@ def verify():
 def dummy():
     return "OK", 200
 
+
+
+def enviar_whatsapp(telefono, mensaje):
+    PHONE_NUMBER_ID = "707135885826193"
+    ACCESS_TOKEN = "EAARS3psBzZAMBQR2RtdD9ISDqqKRTJV6DPZAtFxRToZBZBjbeQUUITHHvkU5tTnXi48htGYcY7ZAtdW1YZA5nHTHhcuQZB5SYdAANB9vNcdznqrkrMepnnq1yqZC4fxKsywT2XnzO71Jh1slCVWY7kebqSjy052R8SlxTTDN1yUZCGzerMvJpJ9Q8aDOIHmAUtFhk8WgE0dZBIhdENArQylBoFo7ZAwPhSZBVRR195YAzGmFZAbs5jqPVphrYtiNbZCckGNrl9L8MqLGmrKaLLLsflYVAd0nSILwj0yQkEYAZDZD"
+
+    url = f"https://graph.facebook.com/v19.0/{PHONE_NUMBER_ID}/messages"
+
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": telefono,
+        "type": "text",
+        "text": {
+            "body": mensaje
+        }
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+
+    return response.status_code, response.text
+
+
+@whatsapp_bp.route("/test/whatsapp", methods=["GET"])
+def test_whatsapp():
+    telefono = request.args.get("telefono")
+
+    if not telefono:
+        return jsonify(error="Falta parámetro 'telefono'"), 400
+
+    status, response = enviar_whatsapp(
+        telefono=telefono,
+        mensaje="✅ Mensaje de prueba enviado desde PRODUCCIÓN"
+    )
+
+    return jsonify(
+        status=status,
+        whatsapp_response=response
+    )
