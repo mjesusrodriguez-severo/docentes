@@ -43,8 +43,10 @@ def create_app():
 
     from app.auth import auth_bp
     from .routes import main_bp
+    from app.utils.whatsapp import whatsapp_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
+    app.register_blueprint(whatsapp_bp)
 
     return app
