@@ -65,3 +65,74 @@ def test_whatsapp():
         status=status,
         whatsapp_response=response
     )
+
+def enviar_amonestacion_whatsapp(telefono, amonestacion, fecha_madrid):
+    """
+    Envía una amonestación por WhatsApp usando plantilla oficial.
+    Sustituye directamente al envío por SMS.
+    """
+
+    PHONE_NUMBER_ID = "707135885826193"
+    ACCESS_TOKEN = "EAARS3psBzZAMBQR2RtdD9ISDqqKRTJV6DPZAtFxRToZBZBjbeQUUITHHvkU5tTnXi48htGYcY7ZAtdW1YZA5nHTHhcuQZB5SYdAANB9vNcdznqrkrMepnnq1yqZC4fxKsywT2XnzO71Jh1slCVWY7kebqSjy052R8SlxTTDN1yUZCGzerMvJpJ9Q8aDOIHmAUtFhk8WgE0dZBIhdENArQylBoFo7ZAwPhSZBVRR195YAzGmFZAbs5jqPVphrYtiNbZCckGNrl9L8MqLGmrKaLLLsflYVAd0nSILwj0yQkEYAZDZD"
+
+    url = f"https://graph.facebook.com/v19.0/{PHONE_NUMBER_ID}/messages"
+
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": telefono,
+        "type": "template",
+        "template": {
+            "name": "amonestacion",      # nombre EXACTO de la plantilla
+            "language": {
+                "code": "es"
+            },
+            "components": [
+                {
+                    "type": "body",
+                    "parameters": [
+                        {
+                            "type": "text",
+                            "text": f"{amonestacion.alumno.nombre}"
+                        },
+                        {
+                            "type": "text",
+                            "text": f"{amonestacion.alumno.apellidos}"
+                        },
+                        {
+                            "type": "text",
+                            "text": fecha_madrid.strftime("%d/%m/%Y")
+                        },
+                        {
+                            "type": "text",
+                            "text": fecha_madrid.strftime("%H:%M")
+                        },
+                        {
+                            "type": "text",
+                            "text": amonestacion.profesor.nombre
+                        },
+                        {
+                            "type": "text",
+                            "text": amonestacion.motivo
+                        },
+                        {
+                            "type": "text",
+                            "text": amonestacion.descripcion
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+
+    return {
+        "ok": response.status_code == 200,
+        "status_code": response.status_code,
+        "response": response.text
+    }
