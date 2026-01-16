@@ -1431,12 +1431,12 @@ def nueva_sustitucion():
     status, respuesta = enviar_sustitucion_whatsapp(sustituto.telefono, sustitucion)
 
     # Mostrar por pantalla la respuesta de la API (debug)
-    flash(f"Respuesta WhatsApp API (status {status}): {respuesta}", "info")
+    print(f"Respuesta WhatsApp API (status {status}): {respuesta}", "info")
 
     if status == 200:
-        flash("Sustitución creada y WhatsApp enviado correctamente", "success")
+        print("Sustitución creada y WhatsApp enviado correctamente", "success")
     else:
-        flash("Sustitución creada, pero ERROR al enviar WhatsApp", "danger")
+        print("Sustitución creada, pero ERROR al enviar WhatsApp", "danger")
 
     return redirect(url_for("main.ver_sustituciones"))
 
