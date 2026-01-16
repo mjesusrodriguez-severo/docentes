@@ -48,6 +48,9 @@ from flask import send_file
 from io import BytesIO
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font
+
+from .utils.whatsapp import enviar_sustitucion_whatsapp
+
 try:
     from zoneinfo import ZoneInfo
 except ImportError:
@@ -1424,12 +1427,13 @@ def nueva_sustitucion():
         f"📂 Material sustitución: {enlace_material}"
     )
 
-    ok, respuesta = enviar_sms_esendex(sustituto.telefono, mensaje)
+    #ok, respuesta = enviar_sms_esendex(sustituto.telefono, mensaje)
+    ok, respuesta = enviar_sustitucion_whatsapp(sustituto.telefono, sustitucion)
 
     if ok:
-        flash("Sustitución creada y SMS enviado", "success")
+        flash("Sustitución creada y Whatsapp enviado", "success")
     else:
-        flash(f"Sustitución creada, pero error al enviar SMS: {respuesta}", "warning")
+        flash(f"Sustitución creada, pero error al enviar Whatsapp: {respuesta}", "warning")
 
     return redirect(url_for("main.ver_sustituciones"))
 

@@ -21,9 +21,9 @@ def dummy():
 
 
 
-def enviar_whatsapp(telefono, mensaje):
-    PHONE_NUMBER_ID = "707135885826193"
-    ACCESS_TOKEN = "EAARS3psBzZAMBQR2RtdD9ISDqqKRTJV6DPZAtFxRToZBZBjbeQUUITHHvkU5tTnXi48htGYcY7ZAtdW1YZA5nHTHhcuQZB5SYdAANB9vNcdznqrkrMepnnq1yqZC4fxKsywT2XnzO71Jh1slCVWY7kebqSjy052R8SlxTTDN1yUZCGzerMvJpJ9Q8aDOIHmAUtFhk8WgE0dZBIhdENArQylBoFo7ZAwPhSZBVRR195YAzGmFZAbs5jqPVphrYtiNbZCckGNrl9L8MqLGmrKaLLLsflYVAd0nSILwj0yQkEYAZDZD"
+def enviar_sustitucion_whatsapp(telefono, sustitucion):
+    PHONE_NUMBER_ID = "971299449400630"
+    ACCESS_TOKEN = "EAAhbe78U2pMBQUz1wHYftC1p7zQSabJ4WKQWdRd34eEBMe4d6AjMfhc14ZA0DtZBHiZCBjwMzfJaxYiYgR4lhm07qIMzlZBkaBKLWYFhZCGk4tu0rPz4hdXgkQsDUF5UaygpiMEnbiJOj0g74DLFepjZBPGhKBEYGByoAhoBHb67htxtsZBBZCf0uxnUSaw27gZDZD"
 
     url = f"https://graph.facebook.com/v19.0/{PHONE_NUMBER_ID}/messages"
 
@@ -34,37 +34,45 @@ def enviar_whatsapp(telefono, mensaje):
 
     payload = {
         "messaging_product": "whatsapp",
-        "to": "34675151146",
+        "to": telefono,
         "type": "template",
         "template": {
-            "name": "hello_world",
+            "name": "sustituciones",
             "language": {
-                "code": "en_US"
-            }
+                "code": "en_EN"
+            },
+            "components": [
+                {
+                    "type": "body",
+                    "parameters": [
+                        {
+                            "type": "text",
+                            "text": sustitucion.sustituto.nombre
+                        },
+                        {
+                            "type": "text",
+                            "text": sustitucion.grupo.nombre
+                        },
+                        {
+                            "type": "text",
+                            "text": sustitucion.fecha.strftime("%d/%m/%Y")
+                        },
+                        {
+                            "type": "text",
+                            "text": f"{sustitucion.hora_inicio} - {sustitucion.hora_fin}"
+                        },
+                        {
+                            "type": "text",
+                            "text": sustitucion.sustituido.nombre
+                        }
+                    ]
+                }
+            ]
         }
     }
 
     response = requests.post(url, headers=headers, json=payload)
-
-    return response.status_code, response.text
-
-
-@whatsapp_bp.route("/test/whatsapp", methods=["GET"])
-def test_whatsapp():
-    telefono = request.args.get("telefono")
-
-    if not telefono:
-        return jsonify(error="Falta parámetro 'telefono'"), 400
-
-    status, response = enviar_whatsapp(
-        telefono=telefono,
-        mensaje="✅ Mensaje de prueba enviado desde PRODUCCIÓN"
-    )
-
-    return jsonify(
-        status=status,
-        whatsapp_response=response
-    )
+    return response.status_code, response.json()
 
 def enviar_amonestacion_whatsapp(telefono, amonestacion, fecha_madrid):
     """
@@ -72,8 +80,8 @@ def enviar_amonestacion_whatsapp(telefono, amonestacion, fecha_madrid):
     Sustituye directamente al envío por SMS.
     """
 
-    PHONE_NUMBER_ID = "707135885826193"
-    ACCESS_TOKEN = "EAARS3psBzZAMBQR2RtdD9ISDqqKRTJV6DPZAtFxRToZBZBjbeQUUITHHvkU5tTnXi48htGYcY7ZAtdW1YZA5nHTHhcuQZB5SYdAANB9vNcdznqrkrMepnnq1yqZC4fxKsywT2XnzO71Jh1slCVWY7kebqSjy052R8SlxTTDN1yUZCGzerMvJpJ9Q8aDOIHmAUtFhk8WgE0dZBIhdENArQylBoFo7ZAwPhSZBVRR195YAzGmFZAbs5jqPVphrYtiNbZCckGNrl9L8MqLGmrKaLLLsflYVAd0nSILwj0yQkEYAZDZD"
+    PHONE_NUMBER_ID = "971299449400630"
+    ACCESS_TOKEN = "EAAhbe78U2pMBQUz1wHYftC1p7zQSabJ4WKQWdRd34eEBMe4d6AjMfhc14ZA0DtZBHiZCBjwMzfJaxYiYgR4lhm07qIMzlZBkaBKLWYFhZCGk4tu0rPz4hdXgkQsDUF5UaygpiMEnbiJOj0g74DLFepjZBPGhKBEYGByoAhoBHb67htxtsZBBZCf0uxnUSaw27gZDZD"
 
     url = f"https://graph.facebook.com/v19.0/{PHONE_NUMBER_ID}/messages"
 
