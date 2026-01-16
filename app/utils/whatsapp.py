@@ -39,7 +39,7 @@ def enviar_sustitucion_whatsapp(telefono, sustitucion):
         "template": {
             "name": "sustituciones",
             "language": {
-                "code": "en_EN"
+                "code": "en_US"
             },
             "components": [
                 {
