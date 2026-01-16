@@ -1378,9 +1378,9 @@ def ver_sustituciones():
 @login_required
 @rol_requerido("jefatura")
 def nueva_sustitucion():
-    if current_user.rol != "jefatura":
-        flash("No tienes permiso para crear sustituciones", "danger")
-        return redirect(url_for("main.ver_sustituciones"))
+    #if current_user.rol != "jefatura":
+    #    flash("No tienes permiso para crear sustituciones", "danger")
+    #    return redirect(url_for("main.ver_sustituciones"))
 
     fecha = request.form.get("fecha")
     hora_inicio = request.form.get("hora_inicio")
