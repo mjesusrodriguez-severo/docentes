@@ -2285,8 +2285,8 @@ def subir_informe(grupo_id, mes):
                 continue
 
         valores = [str(v).strip().upper() for v in fila[columnas_fecha]]
-        cj = valores.count('CJ')
-        ci = valores.count('CI')
+        cj = valores.count('J')
+        ci = valores.count('I')
         porcentaje = (ci / dias_lectivos_totales * 100) if dias_lectivos_totales > 0 else 0
         absentista = porcentaje >= 20
 
