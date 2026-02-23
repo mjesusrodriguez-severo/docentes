@@ -5,6 +5,7 @@ import traceback
 from collections import defaultdict
 from pathlib import Path
 
+import pytz
 from reportlab.lib.enums import TA_LEFT, TA_JUSTIFY, TA_RIGHT, TA_CENTER
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -49,7 +50,7 @@ from io import BytesIO
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font
 
-from .utils.whatsapp import enviar_sustitucion_whatsapp
+from .utils.whatsapp import enviar_sustitucion_whatsapp, enviar_amonestacion_whatsapp
 
 try:
     from zoneinfo import ZoneInfo
@@ -544,7 +545,11 @@ def crear_amonestacion():
                 f"Motivo: {motivo}. Por favor, revisa la plataforma."
             )
 
-            ok, respuesta = enviar_sms_esendex(tutor.telefono, mensaje)
+            # Fecha y hora en Madrid
+            tz_madrid = pytz.timezone("Europe/Madrid")
+            fecha_madrid = datetime.now(tz_madrid)
+
+            ok, respuesta = enviar_amonestacion_whatsapp(telefono=tutor.telefono,amonestacion=amonestacion, fecha_madrid=fecha_madrid)
             if not ok:
                 flash("Error al enviar SMS al tutor.", "danger")
 
@@ -1427,11 +1432,11 @@ def nueva_sustitucion():
         f"📂 Material sustitución: {enlace_material}"
     )
 
-    #ok, respuesta = enviar_sms_esendex(sustituto.telefono, mensaje)
-    status, respuesta = enviar_sustitucion_whatsapp(sustituto.telefono, sustitucion)
+    ok, status = enviar_sms_esendex(sustituto.telefono, mensaje)
+    #status, respuesta = enviar_sustitucion_whatsapp(sustituto.telefono, sustitucion)
 
     # Mostrar por pantalla la respuesta de la API (debug)
-    print(f"Respuesta WhatsApp API (status {status}): {respuesta}", "info")
+    #print(f"Respuesta WhatsApp API (status {status}): {respuesta}", "info")
 
     if status == 200:
         print("Sustitución creada y WhatsApp enviado correctamente", "success")

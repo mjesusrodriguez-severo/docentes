@@ -92,7 +92,7 @@ def enviar_amonestacion_whatsapp(telefono, amonestacion, fecha_madrid):
 
     payload = {
         "messaging_product": "whatsapp",
-        "to": telefono,
+        "to": 626188229,
         "type": "template",
         "template": {
             "name": "amonestacion",      # nombre EXACTO de la plantilla
