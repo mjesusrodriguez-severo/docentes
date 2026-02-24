@@ -549,7 +549,8 @@ def crear_amonestacion():
             tz_madrid = pytz.timezone("Europe/Madrid")
             fecha_madrid = datetime.now(tz_madrid)
 
-            ok, respuesta = enviar_amonestacion_whatsapp(telefono=tutor.telefono,amonestacion=amonestacion, fecha_madrid=fecha_madrid)
+            #ok, respuesta = enviar_amonestacion_whatsapp(telefono=tutor.telefono,amonestacion=amonestacion, fecha_madrid=fecha_madrid)
+            ok, respuesta = enviar_sms_amonestacion_utils(telefono=tutor.telefono,amonestacion=amonestacion)
             if not ok:
                 flash("Error al enviar SMS al tutor.", "danger")
 

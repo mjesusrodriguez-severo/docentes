@@ -74,7 +74,7 @@ def enviar_sustitucion_whatsapp(telefono, sustitucion):
     response = requests.post(url, headers=headers, json=payload)
     return response.status_code, response.json()
 
-def enviar_amonestacion_whatsapp(telefono, amonestacion, fecha_madrid):
+def enviar_amonestacion_whatsapp():
     """
     Envía una amonestación por WhatsApp usando plantilla oficial.
     Sustituye directamente al envío por SMS.
@@ -95,7 +95,7 @@ def enviar_amonestacion_whatsapp(telefono, amonestacion, fecha_madrid):
         "to": 626188229,
         "type": "template",
         "template": {
-            "name": "amonestacion",      # nombre EXACTO de la plantilla
+            "name": "amonestaciones",      # nombre EXACTO de la plantilla
             "language": {
                 "code": "es"
             },
@@ -105,15 +105,15 @@ def enviar_amonestacion_whatsapp(telefono, amonestacion, fecha_madrid):
                     "parameters": [
                         {
                             "type": "text",
-                            "text": f"{amonestacion.alumno.nombre}"
+                            "text": f"Pepito Pérez"
                         },
                         {
                             "type": "text",
-                            "text": f"{amonestacion.alumno.grupo_id.nombre}"
+                            "text": f"5º Primaria"
                         },
                         {
                             "type": "text",
-                            "text": amonestacion.motivo
+                            "text": "Faltarle el respeto al profesor"
                         }
                     ]
                 }
@@ -122,9 +122,13 @@ def enviar_amonestacion_whatsapp(telefono, amonestacion, fecha_madrid):
     }
 
     response = requests.post(url, headers=headers, json=payload)
+    print(response.text)
 
     return {
         "ok": response.status_code == 200,
         "status_code": response.status_code,
         "response": response.text
     }
+
+if __name__ == "__main__":
+    enviar_amonestacion_whatsapp()
