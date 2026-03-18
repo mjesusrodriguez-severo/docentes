@@ -1,5 +1,7 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
+from twilio.rest import Client
 import requests
+import json
 
 whatsapp_bp = Blueprint("whatsapp", __name__)
 
@@ -73,6 +75,31 @@ def enviar_sustitucion_whatsapp(telefono, sustitucion):
 
     response = requests.post(url, headers=headers, json=payload)
     return response.status_code, response.json()
+
+def enviar_whatsapp_sustitucion_twilio(telefono, sustitucion):
+    try:
+        client = Client(
+            current_app.config["TWILIO_ACCOUNT_SID"],
+            current_app.config["TWILIO_AUTH_TOKEN"]
+        )
+
+        message = client.messages.create(
+            from_=f"whatsapp:{current_app.config['TWILIO_WHATSAPP_NUMBER']}",
+            to=f"whatsapp:+34{telefono}",
+            content_sid=current_app.config["TWILIO_TEMPLATE_SID"],
+            content_variables=json.dumps({
+                "1": sustitucion.fecha.strftime("%d/%m/%Y"),
+                "2": f"{sustitucion.hora_inicio} - {sustitucion.hora_fin}",
+                "3": sustitucion.grupo.nombre,
+                "4": str(sustitucion.id)
+            })
+        )
+
+        print(message.sid)
+
+        return True, message.sid
+    except Exception as e:
+        return False, str(e)
 
 def enviar_amonestacion_whatsapp(telefono, amonestacion, fecha_madrid):
     """

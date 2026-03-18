@@ -80,7 +80,7 @@ def enviar_sms_twilio(telefono, mensaje):
         message = client.messages.create(
             body=mensaje,
             from_=current_app.config['TWILIO_PHONE_NUMBER'],
-            to=telefono
+            to=f"+34{telefono}"
         )
 
         return True, message.sid

@@ -50,7 +50,8 @@ from io import BytesIO
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font
 
-from .utils.whatsapp import enviar_sustitucion_whatsapp, enviar_amonestacion_whatsapp
+from .utils.whatsapp import enviar_sustitucion_whatsapp, enviar_amonestacion_whatsapp, \
+    enviar_whatsapp_sustitucion_twilio
 
 try:
     from zoneinfo import ZoneInfo
@@ -1433,11 +1434,23 @@ def nueva_sustitucion():
         f"📂 Material sustitución: {enlace_material}"
     )
 
-    ok, status = enviar_sms_twilio(sustituto.telefono, mensaje)
-    #status, respuesta = enviar_sustitucion_whatsapp(sustituto.telefono, sustitucion)
+    telefonos_whatsapp = ["675151146", "657313165"]
+
+    telefono = str(sustituto.telefono)
+
+    if telefono in telefonos_whatsapp:
+        status, respuesta = enviar_whatsapp_sustitucion_twilio(telefono, sustitucion)
+        print("Enviado por WhatsApp")
+    else:
+        status, respuesta = enviar_sms_esendex(telefono, mensaje)
+        print("Enviado por SMS (Esendex)")
+
+    #ok, status = enviar_sms_twilio(sustituto.telefono, mensaje)
+    #ok, status = enviar_sms_esendex(sustituto.telefono, mensaje)
+    #status, respuesta = enviar_whatsapp_sustitucion_twilio(sustituto.telefono, sustitucion)
 
     # Mostrar por pantalla la respuesta de la API (debug)
-    #print(f"Respuesta WhatsApp API (status {status}): {respuesta}", "info")
+    print(f"Respuesta WhatsApp API (status {status}): {respuesta}", "info")
 
     if status == 200:
         print("Sustitución creada y WhatsApp enviado correctamente", "success")
