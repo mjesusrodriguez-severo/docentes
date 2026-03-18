@@ -6,6 +6,7 @@ except ImportError:
 import requests
 from requests.auth import HTTPBasicAuth
 from flask import current_app, url_for
+from twilio.rest import Client
 
 
 def enviar_sms_esendex(telefono, mensaje):
@@ -64,3 +65,25 @@ def enviar_sms_amonestacion_utils(telefono, amonestacion):
         f"Descripción: {amonestacion.descripcion}\n"
     )
     return enviar_sms_esendex(telefono, mensaje)
+
+def enviar_sms_twilio(telefono, mensaje):
+    """
+    Envía un SMS usando Twilio API.
+    """
+
+    try:
+        client = Client(
+            current_app.config['TWILIO_ACCOUNT_SID'],
+            current_app.config['TWILIO_AUTH_TOKEN']
+        )
+
+        message = client.messages.create(
+            body=mensaje,
+            from_=current_app.config['TWILIO_PHONE_NUMBER'],
+            to=telefono
+        )
+
+        return True, message.sid
+
+    except Exception as e:
+        return False, str(e)

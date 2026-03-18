@@ -41,7 +41,7 @@ from .utils.google_auth import build_drive_service
 from .utils.incidencias import enviar_correo_incidencia, enviar_correo_comentario_incidencia
 from .utils.reservas import render_calendario_espacio, enviar_correo_reserva_espacio, enviar_correo_reserva_material, \
     render_calendario_espacio_primaria
-from .utils.sms import enviar_sms_esendex, enviar_sms_amonestacion_utils
+from .utils.sms import enviar_sms_esendex, enviar_sms_amonestacion_utils, enviar_sms_twilio
 
 import pandas as pd
 
@@ -1433,7 +1433,7 @@ def nueva_sustitucion():
         f"📂 Material sustitución: {enlace_material}"
     )
 
-    ok, status = enviar_sms_esendex(sustituto.telefono, mensaje)
+    ok, status = enviar_sms_twilio(sustituto.telefono, mensaje)
     #status, respuesta = enviar_sustitucion_whatsapp(sustituto.telefono, sustitucion)
 
     # Mostrar por pantalla la respuesta de la API (debug)

@@ -20,6 +20,10 @@ class Config:
     OAUTHLIB_INSECURE_TRANSPORT = True  # Solo para desarrollo
     OAUTH_REDIRECT_URI = "http://localhost:5000/login/google/authorized"
 
+    TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+    TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+    TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
+
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
