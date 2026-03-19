@@ -1,11 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center mb-2">
+<div class="d-flex justify-content-between align-items-center mb-2">
   <h5 class="mb-0 text-uppercase text-secondary">Portátiles</h5>
-  <button class="btn btn-outline-primary" id="toggle-edicion">
-    <i class="bi bi-pencil"></i> Activar edición
-  </button>
+
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('main.nuevo_dispositivo') }}" class="btn btn-success">
+      <i class="bi bi-plus-lg"></i> Nuevo dispositivo
+    </a>
+
+    <button class="btn btn-outline-primary" id="toggle-edicion">
+      <i class="bi bi-pencil"></i> Activar edición
+    </button>
+  </div>
 </div>
 
 <!-- Accesos rápidos a otras vistas -->
@@ -31,6 +38,10 @@
     <a href="{{ url_for('main.ver_allinone') }}"
        class="btn btn-sm {% if vista_actual == 'allinones' %}btn-primary{% else %}btn-outline-dark{% endif %}">
       <i class="bi bi-display"></i> All-in-One
+    </a>
+    <a href="{{ url_for('main.ver_robotica') }}"
+       class="btn btn-sm {% if vista_actual == 'robotica' %}btn-primary{% else %}btn-outline-dark{% endif %}">
+      <i class="bi bi-cpu"></i> Robotica
     </a>
     <a href="{{ url_for('main.ver_inventario') }}"
        class="btn btn-sm {% if vista_actual == 'inventario' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
@@ -93,9 +104,15 @@
           </select>
         </td>
         <td class="text-end">
-          <button class="btn btn-sm btn-outline-secondary toggle-detalle">
-            <i class="bi bi-chevron-down"></i>
-          </button>
+          <div class="btn-group">
+              <button class="btn btn-sm btn-outline-secondary toggle-detalle">
+                <i class="bi bi-chevron-down"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger"
+                        onclick="eliminarDispositivo('{{ url_for('main.eliminar_dispositivo', id=d.id) }}')">
+                  <i class="bi bi-trash"></i>
+              </button>
+          </div>
         </td>
       </tr>
       <tr class="detalle-row d-none" id="detalle-{{ d.id }}">
@@ -123,5 +140,26 @@
   </table>
 {% endblock %}
 {% block scripts %}
+<script>
+function eliminarDispositivo(url) {
+    if (!confirm("¿Seguro que quieres eliminar este dispositivo?")) return;
+
+    fetch(url, {
+        method: "POST"
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert("Error al eliminar");
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        alert("Error en la petición");
+    });
+}
+</script>
   <script src="{{ url_for('static', filename='js/edicion-dispositivos.js') }}"></script>
 {% endblock %}

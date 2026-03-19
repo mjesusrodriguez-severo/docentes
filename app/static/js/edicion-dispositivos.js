@@ -8,9 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
     modoEdicion = !modoEdicion;
     const inputs = document.querySelectorAll('input, select');
     const guardarBtns = document.querySelectorAll('.guardar-btn');
+    const eliminarBtns = document.querySelectorAll('.btn-eliminar');
 
     inputs.forEach(i => i.disabled = !modoEdicion);
     guardarBtns.forEach(btn => btn.classList.toggle('d-none', !modoEdicion));
+    eliminarBtns.forEach(btn => btn.classList.toggle('d-none', !modoEdicion));
 
     boton.innerHTML = modoEdicion
       ? '<i class="bi bi-eye"></i> Salir de edición'

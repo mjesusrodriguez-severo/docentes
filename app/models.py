@@ -163,7 +163,7 @@ class Dispositivo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100))
     etiqueta = db.Column(db.String(100))
-    tipo = db.Column(db.Enum('portatil', 'allinone', 'sobremesa', 'pizarra', 'tablet', 'monitor', 'impresora', 'otro'), nullable=False)
+    tipo = db.Column(db.Enum('portatil', 'allinone', 'sobremesa', 'pizarra', 'tablet', 'monitor', 'impresora', 'robotica', 'otro'), nullable=False)
     marca = db.Column(db.String(100), nullable=True)
     modelo = db.Column(db.String(100), nullable=True)
     numero_serie = db.Column(db.String(50), unique=True)  # CAMPO NUEVO

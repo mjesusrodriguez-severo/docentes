@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-2">
-  <h5 class="mb-0 text-uppercase text-secondary">All-in-one</h5>
+  <h5 class="mb-0 text-uppercase text-secondary">Robotica</h5>
 
   <div class="d-flex gap-2">
     <a href="{{ url_for('main.nuevo_dispositivo') }}" class="btn btn-success">
@@ -50,7 +50,7 @@
   </div>
 </div>
 
-<p class="text-muted">Mostrando todos los sobremesas de tipo all-in-one ({{ sobremesas|length }} dispositivos)</p>
+<p class="text-muted">Mostrando todo el material de robótica: ({{ robotica|length }} dispositivos)</p>
 
 <table class="table table-sm table-hover align-middle">
   <thead class="table-light">
@@ -63,7 +63,7 @@
     </tr>
   </thead>
   <tbody>
-    {% for d in allinones %}
+    {% for d in robotica %}
     <tr data-id="{{ d.id }}">
       <td>
         <input class="form-control form-control-sm" name="etiqueta" value="{{ d.nombre or '' }}" disabled>

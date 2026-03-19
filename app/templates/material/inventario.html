@@ -29,6 +29,10 @@
        class="btn btn-sm {% if vista_actual == 'allinones' %}btn-primary{% else %}btn-outline-dark{% endif %}">
       <i class="bi bi-display"></i> All-in-One
     </a>
+    <a href="{{ url_for('main.ver_robotica') }}"
+       class="btn btn-sm {% if vista_actual == 'robotica' %}btn-primary{% else %}btn-outline-dark{% endif %}">
+      <i class="bi bi-cpu"></i> Robotica
+    </a>
     <a href="{{ url_for('main.ver_inventario') }}"
        class="btn btn-sm {% if vista_actual == 'inventario' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
       <i class="bi bi-grid-3x3-gap"></i> Vista completa

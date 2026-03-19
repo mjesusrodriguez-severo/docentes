@@ -1619,6 +1619,19 @@ def ver_pizarras():
     ubicaciones = Ubicacion.query.order_by(Ubicacion.nombre).all()
     return render_template("material/pizarras.html", vista_actual='pizarras', pizarras=pizarras, ubicaciones=ubicaciones)
 
+@main_bp.route('/robotica')
+@login_required
+@rol_requerido("tic")
+def ver_robotica():
+    robotica = Dispositivo.query.filter_by(tipo='robotica').order_by(Dispositivo.nombre).all()
+    ubicaciones = Ubicacion.query.order_by(Ubicacion.nombre).all()
+    return render_template(
+        'material/robotica.html',
+        vista_actual='robotica',
+        robotica=robotica,
+        ubicaciones=ubicaciones
+    )
+
 @main_bp.route('/inventario')
 @login_required
 @rol_requerido("tic")
@@ -1638,6 +1651,49 @@ def ver_inventario():
         estados=estados,
         vista_actual='inventario'
     )
+
+@main_bp.route('/dispositivos/eliminar/<int:id>', methods=['POST'])
+@login_required
+@rol_requerido("tic")
+def eliminar_dispositivo(id):
+    try:
+        dispositivo = Dispositivo.query.get_or_404(id)
+        db.session.delete(dispositivo)
+        db.session.commit()
+        return jsonify(success=True)
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(success=False, error=str(e)), 500
+
+@main_bp.route('/dispositivos/nuevo', methods=['GET', 'POST'])
+@login_required
+@rol_requerido("tic")
+def nuevo_dispositivo():
+    if request.method == 'POST':
+        try:
+            dispositivo = Dispositivo(
+                tipo=request.form.get("tipo"),
+                nombre=request.form.get("nombre"),
+                etiqueta=request.form.get("etiqueta"),
+                numero_serie=request.form.get("numero_serie"),
+                estado=request.form.get("estado"),
+                ubicacion_id=request.form.get("ubicacion_id"),
+                marca=request.form.get("marca"),
+                modelo=request.form.get("modelo"),
+                observaciones=request.form.get("observaciones")
+            )
+
+            db.session.add(dispositivo)
+            db.session.commit()
+
+            return redirect(url_for('main.ver_inventario'))
+
+        except Exception as e:
+            db.session.rollback()
+            return f"Error: {e}"
+
+    ubicaciones = Ubicacion.query.all()
+    return render_template("material/nuevo_dispositivo.html", ubicaciones=ubicaciones)
 
 # ╔════════════════════════════════════════════════════════════════════════╗
 # ║                            RUTAS DE RESERVAS                           ║
