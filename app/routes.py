@@ -1531,6 +1531,47 @@ def nueva_ubicacion():
     return redirect(url_for('main.listado_ubicaciones'))
 
 # ╔════════════════════════════════════════════════════════════════════════╗
+# ║                           RUTAS DE UBICACIONES                         ║
+# ╚════════════════════════════════════════════════════════════════════════╝
+@main_bp.route('/ubicaciones')
+@login_required
+@rol_requerido("tic")
+def ver_ubicaciones():
+    ubicaciones = Ubicacion.query.order_by(Ubicacion.planta, Ubicacion.numero_puerta, Ubicacion.nombre).all()
+    return render_template(
+        'material/ubicaciones.html',
+        ubicaciones=ubicaciones,
+        vista_actual='ubicaciones'
+    )
+
+@main_bp.route('/ubicaciones/guardar-cambios', methods=['POST'])
+@login_required
+@rol_requerido("tic")
+def guardar_cambios_ubicaciones():
+    data = request.json
+
+    try:
+        for item in data:
+            ubicacion = Ubicacion.query.get(item.get('id'))
+            if not ubicacion:
+                continue
+
+            for campo in ['tipo', 'nombre', 'numero_puerta', 'observaciones', 'planta']:
+                if campo in item:
+                    valor = item[campo]
+                    if valor == '':
+                        valor = None
+                    setattr(ubicacion, campo, valor)
+
+        db.session.commit()
+        return jsonify(success=True)
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(success=False, error=str(e)), 500
+
+
+# ╔════════════════════════════════════════════════════════════════════════╗
 # ║                           RUTAS DE EQUIPOS                             ║
 # ╚════════════════════════════════════════════════════════════════════════╝
 
