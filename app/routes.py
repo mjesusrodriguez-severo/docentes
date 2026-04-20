@@ -941,7 +941,7 @@ def ver_calendario_departamento_taquillas():
         nombre_visible="Departamento Taquillas"
     )
 
-@main_bp.route("/reservas/aula-laboratorio")
+@main_bp.route("/reservas/laboratorio")
 @login_required
 def ver_calendario_laboratorio():
     return render_calendario_espacio(
