@@ -224,7 +224,7 @@ class ReservaSala(db.Model):
         'sala_reuniones',
         'aula_taller',
         'departamento_taquillas',
-        'aula_laboratorio',
+        'laboratorio',
         'aula_digital',
         'biblioteca'
     ), nullable=False)
