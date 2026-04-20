@@ -943,7 +943,7 @@ def ver_calendario_departamento_taquillas():
 
 @main_bp.route("/reservas/aula-laboratorio")
 @login_required
-def ver_calendario_aula_laboratorio():
+def ver_calendario_laboratorio():
     return render_calendario_espacio(
         nombre_espacio="aula_laboratorio",
         plantilla="reservas/laboratorio.html",
