@@ -945,7 +945,7 @@ def ver_calendario_departamento_taquillas():
 @login_required
 def ver_calendario_laboratorio():
     return render_calendario_espacio(
-        nombre_espacio="aula_laboratorio",
+        nombre_espacio="laboratorio",
         plantilla="reservas/laboratorio.html",
         nombre_visible="Laboratorio"
     )
