@@ -9,7 +9,7 @@ ESPACIOS_NOMBRES = {
     "sala-reuniones": "Sala de Reuniones",
     "aula-taller": "Aula Taller",
     "departamento-taquillas": "Departamento Taquillas",
-    "aula-laboratorio": "Aula Laboratorio",
+    "laboratorio": "Aula Laboratorio",
     "aula-digital": "Aula Digital",
     "biblioteca": "Biblioteca"
 }
