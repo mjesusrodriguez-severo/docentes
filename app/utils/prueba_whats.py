@@ -92,7 +92,7 @@ def enviar_amonestacion_whatsapp():
 
     payload = {
         "messaging_product": "whatsapp",
-        "to": 626188229,
+        "to": 675151146,
         "type": "template",
         "template": {
             "name": "amonestaciones",      # nombre EXACTO de la plantilla

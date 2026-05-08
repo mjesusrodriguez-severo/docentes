@@ -66,7 +66,7 @@
     {% for d in allinones %}
     <tr data-id="{{ d.id }}">
       <td>
-        <input class="form-control form-control-sm" name="etiqueta" value="{{ d.nombre or '' }}" disabled>
+        <input class="form-control form-control-sm" name="etiqueta" value="{{ d.etiqueta or '' }}" disabled>
       </td>
       <td>
         <input class="form-control form-control-sm" name="numero_serie" value="{{ d.numero_serie or '' }}" disabled>

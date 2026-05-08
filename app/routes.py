@@ -1,19 +1,13 @@
-import locale
 import os
 import re
-import traceback
 from collections import defaultdict
 from pathlib import Path
 
 import pytz
-from reportlab.lib.enums import TA_LEFT, TA_JUSTIFY, TA_RIGHT, TA_CENTER
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
-from sqlalchemy import func  # Asegúrate de tener este import
+from reportlab.lib.enums import TA_LEFT
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, abort, current_app, send_file, make_response
 from flask_login import login_required, current_user
-from reportlab.lib.units import cm, mm
+from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, HRFlowable, Frame
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -31,12 +25,10 @@ from flask_mail import Message
 from . import mail
 import io
 
-import requests
-from requests.auth import HTTPBasicAuth
 from werkzeug.utils import secure_filename
 
 from .utils.decoradores import rol_requerido
-from .utils.drive import subir_archivo_a_drive, crear_carpeta_sustitucion
+from .utils.drive import subir_archivo_a_drive
 from .utils.google_auth import build_drive_service
 from .utils.incidencias import enviar_correo_incidencia, enviar_correo_comentario_incidencia
 from .utils.reservas import render_calendario_espacio, enviar_correo_reserva_espacio, enviar_correo_reserva_material, \
@@ -1434,28 +1426,28 @@ def nueva_sustitucion():
         f"📂 Material sustitución: {enlace_material}"
     )
 
-    telefonos_whatsapp = ["675151146", "657313165"]
+    #telefonos_whatsapp = ["675151146", "657313165"]
 
     telefono = str(sustituto.telefono)
 
-    if telefono in telefonos_whatsapp:
-        status, respuesta = enviar_whatsapp_sustitucion_twilio(telefono, sustitucion)
-        print("Enviado por WhatsApp")
-    else:
-        status, respuesta = enviar_sms_esendex(telefono, mensaje)
-        print("Enviado por SMS (Esendex)")
+    #if telefono in telefonos_whatsapp:
+    #    status, respuesta = enviar_whatsapp_sustitucion_twilio(telefono, sustitucion)
+    #    print("Enviado por WhatsApp")
+    #else:
+    #    status, respuesta = enviar_sms_esendex(telefono, mensaje)
+    #    print("Enviado por SMS (Esendex)")
 
+    ok, status = enviar_sms_esendex(sustituto.telefono, mensaje)
     #ok, status = enviar_sms_twilio(sustituto.telefono, mensaje)
-    #ok, status = enviar_sms_esendex(sustituto.telefono, mensaje)
     #status, respuesta = enviar_whatsapp_sustitucion_twilio(sustituto.telefono, sustitucion)
 
     # Mostrar por pantalla la respuesta de la API (debug)
-    print(f"Respuesta WhatsApp API (status {status}): {respuesta}", "info")
+    #print(f"Respuesta WhatsApp API (status {status}): {respuesta}", "info")
 
-    if status == 200:
-        print("Sustitución creada y WhatsApp enviado correctamente", "success")
+    if status:
+        print("Sustitución creada y mensaje enviado correctamente")
     else:
-        print("Sustitución creada, pero ERROR al enviar WhatsApp", "danger")
+        print("Sustitución creada, pero ERROR al enviar mensaje")
 
     return redirect(url_for("main.ver_sustituciones"))
 
@@ -1595,20 +1587,44 @@ def ver_portatiles():
 @login_required
 @rol_requerido("tic")
 def actualizar_multiples_dispositivos():
-    data = request.json  # Lista de objetos con datos de dispositivos
+    data = request.get_json()
+
     try:
         for item in data:
             dispositivo = Dispositivo.query.get(item.get('id'))
+
             if not dispositivo:
                 continue
-            for campo in ['etiqueta', 'numero_serie', 'estado', 'ubicacion_id', 'marca', 'modelo', 'observaciones']:
+
+            for campo in [
+                'etiqueta',
+                'numero_serie',
+                'estado',
+                'ubicacion_id',
+                'marca',
+                'modelo',
+                'observaciones'
+            ]:
                 if campo in item:
-                    setattr(dispositivo, campo, item[campo] or None)
+                    valor = item[campo]
+
+                    if campo == 'ubicacion_id':
+                        valor = int(valor) if valor else None
+                    else:
+                        valor = valor if valor != '' else None
+
+                    setattr(dispositivo, campo, valor)
+
+            # Sincronizar nombre con etiqueta
+            if 'etiqueta' in item:
+                dispositivo.nombre = item.get('etiqueta') or None
+
         db.session.commit()
         return jsonify(success=True)
+
     except Exception as e:
         db.session.rollback()
-        return jsonify(success=False, error=str(e))
+        return jsonify(success=False, error=str(e)), 500
 
 @main_bp.route('/sobremesa')
 @login_required
