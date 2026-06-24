@@ -2222,10 +2222,10 @@ def normalizar(texto):
 @main_bp.route('/exportar-absentismo')
 @login_required
 def exportar_absentismo():
-    # Opcional: limitar solo a TIC / jefatura
     if current_user.rol not in ['tic', 'jefatura']:
         flash('No tienes permiso para exportar este informe.', 'danger')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('main.ver_absentismo'))
+
     query = """
         SELECT
             g.nombre AS grupo,
@@ -2234,28 +2234,42 @@ def exportar_absentismo():
             SUM(ia.faltas_injustificadas) AS faltas_injustificadas,
             SUM(ia.faltas_justificadas + ia.faltas_injustificadas) AS total_faltas,
             ROUND(
-                100 * SUM(ia.faltas_injustificadas) /
-                NULLIF(SUM(ia.faltas_justificadas + ia.faltas_injustificadas), 0),
+                100 * SUM(ia.faltas_justificadas + ia.faltas_injustificadas) / 176,
                 2
-            ) AS porcentaje_injustificadas,
-            MAX(ia.absentista) AS absentista
+            ) AS porcentaje_absentismo,
+            CASE
+                WHEN ROUND(
+                    100 * SUM(ia.faltas_justificadas + ia.faltas_injustificadas) / 176,
+                    2
+                ) >= 20 THEN 1
+                ELSE 0
+            END AS absentista
         FROM informe_alumno ia
         JOIN alumnos a ON a.id = ia.alumno_id
         JOIN grupos g ON g.id = a.grupo_id
         JOIN informe_faltas inf ON inf.id = ia.informe_id
+        WHERE (
+            (inf.anio = 2025 AND inf.mes IN ('septiembre', 'octubre', 'noviembre', 'diciembre'))
+            OR
+            (inf.anio = 2026 AND inf.mes IN ('enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio'))
+        )
         GROUP BY g.id, a.id
-        ORDER BY g.orden, g.nombre, porcentaje_injustificadas DESC;
+        ORDER BY g.orden, g.nombre, porcentaje_absentismo DESC;
     """
 
     df = pd.read_sql(query, db.engine)
+
     output = BytesIO()
+
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, sheet_name='Absentismo', index=False)
+        df.to_excel(writer, sheet_name='Absentismo 2025-2026', index=False)
+
     output.seek(0)
+
     return send_file(
         output,
         as_attachment=True,
-        download_name='absentismo_curso.xlsx',
+        download_name='absentismo_2025_2026.xlsx',
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
 
