@@ -2219,6 +2219,46 @@ def normalizar(texto):
     texto = texto.replace(',', '')      # Elimina comas
     return texto.strip()
 
+@main_bp.route('/exportar-absentismo')
+@login_required
+def exportar_absentismo():
+    # Opcional: limitar solo a TIC / jefatura
+    if current_user.rol not in ['tic', 'jefatura']:
+        flash('No tienes permiso para exportar este informe.', 'danger')
+        return redirect(url_for('dashboard'))
+    query = """
+        SELECT
+            g.nombre AS grupo,
+            CONCAT(a.apellidos, ', ', a.nombre) AS alumno,
+            SUM(ia.faltas_justificadas) AS faltas_justificadas,
+            SUM(ia.faltas_injustificadas) AS faltas_injustificadas,
+            SUM(ia.faltas_justificadas + ia.faltas_injustificadas) AS total_faltas,
+            ROUND(
+                100 * SUM(ia.faltas_injustificadas) /
+                NULLIF(SUM(ia.faltas_justificadas + ia.faltas_injustificadas), 0),
+                2
+            ) AS porcentaje_injustificadas,
+            MAX(ia.absentista) AS absentista
+        FROM informe_alumno ia
+        JOIN alumnos a ON a.id = ia.alumno_id
+        JOIN grupos g ON g.id = a.grupo_id
+        JOIN informe_faltas inf ON inf.id = ia.informe_id
+        GROUP BY g.id, a.id
+        ORDER BY g.orden, g.nombre, porcentaje_injustificadas DESC;
+    """
+
+    df = pd.read_sql(query, db.engine)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name='Absentismo', index=False)
+    output.seek(0)
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name='absentismo_curso.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
 '''
 @main_bp.route('/subir-informe/<int:grupo_id>/<mes>', methods=['POST'])
 @login_required

@@ -17,6 +17,14 @@
     </div>
   </div>
 
+    <!-- Botón exportar -->
+    <div class="mb-4">
+        <a href="{{ url_for('main.exportar_absentismo') }}"
+           class="btn btn-success">
+            <i class="fas fa-file-excel"></i> Exportar absentismo anual
+        </a>
+    </div>
+
   <!-- Tabla de grupos -->
   <h5 class="text-secondary">Grupos en {{ mes_actual|capitalize }} {{ anio_actual }}</h5>
 
