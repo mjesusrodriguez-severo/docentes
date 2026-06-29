@@ -43,6 +43,9 @@ class Alumno(db.Model):
     observaciones = db.Column(db.Text)
     grupo_id = db.Column(db.Integer, db.ForeignKey('grupos.id'))
 
+    activo = db.Column(db.Boolean, nullable=False, default=True)
+    fecha_baja = db.Column(db.Date, nullable=True)
+
     informes = db.relationship("InformeAlumno", back_populates="alumno")
 
     responsables = db.relationship(

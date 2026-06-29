@@ -207,7 +207,7 @@ def listar_alumnos(grupo_id=None):
 
     if grupo_id:
         grupo_seleccionado = Grupo.query.get_or_404(grupo_id)
-        alumnos = Alumno.query.filter_by(grupo_id=grupo_id).order_by(Alumno.apellidos, Alumno.nombre).all()
+        alumnos = Alumno.query.filter_by(grupo_id=grupo_id, activo=True).order_by(Alumno.apellidos, Alumno.nombre).all()
 
     return render_template(
         "alumnos/alumnos_por_grupo.html",
