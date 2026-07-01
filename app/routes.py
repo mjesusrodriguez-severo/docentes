@@ -238,11 +238,8 @@ def ver_alumno(alumno_id):
 def eliminar_alumno(alumno_id):
     alumno = Alumno.query.get_or_404(alumno_id)
     grupo_id = alumno.grupo_id
-
-    # Baja lógica: no se borra el alumno ni sus informes
     alumno.activo = False
     alumno.fecha_baja = date.today()
-    alumno.grupo_id = None
     db.session.commit()
 
     return redirect(url_for("main.listar_alumnos", grupo_id=grupo_id))
