@@ -236,24 +236,13 @@ def ver_alumno(alumno_id):
 @main_bp.route("/alumno/<int:alumno_id>/eliminar", methods=["POST"])
 @login_required
 def eliminar_alumno(alumno_id):
-    from .models import Alumno, Responsable, db
-
     alumno = Alumno.query.get_or_404(alumno_id)
+    grupo_id = alumno.grupo_id
 
-    # Guardar los responsables asociados antes de eliminar el alumno
-    responsables_asociados = list(alumno.responsables)
-
-    grupo_id = alumno.grupo_id  # Guardamos grupo antes de borrar
-
-    # Eliminar al alumno
-    db.session.delete(alumno)
-    db.session.commit()
-
-    # Comprobar si alguno de los responsables ya no tiene alumnos
-    for responsable in responsables_asociados:
-        if not responsable.alumnos:  # No tiene alumnos asociados
-            db.session.delete(responsable)
-
+    # Baja lógica: no se borra el alumno ni sus informes
+    alumno.activo = False
+    alumno.fecha_baja = date.today()
+    alumno.grupo_id = None
     db.session.commit()
 
     return redirect(url_for("main.listar_alumnos", grupo_id=grupo_id))
