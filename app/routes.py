@@ -200,21 +200,44 @@ def eliminar_usuario(usuario_id):
 @login_required
 def listar_alumnos(grupo_id=None):
     from .models import Grupo, Alumno
-
     grupos = Grupo.query.order_by(Grupo.orden).all()
     grupo_seleccionado = None
     alumnos = []
+    alumnos_archivados = []
 
     if grupo_id:
         grupo_seleccionado = Grupo.query.get_or_404(grupo_id)
-        alumnos = Alumno.query.filter_by(grupo_id=grupo_id, activo=True).order_by(Alumno.apellidos, Alumno.nombre).all()
+        alumnos = Alumno.query.filter_by(
+            grupo_id=grupo_id,
+            activo=True
+        ).order_by(Alumno.apellidos, Alumno.nombre).all()
+        if current_user.rol == "tic":
+            alumnos_archivados = Alumno.query.filter_by(
+                grupo_id=grupo_id,
+                activo=False
+            ).order_by(Alumno.apellidos, Alumno.nombre).all()
 
     return render_template(
         "alumnos/alumnos_por_grupo.html",
         grupos=grupos,
         grupo_seleccionado=grupo_seleccionado,
-        alumnos=alumnos
+        alumnos=alumnos,
+        alumnos_archivados=alumnos_archivados
     )
+
+@main_bp.route("/alumno/<int:alumno_id>/activar", methods=["POST"])
+@login_required
+def activar_alumno(alumno_id):
+    from .models import Alumno, db
+    if current_user.rol != "tic":
+        abort(403)
+
+    alumno = Alumno.query.get_or_404(alumno_id)
+    grupo_id = alumno.grupo_id
+    alumno.activo = True
+    alumno.fecha_baja = None
+    db.session.commit()
+    return redirect(url_for("main.listar_alumnos", grupo_id=grupo_id))
 
 @main_bp.route("/alumno/<int:alumno_id>")
 @login_required

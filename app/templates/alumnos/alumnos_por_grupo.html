@@ -90,4 +90,52 @@
   {% else %}
     <p class="text-center text-muted">Selecciona un grupo para ver su alumnado.</p>
   {% endif %}
+
+  {% if current_user.rol == 'tic' and alumnos_archivados %}
+  <div class="mt-5">
+    <h5 class="mb-3 text-uppercase text-secondary">Alumnos archivados</h5>
+
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead class="table-light text-start">
+          <tr>
+            <th>Nombre</th>
+            <th>Apellidos</th>
+            <th>Identificación</th>
+            <th>Fecha baja</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for alumno in alumnos_archivados %}
+            <tr>
+              <td>{{ alumno.nombre }}</td>
+              <td>{{ alumno.apellidos }}</td>
+              <td>{{ alumno.identificacion or '—' }}</td>
+              <td>
+                {% if alumno.fecha_baja %}
+                  {{ alumno.fecha_baja.strftime('%d/%m/%Y') }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <form method="POST"
+                      action="{{ url_for('main.activar_alumno', alumno_id=alumno.id) }}"
+                      onsubmit="return confirm('¿Quieres reactivar este alumno?');"
+                      style="display:inline;">
+                  <button type="submit"
+                          class="btn btn-sm btn-outline-success"
+                          title="Reactivar">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
 {% endblock %}
