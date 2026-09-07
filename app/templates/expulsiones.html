@@ -3,8 +3,19 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-    <h5 class="mb-0 text-uppercase text-secondary">Expulsiones</h5>
+    <div>
+        <h5 class="mb-0 text-uppercase text-secondary">
+            Expulsiones
+        </h5>
+        <small class="text-muted">
+            Curso 2026/2027
+        </small>
+    </div>
     <div class="d-flex gap-2 ms-auto">
+        <a href="{{ url_for('main.historico_expulsiones') }}"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-archive"></i> Histórico
+        </a>
         <button class="btn btn-danger text-white" onclick="mostrarFormularioExpulsion()">
           <i class="bi bi-person-dash-fill"></i> Expulsar alumno
         </button>

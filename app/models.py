@@ -337,4 +337,6 @@ class Expulsion(db.Model):
     fecha_fin = db.Column(db.Date, nullable=False)
 
     fecha_creacion = db.Column(db.DateTime, default=db.func.current_timestamp())
+    archivada = db.Column(db.Boolean, default=False, nullable=False)
+    curso_academico = db.Column(db.String(9), default='2026/2027', nullable=False)
 

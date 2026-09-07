@@ -828,12 +828,43 @@ def crear_expulsion():
 
 @main_bp.route("/expulsiones")
 @login_required
+@rol_requerido("tic", "jefatura")
 def ver_expulsiones():
-    if current_user.rol not in ["jefatura", "tic"]:
-        abort(403)
     grupos = Grupo.query.order_by(Grupo.orden).all()
-    expulsiones = Expulsion.query.join(Alumno).join(Grupo).order_by(Expulsion.fecha_creacion.desc()).all()
-    return render_template("expulsiones.html", expulsiones=expulsiones, grupos = grupos)
+    expulsiones = (
+        Expulsion.query
+        .join(Alumno)
+        .join(Grupo)
+        .filter(Expulsion.archivada == False)
+        .order_by(Expulsion.fecha_creacion.desc())
+        .all()
+    )
+
+    return render_template(
+        "expulsiones.html",
+        expulsiones=expulsiones,
+        grupos=grupos
+    )
+
+@main_bp.route("/expulsiones/historico")
+@login_required
+@rol_requerido("tic", "jefatura")
+def historico_expulsiones():
+    expulsiones = (
+        Expulsion.query
+        .join(Alumno)
+        .join(Grupo)
+        .filter(Expulsion.archivada == True)
+        .order_by(Expulsion.fecha_creacion.desc())
+        .all()
+    )
+
+    grupos = Grupo.query.order_by(Grupo.orden).all()
+    return render_template(
+        "expulsiones_historico.html",
+        expulsiones=expulsiones,
+        grupos=grupos
+    )
 
 @main_bp.route("/amonestaciones/historico")
 @login_required

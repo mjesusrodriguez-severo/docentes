@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block title %}Histórico de expulsiones{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+
+    <div>
+        <h5 class="mb-0 text-uppercase text-secondary">
+            Histórico de expulsiones
+        </h5>
+
+        <small class="text-muted">
+            Curso 2025/2026
+        </small>
+    </div>
+
+    <div class="d-flex gap-2 ms-auto">
+
+        <a href="{{ url_for('main.ver_expulsiones') }}"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left"></i>
+            Volver a expulsiones
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- Información del histórico -->
+<div class="alert alert-secondary d-flex align-items-center mb-4" role="alert">
+
+    <i class="bi bi-archive-fill me-2"></i>
+
+    <div>
+        Se muestran las expulsiones archivadas correspondientes al
+        <strong>curso 2025/2026</strong>.
+    </div>
+
+</div>
+
+
+<!-- Filtros -->
+<div class="card shadow-sm border mb-4">
+
+    <div class="card-body">
+
+        <h6 class="card-title text-uppercase text-muted mb-3">
+            Filtros de búsqueda
+        </h6>
+
+        <div class="row align-items-end gy-2">
+
+
+            <!-- Alumno -->
+            <div class="col-md-5">
+
+                <label for="inputAlumno" class="form-label">
+                    Filtrar por alumno:
+                </label>
+
+                <input
+                    type="text"
+                    id="inputAlumno"
+                    class="form-control"
+                    placeholder="Escribe un nombre..."
+                    oninput="aplicarFiltros()">
+
+            </div>
+
+
+            <!-- Grupo -->
+            <div class="col-md-5">
+
+                <label for="filtroGrupo" class="form-label">
+                    Filtrar por grupo:
+                </label>
+
+                <select
+                    id="filtroGrupo"
+                    class="form-select"
+                    onchange="aplicarFiltros()">
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                    {% for grupo in grupos %}
+
+                        <option value="{{ grupo.id }}">
+                            {{ grupo.nombre }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- Limpiar -->
+            <div class="col-md-2">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary w-100"
+                    onclick="limpiarFiltros()">
+
+                    <i class="bi bi-x-circle"></i>
+                    Limpiar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Contador -->
+<div class="row align-items-center gy-2 mb-3">
+
+    <div class="col-12 col-md-4">
+
+        <span
+            id="contador"
+            class="badge bg-secondary"
+            data-total="{{ expulsiones|length }}">
+
+            Mostrando {{ expulsiones|length }} expulsión(es)
+
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- Listado -->
+<div class="row p-4">
+
+{% for expulsion in expulsiones %}
+
+    <div
+        class="card-escuela mb-4 position-relative"
+        data-alumno-nombre="{{ expulsion.alumno.nombre }} {{ expulsion.alumno.apellidos }}"
+        data-grupo-id="{{ expulsion.alumno.grupo.id }}"
+    >
+
+
+        <!-- Fecha -->
+        <div class="fecha-hora-amonestacion d-flex justify-content-end mb-2">
+
+            <b>
+
+                <i class="bi bi-calendar-event me-1"></i>
+
+                Expulsión realizada el
+
+                {{ expulsion.fecha_expulsion.strftime("%d/%m/%Y") }}
+
+            </b>
+
+        </div>
+
+
+        <!-- Cabecera -->
+        <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+
+            <span class="badge-soft badge-group">
+                {{ expulsion.alumno.grupo.nombre }}
+            </span>
+
+            <span class="badge bg-secondary">
+                <i class="bi bi-archive"></i>
+                {{ expulsion.curso_academico }}
+            </span>
+
+        </div>
+
+
+        <!-- Alumno -->
+        <div class="bg-light text-dark p-2 rounded d-flex align-items-center mb-3">
+
+            <i class="bi bi-person-vcard-fill me-2 text-secondary"></i>
+
+            <strong class="text-uppercase small">
+
+                {{ expulsion.alumno.nombre }}
+                {{ expulsion.alumno.apellidos }}
+
+            </strong>
+
+        </div>
+
+
+        <!-- Artículo -->
+        <p class="mb-1">
+
+            <strong>
+                Artículo vulnerado:
+            </strong>
+
+            {{ expulsion.articulo }}
+
+            {% if expulsion.apartado %}
+                , apartado {{ expulsion.apartado }}
+            {% endif %}
+
+        </p>
+
+
+        <!-- Días -->
+        <p class="card-text mb-1">
+
+            <strong>
+                Días de expulsión:
+            </strong>
+
+            {{ expulsion.dias_expulsion }}
+
+        </p>
+
+
+        <!-- Inicio -->
+        <p class="card-text mb-1">
+
+            <strong>
+                Inicio de la expulsión:
+            </strong>
+
+            {{ expulsion.fecha_inicio.strftime('%d/%m/%Y') }}
+
+        </p>
+
+
+        <!-- Fin -->
+        <p class="card-text mb-1">
+
+            <strong>
+                Incorporación al centro:
+            </strong>
+
+            {{ expulsion.fecha_fin.strftime('%d/%m/%Y') }}
+
+        </p>
+
+
+        <!-- Descargar documento -->
+        <div class="mt-3 d-flex gap-2 justify-content-end">
+
+            <a
+                href="{{ url_for(
+                    'main.descargar_expulsion_docx',
+                    expulsion_id=expulsion.id
+                ) }}"
+                class="btn btn-outline-danger btn-sm">
+
+                <i class="bi bi-file-earmark-text"></i>
+                Descargar Expulsión
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+{% else %}
+
+    <div class="col-12">
+
+        <div class="alert alert-light border text-center text-muted">
+
+            <i class="bi bi-archive me-1"></i>
+
+            No hay expulsiones archivadas.
+
+        </div>
+
+    </div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}
+
+
+
+{% block scripts %}
+
+<script>
+
+function aplicarFiltros() {
+
+    const alumnoNombre =
+        document
+            .getElementById("inputAlumno")
+            .value
+            .toLowerCase()
+            .trim();
+
+    const grupoId =
+        document
+            .getElementById("filtroGrupo")
+            .value;
+
+    const tarjetas =
+        document.querySelectorAll(".card-escuela");
+
+    let visibles = 0;
+
+
+    tarjetas.forEach(card => {
+
+        const nombre =
+            card.dataset.alumnoNombre.toLowerCase();
+
+        const grupo =
+            card.dataset.grupoId;
+
+
+        const cumpleAlumno =
+            !alumnoNombre ||
+            nombre.includes(alumnoNombre);
+
+
+        const cumpleGrupo =
+            !grupoId ||
+            grupo === grupoId;
+
+
+        const mostrar =
+            cumpleAlumno &&
+            cumpleGrupo;
+
+
+        card.classList.toggle(
+            "d-none",
+            !mostrar
+        );
+
+
+        if (mostrar) {
+            visibles++;
+        }
+
+    });
+
+
+    actualizarContador(visibles);
+}
+
+
+
+function limpiarFiltros() {
+
+    document.getElementById("inputAlumno").value = "";
+
+    document.getElementById("filtroGrupo").value = "";
+
+    aplicarFiltros();
+
+}
+
+
+
+function actualizarContador(visibles) {
+
+    const contador =
+        document.getElementById("contador");
+
+    const total =
+        parseInt(
+            contador.dataset.total,
+            10
+        );
+
+
+    contador.innerText =
+        `Mostrando ${visibles} de ${total} expulsión(es)`;
+
+}
+
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    aplicarFiltros
+);
+
+</script>
+
+{% endblock %}
