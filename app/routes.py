@@ -186,9 +186,10 @@ def editar_usuario(usuario_id):
 @rol_requerido("tic")
 def eliminar_usuario(usuario_id):
     usuario = Usuario.query.get_or_404(usuario_id)
-    db.session.delete(usuario)
+    # En lugar de eliminar el usuario, lo archivamos (para que no de conflicto con las amonestaciones)
+    usuario.archivado = True
     db.session.commit()
-    flash("Usuario eliminado correctamente.")
+    flash("Usuario archivado correctamente.")
     return redirect(url_for("main.listar_usuarios"))
 
 # ╔════════════════════════════════════════════════════════════════════════╗
