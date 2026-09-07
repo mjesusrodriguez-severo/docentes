@@ -142,7 +142,7 @@ def dashboard():
 @login_required
 @rol_requerido("tic", "jefatura")
 def listar_usuarios():
-    usuarios = Usuario.query.filter(Usuario.Archivado == False).all()
+    usuarios = Usuario.query.filter(Usuario.archivado == False).all()
     return render_template("usuarios/listar_usuarios.html", usuarios=usuarios)
 
 @main_bp.route("/usuarios/nuevo", methods=["GET", "POST"])
