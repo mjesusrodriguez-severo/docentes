@@ -562,8 +562,11 @@ def crear_amonestacion():
     # GET
     grupos = Grupo.query.order_by(Grupo.orden).all()
     page = request.args.get("page", 1, type=int)
+
+    # Por defecto, solo mostramos amonestaciones activas
+    amonestaciones_query = Amonestacion.query.filter_by(archivada=False)
     if current_user.rol in ["jefatura", "tic"]:
-        amonestaciones_query = Amonestacion.query
+        pass
     elif current_user.rol == "tutor":
         grupo_tutoria = Grupo.query.filter_by(tutor_id=current_user.id).first()
         if grupo_tutoria:
@@ -831,6 +834,23 @@ def ver_expulsiones():
     grupos = Grupo.query.order_by(Grupo.orden).all()
     expulsiones = Expulsion.query.join(Alumno).join(Grupo).order_by(Expulsion.fecha_creacion.desc()).all()
     return render_template("expulsiones.html", expulsiones=expulsiones, grupos = grupos)
+
+@main_bp.route("/amonestaciones/historico")
+@login_required
+@rol_requerido("tic", "jefatura")
+def historico_amonestaciones():
+    amonestaciones = (
+        Amonestacion.query
+        .filter_by(archivada=True)
+        .order_by(Amonestacion.fecha.desc())
+        .all()
+    )
+    grupos = Grupo.query.order_by(Grupo.orden).all()
+    return render_template(
+        "amonestaciones_historico.html",
+        amonestaciones=amonestaciones,
+        grupos=grupos
+    )
 
 # Asegura que la fecha salga en español
 #try:

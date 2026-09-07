@@ -8,6 +8,9 @@
 
         <div class="d-flex gap-2 ms-auto">
           {% if current_user.rol in ["jefatura", "tic"] %}
+            <a href="{{ url_for('main.historico_amonestaciones') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-archive"></i> Histórico
+            </a>
             <a href="{{ url_for('main.ver_expulsiones') }}" class="btn btn-danger text-white">
               <i class="bi bi-person-dash-fill"></i> Expulsar alumno
             </a>

@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+
+{% block title %}Histórico de amonestaciones{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+    <div>
+        <h5 class="mb-0 text-uppercase text-secondary">
+            Histórico de amonestaciones
+        </h5>
+        <small class="text-muted">
+            Curso 2025/2026
+        </small>
+    </div>
+
+    <div class="d-flex gap-2 ms-auto">
+        <a href="{{ url_for('main.crear_amonestacion') }}"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a amonestaciones
+        </a>
+    </div>
+</div>
+
+
+<!-- Información del histórico -->
+<div class="alert alert-secondary d-flex align-items-center mb-4" role="alert">
+    <i class="bi bi-archive-fill me-2"></i>
+    <div>
+        Se muestran las amonestaciones archivadas correspondientes al
+        <strong>curso 2025/2026</strong>.
+    </div>
+</div>
+
+
+<!-- Filtros -->
+<div class="card shadow-sm border mb-4">
+    <div class="card-body">
+
+        <h6 class="card-title text-uppercase text-muted mb-3">
+            Filtros de búsqueda
+        </h6>
+
+        <div class="row align-items-end gy-2">
+
+            <!-- Alumno -->
+            <div class="col-md-4">
+                <label for="inputAlumno" class="form-label">
+                    Filtrar por alumno:
+                </label>
+
+                <input
+                    type="text"
+                    id="inputAlumno"
+                    class="form-control"
+                    placeholder="Escribe un nombre..."
+                    oninput="aplicarFiltros()">
+            </div>
+
+
+            <!-- Grupo -->
+            <div class="col-md-3">
+                <label for="filtroGrupo" class="form-label">
+                    Filtrar por grupo:
+                </label>
+
+                <select
+                    id="filtroGrupo"
+                    class="form-select"
+                    onchange="aplicarFiltros()">
+
+                    <option value="">Todos</option>
+
+                    {% for grupo in grupos %}
+                        <option value="{{ grupo.id }}">
+                            {{ grupo.nombre }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+
+
+            <!-- Estado -->
+            <div class="col-md-4">
+
+                <div class="btn-group w-100" role="group" id="filtro-tipo">
+
+                    <button
+                        type="button"
+                        class="btn btn-light active"
+                        data-tipo="todas"
+                        onclick="seleccionarFiltroTipo(this)">
+                        Todas
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        data-tipo="aceptadas"
+                        onclick="seleccionarFiltroTipo(this)">
+                        Aceptadas
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        data-tipo="rechazadas"
+                        onclick="seleccionarFiltroTipo(this)">
+                        Rechazadas
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        data-tipo="pendientes"
+                        onclick="seleccionarFiltroTipo(this)">
+                        Pendientes
+                    </button>
+
+                </div>
+            </div>
+
+
+            <!-- Limpiar filtros -->
+            <div class="col-md-1 text-end">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary w-100"
+                    onclick="limpiarFiltros()"
+                    title="Limpiar filtros">
+
+                    <i class="bi bi-x-circle"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Contador -->
+<div class="row align-items-center gy-2 mb-3">
+
+    <div class="col-12 col-md-4">
+
+        <span
+            id="contador"
+            class="badge bg-secondary"
+            data-total="{{ amonestaciones|length }}">
+
+            Mostrando {{ amonestaciones|length }} amonestación(es)
+
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- Listado -->
+<div class="row p-4">
+
+{% for amonestacion in amonestaciones %}
+
+    <div
+        class="card-escuela mb-4 position-relative
+        {% if amonestacion.estado == 'pendiente' %} bg-warning-subtle estado-pendiente{% endif %}
+        {% if amonestacion.estado == 'rechazada' %} bg-danger-subtle estado-rechazada{% endif %}
+        {% if amonestacion.estado == 'aceptada' %} estado-aceptada{% endif %}"
+
+        data-alumno-nombre="{{ amonestacion.alumno.nombre }} {{ amonestacion.alumno.apellidos }}"
+        data-grupo-id="{{ amonestacion.alumno.grupo.id }}"
+        data-estado="{{ amonestacion.estado }}"
+    >
+
+
+        <!-- Fecha -->
+        <div class="fecha-hora-amonestacion d-flex justify-content-end mb-2">
+
+            <b>
+                <i class="bi bi-calendar-event me-1"></i>
+                Amonestación puesta el
+                {{ amonestacion.fecha | fecha_esp }}
+            </b>
+
+        </div>
+
+
+        <!-- Cabecera -->
+        <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+
+            <span class="badge-soft badge-group">
+                {{ amonestacion.alumno.grupo.nombre }}
+            </span>
+
+            <span class="badge-soft badge-profesor">
+                {{ amonestacion.profesor.nombre }}
+            </span>
+
+            <span class="badge bg-secondary">
+                <i class="bi bi-archive"></i>
+                {{ amonestacion.curso_academico }}
+            </span>
+
+        </div>
+
+
+        <!-- Alumno -->
+        <div class="bg-light text-dark p-2 rounded d-flex align-items-center mb-3">
+
+            <i class="bi bi-person-vcard-fill me-2 text-secondary"></i>
+
+            <strong class="text-uppercase small">
+                {{ amonestacion.alumno.nombre }}
+                {{ amonestacion.alumno.apellidos }}
+            </strong>
+
+        </div>
+
+
+        <!-- Motivo -->
+        <p class="mb-1">
+            <strong>Motivo:</strong>
+            {{ amonestacion.motivo }}
+        </p>
+
+
+        <!-- Descripción -->
+        <p class="mb-1">
+            <strong>Descripción:</strong>
+            {{ amonestacion.descripcion }}
+        </p>
+
+
+        <!-- Estado -->
+        <div class="d-flex justify-content-end align-items-start mt-3">
+
+            {% if amonestacion.estado == "aceptada" %}
+
+                <div class="text-success estado-final text-end">
+                    <i class="bi bi-check2-circle"></i>
+                    Revisado por jefatura
+                </div>
+
+            {% elif amonestacion.estado == "rechazada" %}
+
+                <div class="text-danger estado-final text-end">
+                    <i class="bi bi-x-octagon"></i>
+                    Rechazada por jefatura
+                </div>
+
+            {% else %}
+
+                <div class="fw-semibold estado-final text-warning text-end">
+                    <i class="bi bi-hourglass-split"></i>
+                    Pendiente
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- Información del envío -->
+        {% if amonestacion.enviado_responsables and amonestacion.fecha_envio_sms %}
+
+            <div class="text-muted small text-end mt-2">
+
+                <i class="bi bi-send-check"></i>
+
+                Enviado a responsables el
+                {{ amonestacion.fecha_envio_sms.strftime('%d-%m-%Y %H:%M') }}
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- PDF -->
+        {% if amonestacion.estado == "aceptada" %}
+
+            <div class="text-end mt-3">
+
+                <a
+                    href="{{ url_for(
+                        'main.descargar_amonestacion_pdf',
+                        amonestacion_id=amonestacion.id
+                    ) }}"
+                    class="btn btn-sm btn-outline-danger">
+
+                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                    Descargar PDF
+
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+{% else %}
+
+    <div class="col-12">
+
+        <div class="alert alert-light border text-center text-muted">
+
+            <i class="bi bi-archive me-1"></i>
+            No hay amonestaciones archivadas.
+
+        </div>
+
+    </div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}
+
+
+
+{% block scripts %}
+
+<script>
+
+let tipoFiltroSeleccionado = "todas";
+
+
+function seleccionarFiltroTipo(boton) {
+
+    tipoFiltroSeleccionado = boton.dataset.tipo;
+
+    document
+        .querySelectorAll("#filtro-tipo button")
+        .forEach(btn => btn.classList.remove("active"));
+
+    boton.classList.add("active");
+
+    aplicarFiltros();
+}
+
+
+
+function aplicarFiltros() {
+
+    const alumnoNombre =
+        document
+            .getElementById("inputAlumno")
+            .value
+            .toLowerCase()
+            .trim();
+
+    const grupoId =
+        document
+            .getElementById("filtroGrupo")
+            .value;
+
+    const tarjetas =
+        document.querySelectorAll(".card-escuela");
+
+    let visibles = 0;
+
+
+    tarjetas.forEach(card => {
+
+        const nombre =
+            card.dataset.alumnoNombre.toLowerCase();
+
+        const grupo =
+            card.dataset.grupoId;
+
+        const estado =
+            card.dataset.estado;
+
+
+        const cumpleAlumno =
+            !alumnoNombre ||
+            nombre.includes(alumnoNombre);
+
+
+        const cumpleGrupo =
+            !grupoId ||
+            grupo === grupoId;
+
+
+        const cumpleEstado =
+            tipoFiltroSeleccionado === "todas" ||
+            (
+                tipoFiltroSeleccionado === "aceptadas" &&
+                estado === "aceptada"
+            ) ||
+            (
+                tipoFiltroSeleccionado === "rechazadas" &&
+                estado === "rechazada"
+            ) ||
+            (
+                tipoFiltroSeleccionado === "pendientes" &&
+                estado === "pendiente"
+            );
+
+
+        const mostrar =
+            cumpleAlumno &&
+            cumpleGrupo &&
+            cumpleEstado;
+
+
+        card.classList.toggle(
+            "d-none",
+            !mostrar
+        );
+
+
+        if (mostrar) {
+            visibles++;
+        }
+
+    });
+
+
+    actualizarContador(visibles);
+}
+
+
+
+function limpiarFiltros() {
+
+    document.getElementById("inputAlumno").value = "";
+
+    document.getElementById("filtroGrupo").value = "";
+
+    tipoFiltroSeleccionado = "todas";
+
+
+    document
+        .querySelectorAll("#filtro-tipo button")
+        .forEach(btn => btn.classList.remove("active"));
+
+
+    const botonTodas =
+        document.querySelector(
+            '#filtro-tipo button[data-tipo="todas"]'
+        );
+
+    if (botonTodas) {
+        botonTodas.classList.add("active");
+    }
+
+
+    aplicarFiltros();
+}
+
+
+
+function actualizarContador(visibles) {
+
+    const contador =
+        document.getElementById("contador");
+
+    const total =
+        parseInt(
+            contador.dataset.total,
+            10
+        );
+
+
+    contador.innerText =
+        `Mostrando ${visibles} de ${total} amonestación(es)`;
+}
+
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    aplicarFiltros
+);
+
+</script>
+
+{% endblock %}
