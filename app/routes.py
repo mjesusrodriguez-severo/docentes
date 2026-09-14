@@ -1011,7 +1011,7 @@ def ver_calendario_aula_digital():
 
         "Wednesday": [
             {"franja": "08:30-09:25", "asignatura": "MRD"},
-            {"franja": "09:25-09:20", "asignatura": "Proyecto 2ºCFGB"},
+            {"franja": "10:20-11:15", "asignatura": "Proyecto 2ºCFGB"},
             {"franja": "12:40-13:35", "asignatura": "Digitalización"}
         ],
 
@@ -1141,8 +1141,8 @@ def reservas_material():
                              (hoy + timedelta(days=i + 7)).weekday() < 5]
     franjas_horarias = [
         "08:30-09:25",
-        "09:25-10:25",
-        "10:25-11:15",
+        "09:25-10:20",
+        "10:20-11:15",
         "11:45-12:40",
         "12:40-13:35",
         "13:35-14:30",
