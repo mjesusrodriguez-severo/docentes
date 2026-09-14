@@ -951,31 +951,26 @@ def ver_calendario_sala_reuniones():
 def ver_calendario_aula_taller():
     franjas_bloqueadas = {
         'Monday': [
-            {"franja": "12:40-13:35", "asignatura": "Tecnología 3º ESO"},
-            {"franja": "13:35-14:30", "asignatura": "Taller Mates 2º ESO"}
+            {"franja": "10:20-11:15", "asignatura": "FyQ 3º ESO"},
+            {"franja": "11:45-12:40", "asignatura": "FyQ 4º ESO"},
+            {"franja": "12:40-13:35", "asignatura": "ByG 4º ESO"},
+            {"franja": "13:35-14:30", "asignatura": "Taller de Matemáticas"}
         ],
         'Tuesday': [
-            {"franja": "09:25-10:25", "asignatura": "Francés 4º ESO"},
-            {"franja": "11:15-11:45", "asignatura": "PCT Mates (12:30 - 13:15)"},
-            {"franja": "11:45-12:40", "asignatura": "Economía 4º ESO"},
-            {"franja": "13:35-14:30", "asignatura": "Biología 4º ESO"}
+            {"franja": "10:20-11:15", "asignatura": "Tecnología 2º ESO"},
+            {"franja": "11:45-12:40", "asignatura": "FyQ 4º ESO"}
         ],
         'Wednesday': [
-            {"franja": "08:30-09:25", "asignatura": "Tecnología 2º ESO"},
-            {"franja": "10:25-11:15", "asignatura": "FyQ 3º ESO"},
+            {"franja": "09:25-10:20", "asignatura": "FyQ 2º ESO"},
             {"franja": "11:45-12:40", "asignatura": "FyQ 4º ESO"},
-            {"franja": "12:40-13:35", "asignatura": "Biología 3º ESO"}
+            {"franja": "12:40-13:35", "asignatura": "Biología 1º ESO"}
         ],
         'Thursday': [
-            {"franja": "08:30-09:25", "asignatura": "Biología 4º ESO"},
-            {"franja": "13:35-14:30", "asignatura": "FyQ 2º ESO"},
+            {"franja": "08:30-09:25", "asignatura": "Tecnología 3º ESO"},
+            {"franja": "12:40-13:35", "asignatura": "Taller Mates"},
         ],
         'Friday': [
-            {"franja": "08:30-09:25", "asignatura": "FyQ 4º ESO"},
-            {"franja": "09:25-10:25", "asignatura": "Taller Mates 2º ESO"},
-            {"franja": "11:45-12:40", "asignatura": "PCT Mates (12:30 - 13:15)"},
-            {"franja": "13:35-14:30", "asignatura": "Biología 1º ESO"}
-
+            {"franja": "11:45-12:40", "asignatura": "Biología 3º ESO"}
         ]
     }
     return render_calendario_espacio(
@@ -1010,27 +1005,23 @@ def ver_calendario_aula_digital():
         "Monday": [],
 
         "Tuesday": [
-            {"franja": "08:30-09:25", "asignatura": "Digitalización 4º ESO"},
-            {"franja": "09:25-10:25", "asignatura": "Proyecto 2ºCFGB"},
-            {"franja": "12:40-13:35", "asignatura": "PCT Mat. (12:30 – 13:15)"}
+            {"franja": "11:45-12:40", "asignatura": "Economía"},
+            {"franja": "12:40-13:35", "asignatura": "MRD"}
         ],
 
         "Wednesday": [
-            {"franja": "10:25-11:15", "asignatura": "PCT Mat. (09:45 – 10:50)"},
-            {"franja": "11:45-12:40", "asignatura": "Biología 4º ESO"},
-            {"franja": "12:40-13:35", "asignatura": "Digitalización 4º ESO"}
+            {"franja": "08:30-09:25", "asignatura": "MRD"},
+            {"franja": "09:25-09:20", "asignatura": "Proyecto 2ºCFGB"},
+            {"franja": "12:40-13:35", "asignatura": "Digitalización"}
         ],
 
         "Thursday": [
-            {"franja": "11:45-12:40", "asignatura": "PCT Mat. (11:45 - 12:30)"},
-            {"franja": "12:40-13:35", "asignatura": "Proyecto 2ºCFGB"},
-            {"franja": "13:35-14:30", "asignatura": "MRD 1º ESO"}
+            {"franja": "10:20-11:15", "asignatura": "Digitalización"}
         ],
 
         "Friday": [
-            {"franja": "08:30-09:25", "asignatura": "Digitalización 4º ESO"},
-            {"franja": "12:40-13:35", "asignatura": "MRD 1º ESO"},
-            {"franja": "13:35-14:30", "asignatura": "Filosofía 4ºESO"}
+            {"franja": "11:45-12:40", "asignatura": "Digitalización"},
+            {"franja": "13:35-14:30", "asignatura": "Proyecto 2ºCFGB"}
         ]
     }
     return render_calendario_espacio(
