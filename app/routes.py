@@ -1034,40 +1034,8 @@ def ver_calendario_aula_digital():
 @main_bp.route("/reservas/biblioteca")
 @login_required
 def ver_calendario_biblioteca():
-    franjas_bloqueadas = {
-        "Monday": [
-            {"franja": "09:00-09:45", "asignatura": "PCT Mates"},
-            {"franja": "09:45-10:30", "asignatura": "PCT Lengua"},
-            {"franja": "11:00-11:45", "asignatura": "PCT Lengua"},
-            {"franja": "11:45-12:30", "asignatura": "PCT Lengua"},
-            {"franja": "12:30-13:15", "asignatura": "PCT Lengua"},
-        ],
-        "Tuesday": [
-            {"franja": "09:00-09:45", "asignatura": "PCT Lengua"},
-            {"franja": "09:45-10:30", "asignatura": "PCT Lengua"},
-        ],
-        "Wednesday": [
-            {"franja": "09:45-10:30", "asignatura": "PCT Mates"},
-            {"franja": "11:00-11:45", "asignatura": "PCT Mates"},
-            {"franja": "12:30-13:15", "asignatura": "PCT Lengua"},
-            {"franja": "13:15-14:00", "asignatura": "PCT Lengua"},
-        ],
-        "Thursday": [
-            {"franja": "09:45-10:30", "asignatura": "PCT Lengua"},
-            {"franja": "11:00-11:45", "asignatura": "PCT Mates"},
-            {"franja": "11:45-12:30", "asignatura": "PCT Lengua"},
-            {"franja": "12:30-13:15", "asignatura": "PCT Lengua"},
-        ],
-        "Friday": [
-            {"franja": "11:00-11:45", "asignatura": "PCT Lengua"},
-            {"franja": "11:45-12:30", "asignatura": "PCT Lengua"},
-            {"franja": "12:30-13:15", "asignatura": "PCT Lengua"},
-            {"franja": "13:15-14:00", "asignatura": "PCT Lengua"},
-        ]
-    }
     return render_calendario_espacio_primaria(
         nombre_espacio="biblioteca",
-        franjas_bloqueadas=franjas_bloqueadas,
         plantilla="reservas/biblioteca.html",
         nombre_visible="Biblioteca"
     )
